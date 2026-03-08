@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Index from "./pages/Index";
 import PlanTrip from "./pages/PlanTrip";
+import TripMemories from "./pages/TripMemories";
 import Itinerary from "./pages/Itinerary";
 import Discover from "./pages/Discover";
 import Dashboard from "./pages/Dashboard";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/itinerary" element={<Itinerary />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/memories" element={<TripMemories />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

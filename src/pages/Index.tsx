@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import DestinationCard from "@/components/DestinationCard";
 import { Sparkles, Map, DollarSign, Clock, ArrowRight, Star, ChevronRight, Users, Instagram } from "lucide-react";
 import AboutSection from "@/components/AboutSection";
+import ExploreExperience from "@/components/ExploreExperience";
 import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
 import tokyoImg from "@/assets/dest-tokyo.jpg";

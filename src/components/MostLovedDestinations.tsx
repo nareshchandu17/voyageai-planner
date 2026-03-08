@@ -95,6 +95,7 @@ const MostLovedDestinations = () => {
               src={dest.bgImage}
               alt=""
               className="w-full h-full object-cover"
+              style={{ y: bgY, scale: bgScale }}
             />
             <div className="absolute inset-0 bg-foreground/30" />
           </motion.div>

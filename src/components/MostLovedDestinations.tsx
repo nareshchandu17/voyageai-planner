@@ -15,24 +15,28 @@ import nycImg from "@/assets/dest-nyc.jpg";
 const destinations = [
   {
     name: "Japan",
+    slug: "japan",
     desc: "Technology, vibrant nightlife & traditions",
     cardImage: tokyoImg,
     bgImage: japanBg,
   },
   {
     name: "Switzerland",
+    slug: "switzerland",
     desc: "Romance, culture, and timeless charm",
     cardImage: baliImg,
     bgImage: switzerlandBg,
   },
   {
     name: "Paris",
+    slug: "paris",
     desc: "Romance, culture, and timeless charm",
     cardImage: parisImg,
     bgImage: parisBg,
   },
   {
     name: "New York",
+    slug: "new-york",
     desc: "Diverse culture, iconic skyline, & bustling streets",
     cardImage: nycImg,
     bgImage: nycBg,

@@ -842,6 +842,7 @@ export const allTours: TourData[] = [
   {
     slug: "amalfi-coast-dream",
     image: amalfiImg,
+    heroImage: heroItalyImg,
     title: "Amalfi Coast Dream",
     duration: "6 Days / 5 Nights",
     price: "1,900",

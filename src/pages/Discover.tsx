@@ -61,6 +61,19 @@ const allPackages = [
   { image: barcelonaImg, title: "Switzerland Nature's", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
   { image: maldivesImg, title: "Japan Nature", duration: "7 Days / 6 Nights", price: "1,200", category: "Nature" },
   { image: heroImg, title: "Paris Begins", duration: "6 Days / 5 Nights", price: "1,500", category: "Romantic" },
+  { image: australiaImg, title: "Australia Coastline", duration: "7 Days / 6 Nights", price: "1,800", category: "Nature" },
+  { image: sydneyImg, title: "Sydney Highlights", duration: "6 Days / 5 Nights", price: "1,650", category: "Adventure" },
+  { image: egyptImg, title: "Discover Egypt", duration: "6 Days / 5 Nights", price: "1,050", category: "Adventure" },
+  { image: romeImg, title: "Rome Heritage Tour", duration: "5 Days / 4 Nights", price: "1,350", category: "Romantic" },
+  { image: santoriniImg, title: "Santorini Escape", duration: "5 Days / 4 Nights", price: "1,750", category: "Romantic" },
+  { image: singaporeImg, title: "Singapore City Tour", duration: "4 Days / 3 Nights", price: "1,100", category: "Adventure" },
+  { image: dubaiSkylineImg, title: "Dubai Skyline Tour", duration: "5 Days / 4 Nights", price: "1,400", category: "Adventure" },
+  { image: amalfiImg, title: "Amalfi Coast Dream", duration: "6 Days / 5 Nights", price: "1,900", category: "Romantic" },
+  { image: thailandImg, title: "Thailand Paradise", duration: "7 Days / 6 Nights", price: "950", category: "Nature" },
+  { image: dubaiMarinaImg, title: "Dubai Marina Luxury", duration: "5 Days / 4 Nights", price: "1,600", category: "Adventure" },
+  { image: newzealandImg, title: "New Zealand Explorer", duration: "8 Days / 7 Nights", price: "2,100", category: "Nature" },
+  { image: londonImg, title: "London Classics", duration: "5 Days / 4 Nights", price: "1,250", category: "Adventure" },
+  { image: parisEiffelImg, title: "Paris Romantic Getaway", duration: "4 Days / 3 Nights", price: "1,350", category: "Romantic" },
 ];
 
 const ITEMS_PER_PAGE = 8;

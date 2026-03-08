@@ -13,15 +13,10 @@ const rightImages = [aboutRight1, aboutRight2, aboutRight3, aboutRight4];
 
 const AboutSection = () => {
   const [currentImg, setCurrentImg] = useState(0);
-  const [fade, setFade] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrentImg((prev) => (prev + 1) % rightImages.length);
-        setFade(true);
-      }, 400);
+      setCurrentImg((prev) => (prev + 1) % rightImages.length);
     }, 2000);
     return () => clearInterval(interval);
   }, []);

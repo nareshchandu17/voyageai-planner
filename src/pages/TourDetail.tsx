@@ -45,6 +45,7 @@ const TourDetail = () => {
   const tour = slug ? getTourBySlug(slug) : undefined;
   const heroRef = useRef<HTMLElement>(null);
   const [openDay, setOpenDay] = useState<number | null>(0);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const { scrollY } = useScroll();
   const heroScale = useTransform(scrollY, [0, 600], [1, 1.15]);

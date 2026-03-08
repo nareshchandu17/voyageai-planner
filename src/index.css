@@ -182,6 +182,31 @@
   50% { transform: translateY(-10px); }
 }
 
+/* Cinematic hero zoom-forward animation */
+@keyframes cinematicZoom {
+  0% {
+    transform: scale(1);
+    filter: brightness(0.7);
+  }
+  40% {
+    transform: scale(1.15);
+    filter: brightness(0.85);
+  }
+  100% {
+    transform: scale(1.08);
+    filter: brightness(1);
+  }
+}
+
+.hero-cinematic-container {
+  overflow: hidden;
+}
+
+.hero-cinematic-zoom {
+  animation: cinematicZoom 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: center 60%;
+}
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }

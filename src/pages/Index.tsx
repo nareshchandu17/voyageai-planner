@@ -151,23 +151,27 @@ const Index = () => {
       {/* Features */}
       <section className="py-20 sm:py-28 gradient-hero">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16 animate-in">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-              Everything you need to travel smarter
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              AI-powered tools that handle every aspect of your journey
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+                Everything you need to travel smarter
+              </h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                AI-powered tools that handle every aspect of your journey
+              </p>
+            </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((f, i) => (
-              <div key={i} className={`glass-card p-6 hover-lift animate-in-delay-${Math.min(i, 3)}`}>
-                <div className="w-12 h-12 rounded-2xl gradient-ocean flex items-center justify-center mb-4">
-                  <f.icon className="w-6 h-6 text-primary-foreground" />
+              <ScrollReveal key={i} delay={i * 100}>
+                <div className="glass-card p-6 hover-lift h-full">
+                  <div className="w-12 h-12 rounded-2xl gradient-ocean flex items-center justify-center mb-4">
+                    <f.icon className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground">{f.desc}</p>
                 </div>
-                <h3 className="font-display text-lg font-semibold text-foreground mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground">{f.desc}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>

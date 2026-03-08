@@ -97,7 +97,9 @@ const ExploreExperience = () => {
                 </div>
               )}
             </div>
+            </ScrollReveal>
           ))}
+        </div>
         </div>
 
         {/* Bottom bar */}

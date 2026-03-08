@@ -548,6 +548,7 @@ export const allTours: TourData[] = [
   {
     slug: "japan-nature",
     image: maldivesImg,
+    heroImage: heroJapanImg,
     title: "Japan Nature",
     duration: "7 Days / 6 Nights",
     price: "1,200",

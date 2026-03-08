@@ -173,6 +173,9 @@ const Index = () => {
       {/* FAQ */}
       <FAQSection />
 
+      {/* Vibe With Us */}
+      <VibeWithUs />
+
       {/* Features */}
       <section className="py-20 sm:py-28 gradient-hero">
         <div className="container mx-auto px-4 sm:px-6">

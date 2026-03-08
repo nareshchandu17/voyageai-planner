@@ -909,6 +909,7 @@ export const allTours: TourData[] = [
   {
     slug: "dubai-marina-luxury",
     image: dubaiMarinaImg,
+    heroImage: heroDubaiImg,
     title: "Dubai Marina Luxury",
     duration: "5 Days / 4 Nights",
     price: "1,600",

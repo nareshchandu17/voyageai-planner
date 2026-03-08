@@ -68,7 +68,21 @@ const PlanTrip = () => {
 
   return (
     <div className="min-h-screen gradient-hero pt-24 pb-16">
-      <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          {/* Left side - Image & Info */}
+          <div className="hidden lg:block sticky top-28">
+            <h1 className="font-display text-4xl font-bold text-foreground mb-3">Plan Your Next Journey With Us</h1>
+            <p className="text-muted-foreground mb-8">Share your travel details and let our travel experts design the perfect experience for you.</p>
+            <img
+              src={planTripHero}
+              alt="Group of travelers hiking"
+              className="w-full rounded-2xl object-cover aspect-[4/3] shadow-soft"
+            />
+          </div>
+
+          {/* Right side - Form */}
+          <div className="max-w-xl mx-auto lg:mx-0 w-full">
         {/* Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">

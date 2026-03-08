@@ -779,6 +779,7 @@ export const allTours: TourData[] = [
   {
     slug: "singapore-city-tour",
     image: singaporeImg,
+    heroImage: heroSingaporeImg,
     title: "Singapore City Tour",
     duration: "4 Days / 3 Nights",
     price: "1,100",

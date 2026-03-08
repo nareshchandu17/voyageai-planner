@@ -350,6 +350,7 @@ export const allTours: TourData[] = [
   {
     slug: "bali-cultural-retreat",
     image: baliImg,
+    heroImage: heroBaliImg,
     title: "Bali Cultural Retreat",
     duration: "6 Days / 5 Nights",
     price: "950",

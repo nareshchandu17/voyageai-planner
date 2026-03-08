@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Clock, Plane, Users, Tag, Info, ChevronDown, ArrowUpRight } from "lucide-react";
+import { Clock, Plane, Users, Tag, Info, ChevronDown, ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import TourReviews from "@/components/TourReviews";
@@ -40,12 +40,103 @@ const SectionReveal = ({ children, className = "", delay = 0 }: { children: Reac
   </motion.div>
 );
 
+interface LightboxProps {
+  images: string[];
+  currentIndex: number;
+  onClose: () => void;
+  onChange: (index: number) => void;
+  title: string;
+}
+
+const Lightbox = ({ images, currentIndex, onClose, onChange, title }: LightboxProps) => {
+  const go = useCallback(
+    (dir: number) => {
+      const next = (currentIndex + dir + images.length) % images.length;
+      onChange(next);
+    },
+    [currentIndex, images.length, onChange]
+  );
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [go, onClose]);
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-foreground/90 backdrop-blur-xl z-[60]"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
+        className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-8 pointer-events-none"
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 sm:top-8 sm:right-8 w-11 h-11 rounded-full bg-card/20 backdrop-blur-md border border-white/15 flex items-center justify-center pointer-events-auto hover:bg-card/40 transition-colors z-10"
+        >
+          <X className="w-5 h-5 text-primary-foreground" />
+        </button>
+
+        {/* Counter */}
+        <div className="absolute top-5 left-5 sm:top-8 sm:left-8 text-primary-foreground/70 text-sm font-medium pointer-events-auto z-10">
+          {currentIndex + 1} / {images.length}
+        </div>
+
+        {/* Prev */}
+        <button
+          onClick={() => go(-1)}
+          className="absolute left-3 sm:left-6 w-11 h-11 rounded-full bg-card/20 backdrop-blur-md border border-white/15 flex items-center justify-center pointer-events-auto hover:bg-card/40 transition-colors z-10"
+        >
+          <ChevronLeft className="w-5 h-5 text-primary-foreground" />
+        </button>
+
+        {/* Image */}
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={currentIndex}
+            src={images[currentIndex]}
+            alt={`${title} photo ${currentIndex + 1}`}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl pointer-events-auto"
+          />
+        </AnimatePresence>
+
+        {/* Next */}
+        <button
+          onClick={() => go(1)}
+          className="absolute right-3 sm:right-6 w-11 h-11 rounded-full bg-card/20 backdrop-blur-md border border-white/15 flex items-center justify-center pointer-events-auto hover:bg-card/40 transition-colors z-10"
+        >
+          <ChevronRight className="w-5 h-5 text-primary-foreground" />
+        </button>
+      </motion.div>
+    </>
+  );
+};
+
 const TourDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const tour = slug ? getTourBySlug(slug) : undefined;
   const heroRef = useRef<HTMLElement>(null);
   const [openDay, setOpenDay] = useState<number | null>(0);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const { scrollY } = useScroll();
   const heroScale = useTransform(scrollY, [0, 600], [1, 1.15]);
@@ -325,7 +416,8 @@ const TourDetail = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.6 }}
                 whileHover={{ scale: 1.03 }}
-                className="rounded-2xl overflow-hidden h-[200px] sm:h-[300px] lg:h-[380px]"
+                onClick={() => setLightboxIndex(i)}
+                className="rounded-2xl overflow-hidden h-[200px] sm:h-[300px] lg:h-[380px] cursor-pointer"
               >
                 <img src={img} alt={`${tour.title} gallery ${i + 1}`} className="w-full h-full object-cover" />
               </motion.div>
@@ -388,6 +480,19 @@ const TourDetail = () => {
       </section>
 
       <Footer />
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <Lightbox
+            images={tour.galleryImages}
+            currentIndex={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onChange={setLightboxIndex}
+            title={tour.title}
+          />
+        )}
+      </AnimatePresence>
 
       <BookingModal
         isOpen={bookingOpen}

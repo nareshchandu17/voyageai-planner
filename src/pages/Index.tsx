@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DestinationCard from "@/components/DestinationCard";
@@ -38,40 +39,67 @@ const testimonials = [
 ];
 
 const floatingPhotos = [
-  { src: heroImg, alt: "Santorini", className: "absolute top-20 left-[3%] w-48 sm:w-56 h-36 sm:h-44 -rotate-6 z-10" },
-  { src: parisImg, alt: "Paris", className: "absolute bottom-28 left-[5%] w-44 sm:w-52 h-32 sm:h-40 rotate-3 z-10" },
-  { src: tokyoImg, alt: "Tokyo", className: "absolute top-16 right-[2%] w-44 sm:w-52 h-36 sm:h-44 rotate-6 z-10" },
-  { src: peruImg, alt: "Peru", className: "absolute bottom-24 right-[4%] w-48 sm:w-56 h-32 sm:h-40 -rotate-3 z-10" },
-  { src: baliImg, alt: "Bali", className: "absolute top-1/2 -translate-y-1/2 left-[15%] w-40 sm:w-48 h-28 sm:h-36 rotate-2 z-[5] hidden lg:block" },
-  { src: nycImg, alt: "NYC", className: "absolute top-1/2 -translate-y-1/2 right-[14%] w-40 sm:w-48 h-28 sm:h-36 -rotate-4 z-[5] hidden lg:block" },
+  { src: heroImg, alt: "Santorini", className: "absolute top-20 left-[3%] w-48 sm:w-56 h-36 sm:h-44 -rotate-6 z-10", speed: 0.3 },
+  { src: parisImg, alt: "Paris", className: "absolute bottom-28 left-[5%] w-44 sm:w-52 h-32 sm:h-40 rotate-3 z-10", speed: -0.2 },
+  { src: tokyoImg, alt: "Tokyo", className: "absolute top-16 right-[2%] w-44 sm:w-52 h-36 sm:h-44 rotate-6 z-10", speed: 0.4 },
+  { src: peruImg, alt: "Peru", className: "absolute bottom-24 right-[4%] w-48 sm:w-56 h-32 sm:h-40 -rotate-3 z-10", speed: -0.15 },
+  { src: baliImg, alt: "Bali", className: "absolute top-1/2 -translate-y-1/2 left-[15%] w-40 sm:w-48 h-28 sm:h-36 rotate-2 z-[5] hidden lg:block", speed: 0.25 },
+  { src: nycImg, alt: "NYC", className: "absolute top-1/2 -translate-y-1/2 right-[14%] w-40 sm:w-48 h-28 sm:h-36 -rotate-4 z-[5] hidden lg:block", speed: -0.35 },
 ];
 
 const Index = () => {
+  const [scrollY, setScrollY] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const rect = heroRef.current.getBoundingClientRect();
+        if (rect.bottom > 0) {
+          setScrollY(window.scrollY);
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen">
-      {/* Hero — Traavellio-style collage */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* Ocean background */}
-        <div className="absolute inset-0">
-          <img src={heroOceanBg} alt="" className="w-full h-full object-cover" />
+      {/* Hero — Cinematic parallax collage */}
+      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* Ocean background with cinematic zoom-forward animation */}
+        <div className="absolute inset-0 hero-cinematic-container">
+          <img
+            src={heroOceanBg}
+            alt=""
+            className="w-full h-full object-cover hero-cinematic-zoom"
+            style={{ transform: `scale(${1 + scrollY * 0.0003}) translateY(${scrollY * 0.15}px)` }}
+          />
           <div className="absolute inset-0 bg-foreground/10" />
         </div>
 
-        {/* Floating photo cards — hidden on mobile to keep it clean */}
+        {/* Floating photo cards with parallax */}
         <div className="hidden sm:block">
           {floatingPhotos.map((photo, i) => (
             <div
               key={i}
-              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 transition-transform duration-500 hover:scale-105`}
-              style={{ animationDelay: `${i * 0.15}s` }}
+              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 transition-transform duration-100 hover:scale-105 will-change-transform`}
+              style={{
+                transform: `translateY(${scrollY * photo.speed}px)`,
+                animationDelay: `${i * 0.15}s`,
+              }}
             >
               <img src={photo.src} alt={photo.alt} className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
 
-        {/* Center content */}
-        <div className="relative z-20 text-center px-4 max-w-3xl mx-auto pt-20">
+        {/* Center content with parallax */}
+        <div
+          className="relative z-20 text-center px-4 max-w-3xl mx-auto pt-20"
+          style={{ transform: `translateY(${scrollY * 0.1}px)`, opacity: Math.max(0, 1 - scrollY * 0.002) }}
+        >
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold text-primary-foreground leading-[1.05] mb-6 animate-in drop-shadow-lg">
             Experience the World,
             <br />

@@ -61,6 +61,7 @@ export interface TourItineraryDay {
 export interface TourData {
   slug: string;
   image: string;
+  heroImage: string;
   title: string;
   duration: string;
   price: string;

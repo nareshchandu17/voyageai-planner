@@ -81,6 +81,7 @@ export const allTours: TourData[] = [
   {
     slug: "morocco-desert-journey",
     image: moroccoImg,
+    heroImage: heroMoroccoImg,
     title: "Morocco Desert Journey",
     duration: "8 Days / 7 Nights",
     price: "1,600",

@@ -369,6 +369,7 @@ const PlanTrip = () => {
           </div>
         </div>
       </div>
+      </div>
     </div>
   );
 };

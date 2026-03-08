@@ -10,6 +10,7 @@ import {
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
   TreePine, Crown, Wallet, Tag, Search
 } from "lucide-react";
+import planTripHero from "@/assets/plan-trip-hero.jpg";
 
 const travelStyles = [
   { id: "adventure", label: "Adventure", icon: Mountain },

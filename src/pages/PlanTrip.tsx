@@ -85,16 +85,45 @@ const PlanTrip = () => {
       {/* Form Section */}
       <div className="gradient-hero py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            {/* Left side - Text + Image */}
-            <div className="hidden lg:block">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+            {/* Left side - Text + Image + Contact */}
+            <div className="hidden lg:flex lg:flex-col">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">Plan Your Next Journey With Us</h2>
               <p className="text-muted-foreground mb-8 max-w-md">Share your travel details and let our travel experts design the perfect experience for you.</p>
               <img
                 src={planTripHero}
                 alt="Group of travelers hiking"
-                className="w-full max-h-[400px] rounded-2xl object-cover shadow-soft"
+                className="w-full flex-1 min-h-0 rounded-2xl object-cover shadow-soft"
               />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                <div className="glass-card p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-ocean/10 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5 text-ocean" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Call Us</p>
+                    <p className="text-sm font-medium text-foreground">+1 (555) 123-4567</p>
+                  </div>
+                </div>
+                <div className="glass-card p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-ocean/10 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-ocean" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email Us</p>
+                    <p className="text-sm font-medium text-foreground">hello@voyageai.com</p>
+                  </div>
+                </div>
+                <div className="glass-card p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-ocean/10 flex items-center justify-center shrink-0">
+                    <MapPinned className="w-5 h-5 text-ocean" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Visit Us</p>
+                    <p className="text-sm font-medium text-foreground">New York, USA</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
           {/* Right side - Form */}

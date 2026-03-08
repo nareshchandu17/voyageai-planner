@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import CTASection from "@/components/CTASection";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Clock, Plane, Users, Tag, Info, ChevronDown, ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -479,6 +480,7 @@ const TourDetail = () => {
         </div>
       </section>
 
+      <CTASection />
       <Footer />
 
       {/* Lightbox */}

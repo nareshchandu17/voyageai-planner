@@ -649,6 +649,7 @@ export const allTours: TourData[] = [
   {
     slug: "sydney-highlights",
     image: sydneyImg,
+    heroImage: heroAustraliaImg,
     title: "Sydney Highlights",
     duration: "6 Days / 5 Nights",
     price: "1,650",

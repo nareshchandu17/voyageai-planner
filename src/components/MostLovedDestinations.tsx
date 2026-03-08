@@ -124,6 +124,7 @@ const MostLovedDestinations = () => {
           </div>
 
           {/* Flip Card */}
+          <Link to={`/destinations/${destinations[activeIndex].slug}`}>
           <div
             className="perspective-[1200px]"
             onMouseEnter={() => setIsHovered(true)}

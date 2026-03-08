@@ -43,19 +43,21 @@ const ExploreExperience = () => {
     <section className="py-20 sm:py-28 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-14">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground tracking-wide">
-              Explore by Experience
-            </span>
+        <ScrollReveal>
+          <div className="text-center mb-14">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground tracking-wide">
+                Explore by Experience
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight">
+              Experience Diverse Worlds On
+              <br />
+              One Planet
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight">
-            Experience Diverse Worlds On
-            <br />
-            One Planet
-          </h2>
-        </div>
+        </ScrollReveal>
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

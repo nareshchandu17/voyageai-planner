@@ -37,6 +37,13 @@ const TOTAL_STEPS = 7;
 const PlanTrip = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const [destination, setDestination] = useState("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [budget, setBudget] = useState(2000);

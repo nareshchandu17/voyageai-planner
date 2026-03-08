@@ -252,6 +252,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-getaway",
     image: dubaiImg,
+    heroImage: heroParisImg,
     title: "Paris Getaway",
     duration: "5 Days / 4 Nights",
     price: "1,100",

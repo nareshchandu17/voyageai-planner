@@ -231,25 +231,29 @@ const Index = () => {
       {/* Testimonials */}
       <section className="py-20 sm:py-28">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-              Loved by travelers
-            </h2>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+                Loved by travelers
+              </h2>
+            </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {testimonials.map((t, i) => (
-              <div key={i} className="glass-card p-6 hover-lift">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-sunset text-sunset" />
-                  ))}
+              <ScrollReveal key={i} delay={i * 120}>
+                <div className="glass-card p-6 hover-lift h-full">
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: t.rating }).map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-sunset text-sunset" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-foreground mb-4">"{t.text}"</p>
+                  <div>
+                    <p className="font-medium text-sm text-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-foreground mb-4">"{t.text}"</p>
-                <div>
-                  <p className="font-medium text-sm text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>

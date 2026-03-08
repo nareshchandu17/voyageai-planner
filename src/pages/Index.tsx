@@ -94,7 +94,7 @@ const Index = () => {
           {floatingPhotos.map((photo, i) => (
             <div
               key={i}
-              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 transition-transform duration-100 hover:scale-105 will-change-transform`}
+              className={`${photo.className} rounded-2xl overflow-hidden shadow-2xl transition-transform duration-100 hover:scale-105 will-change-transform`}
               style={{
                 transform: `translateY(${scrollY * photo.speed}px)`,
                 animationDelay: `${i * 0.15}s`,

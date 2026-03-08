@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 import toursHeroBg from "@/assets/tours-hero-bg.jpg";

@@ -98,7 +98,7 @@ const PlanTrip = () => {
         </div>
 
         {/* Card */}
-        <div className="glass-card p-6 sm:p-10 animate-in">
+        <div className="glass-card p-6 sm:p-10 animate-in flex-1 flex flex-col justify-center">
           {/* Step 1: Destination */}
           {step === 1 && (
             <div>

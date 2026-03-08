@@ -4,6 +4,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import vibe1 from "@/assets/vibe-1.jpg";
 import vibe2 from "@/assets/vibe-2.jpg";
 import vibe3 from "@/assets/vibe-3.jpg";
+import vibe4 from "@/assets/vibe-4.jpg";
 import vibe5 from "@/assets/vibe-5.jpg";
 import vibe6 from "@/assets/vibe-6.jpg";
 import vibe7 from "@/assets/vibe-7.jpg";
@@ -11,7 +12,7 @@ import vibe8 from "@/assets/vibe-8.jpg";
 import vibe9 from "@/assets/vibe-9.jpg";
 import vibe10 from "@/assets/vibe-10.jpg";
 
-const images = [vibe1, vibe2, vibe3, vibe5, vibe6, vibe7, vibe8, vibe9, vibe10];
+const images = [vibe1, vibe2, vibe3, vibe4, vibe5, vibe6, vibe7, vibe8, vibe9, vibe10];
 // Double for seamless loop
 const marqueeImages = [...images, ...images];
 

@@ -217,6 +217,7 @@ const DestinationDetail = () => {
         </div>
       </section>
 
+      <DestinationTours destSlug={dest.slug} />
       <CTASection />
       <Footer />
     </div>

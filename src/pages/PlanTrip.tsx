@@ -11,6 +11,7 @@ import {
   TreePine, Crown, Wallet, Tag, Search
 } from "lucide-react";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
+import planTripBanner from "@/assets/plan-trip-banner.jpg";
 
 const travelStyles = [
   { id: "adventure", label: "Adventure", icon: Mountain },

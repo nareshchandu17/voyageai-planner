@@ -9,6 +9,7 @@ import MostLovedDestinations from "@/components/MostLovedDestinations";
 import TravelPackages from "@/components/TravelPackages";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import BlogSection from "@/components/BlogSection";
 import ScrollReveal from "@/components/ScrollReveal";
 import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
@@ -163,6 +164,9 @@ const Index = () => {
 
       {/* Testimonials */}
       <TestimonialsSection />
+
+      {/* Blog / Inspiration */}
+      <BlogSection />
 
       {/* Features */}
       <section className="py-20 sm:py-28 gradient-hero">

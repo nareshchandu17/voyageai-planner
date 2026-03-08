@@ -415,6 +415,7 @@ export const allTours: TourData[] = [
   {
     slug: "switzerland-classic",
     image: icelandImg,
+    heroImage: heroSwitzerlandImg,
     title: "Switzerland Classic",
     duration: "5 Days / 4 Nights",
     price: "1,500",

@@ -7,7 +7,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const hasHero = location.pathname === "/" || location.pathname === "/blog" || location.pathname.startsWith("/blog/");
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -23,7 +23,7 @@ const Navbar = () => {
     { href: "/memories", label: "Memories" },
   ];
 
-  const transparent = isHome && !scrolled;
+  const transparent = hasHero && !scrolled;
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${transparent ? "bg-transparent border-b border-transparent" : "glass-nav"}`}>

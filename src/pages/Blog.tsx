@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
+import PageTransition from "@/components/PageTransition";
 import { ArrowUpRight } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";

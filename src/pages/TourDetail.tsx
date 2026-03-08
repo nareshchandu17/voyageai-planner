@@ -245,6 +245,11 @@ const TourDetail = () => {
                   </div>
                 </div>
               </SectionReveal>
+
+              {/* Traveler Reviews */}
+              <SectionReveal>
+                <TourReviews tourSlug={tour.slug} tourTitle={tour.title} />
+              </SectionReveal>
             </div>
 
             {/* Right Sidebar — Sticky Trip Details */}

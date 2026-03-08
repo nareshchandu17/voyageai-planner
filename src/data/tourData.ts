@@ -976,6 +976,7 @@ export const allTours: TourData[] = [
   {
     slug: "london-classics",
     image: londonImg,
+    heroImage: heroLondonImg,
     title: "London Classics",
     duration: "5 Days / 4 Nights",
     price: "1,250",

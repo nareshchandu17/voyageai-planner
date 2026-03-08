@@ -15,6 +15,7 @@ const Blog = () => {
   const heroY = useTransform(scrollY, [0, 500], [0, 150]);
   const heroScale = useTransform(scrollY, [0, 500], [1, 1.12]);
   const overlayOpacity = useTransform(scrollY, [0, 400], [0.4, 0.7]);
+  const textOpacity = useTransform(scrollY, [0, window.innerHeight * 0.35], [1, 0]);
 
   return (
     <PageTransition>

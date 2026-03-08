@@ -15,6 +15,7 @@ const Blog = () => {
   const heroY = useTransform(scrollY, [0, 500], [0, 150]);
   const heroScale = useTransform(scrollY, [0, 500], [1, 1.12]);
   const overlayOpacity = useTransform(scrollY, [0, 400], [0.4, 0.7]);
+  const textOpacity = useTransform(scrollY, [0, window.innerHeight * 0.35], [1, 0]);
 
   return (
     <PageTransition>
@@ -33,7 +34,7 @@ const Blog = () => {
           className="absolute inset-0 bg-foreground"
           style={{ opacity: overlayOpacity }}
         />
-        <div className="relative z-10 text-center px-4">
+        <motion.div className="relative z-10 text-center px-4" style={{ opacity: textOpacity }}>
           <motion.h1
             className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-primary-foreground leading-tight mb-4"
             initial={{ opacity: 0, y: 30 }}
@@ -50,7 +51,7 @@ const Blog = () => {
           >
             Stories, Tips, And Insights To Inspire Your Journey.
           </motion.p>
-        </div>
+        </motion.div>
       </section>
 
       {/* Blog Grid */}

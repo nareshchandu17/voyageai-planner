@@ -810,6 +810,7 @@ export const allTours: TourData[] = [
   {
     slug: "dubai-skyline-tour",
     image: dubaiSkylineImg,
+    heroImage: heroDubaiImg,
     title: "Dubai Skyline Tour",
     duration: "5 Days / 4 Nights",
     price: "1,400",

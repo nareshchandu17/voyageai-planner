@@ -326,7 +326,8 @@ const TourDetail = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.6 }}
                 whileHover={{ scale: 1.03 }}
-                className="rounded-2xl overflow-hidden h-[200px] sm:h-[300px] lg:h-[380px]"
+                onClick={() => setLightboxIndex(i)}
+                className="rounded-2xl overflow-hidden h-[200px] sm:h-[300px] lg:h-[380px] cursor-pointer"
               >
                 <img src={img} alt={`${tour.title} gallery ${i + 1}`} className="w-full h-full object-cover" />
               </motion.div>

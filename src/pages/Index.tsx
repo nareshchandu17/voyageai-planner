@@ -5,6 +5,7 @@ import DestinationCard from "@/components/DestinationCard";
 import { Sparkles, Map, DollarSign, Clock, ArrowRight, Star, ChevronRight, Users, Instagram } from "lucide-react";
 import AboutSection from "@/components/AboutSection";
 import ExploreExperience from "@/components/ExploreExperience";
+import ScrollReveal from "@/components/ScrollReveal";
 import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
 import tokyoImg from "@/assets/dest-tokyo.jpg";
@@ -150,23 +151,27 @@ const Index = () => {
       {/* Features */}
       <section className="py-20 sm:py-28 gradient-hero">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16 animate-in">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-              Everything you need to travel smarter
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              AI-powered tools that handle every aspect of your journey
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+                Everything you need to travel smarter
+              </h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                AI-powered tools that handle every aspect of your journey
+              </p>
+            </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((f, i) => (
-              <div key={i} className={`glass-card p-6 hover-lift animate-in-delay-${Math.min(i, 3)}`}>
-                <div className="w-12 h-12 rounded-2xl gradient-ocean flex items-center justify-center mb-4">
-                  <f.icon className="w-6 h-6 text-primary-foreground" />
+              <ScrollReveal key={i} delay={i * 100}>
+                <div className="glass-card p-6 hover-lift h-full">
+                  <div className="w-12 h-12 rounded-2xl gradient-ocean flex items-center justify-center mb-4">
+                    <f.icon className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground">{f.desc}</p>
                 </div>
-                <h3 className="font-display text-lg font-semibold text-foreground mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground">{f.desc}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -175,20 +180,24 @@ const Index = () => {
       {/* Trending Destinations */}
       <section className="py-20 sm:py-28">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-2">
-                Trending destinations
-              </h2>
-              <p className="text-muted-foreground">Most popular places our travelers are exploring</p>
+          <ScrollReveal>
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-2">
+                  Trending destinations
+                </h2>
+                <p className="text-muted-foreground">Most popular places our travelers are exploring</p>
+              </div>
+              <Link to="/discover" className="hidden sm:flex items-center gap-1 text-sm text-ocean font-medium hover:gap-2 transition-all">
+                View all <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
-            <Link to="/discover" className="hidden sm:flex items-center gap-1 text-sm text-ocean font-medium hover:gap-2 transition-all">
-              View all <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {destinations.map((d, i) => (
-              <DestinationCard key={i} {...d} />
+              <ScrollReveal key={i} delay={i * 80}>
+                <DestinationCard {...d} />
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -197,19 +206,23 @@ const Index = () => {
       {/* How it works */}
       <section className="py-20 sm:py-28 bg-secondary/50">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-              How it works
-            </h2>
-            <p className="text-muted-foreground">Three simple steps to your dream trip</p>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+                How it works
+              </h2>
+              <p className="text-muted-foreground">Three simple steps to your dream trip</p>
+            </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {steps.map((s, i) => (
-              <div key={i} className="text-center">
-                <div className="text-5xl font-display font-bold text-gradient-ocean mb-4">{s.num}</div>
-                <h3 className="font-display text-xl font-semibold text-foreground mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground">{s.desc}</p>
-              </div>
+              <ScrollReveal key={i} delay={i * 150}>
+                <div className="text-center">
+                  <div className="text-5xl font-display font-bold text-gradient-ocean mb-4">{s.num}</div>
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-2">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -218,25 +231,29 @@ const Index = () => {
       {/* Testimonials */}
       <section className="py-20 sm:py-28">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-              Loved by travelers
-            </h2>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+                Loved by travelers
+              </h2>
+            </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {testimonials.map((t, i) => (
-              <div key={i} className="glass-card p-6 hover-lift">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-sunset text-sunset" />
-                  ))}
+              <ScrollReveal key={i} delay={i * 120}>
+                <div className="glass-card p-6 hover-lift h-full">
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: t.rating }).map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-sunset text-sunset" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-foreground mb-4">"{t.text}"</p>
+                  <div>
+                    <p className="font-medium text-sm text-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-foreground mb-4">"{t.text}"</p>
-                <div>
-                  <p className="font-medium text-sm text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -245,20 +262,22 @@ const Index = () => {
       {/* CTA */}
       <section className="py-20 sm:py-28">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="gradient-ocean rounded-3xl p-10 sm:p-16 text-center">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-primary-foreground mb-4">
-              Ready for your next adventure?
-            </h2>
-            <p className="text-primary-foreground/80 mb-8 max-w-md mx-auto">
-              Let AI plan the trip of a lifetime. Start free, no credit card required.
-            </p>
-            <Link to="/plan">
-              <Button variant="sunset" size="xl">
-                Start Planning Now
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
+          <ScrollReveal>
+            <div className="gradient-ocean rounded-3xl p-10 sm:p-16 text-center">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-primary-foreground mb-4">
+                Ready for your next adventure?
+              </h2>
+              <p className="text-primary-foreground/80 mb-8 max-w-md mx-auto">
+                Let AI plan the trip of a lifetime. Start free, no credit card required.
+              </p>
+              <Link to="/plan">
+                <Button variant="sunset" size="xl">
+                  Start Planning Now
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

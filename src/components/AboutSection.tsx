@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Info, ArrowUpRight } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 import aboutLeft from "@/assets/about-left.jpg";
 import aboutRight1 from "@/assets/about-right-1.jpg";
 import aboutRight2 from "@/assets/about-right-2.jpg";
@@ -31,6 +32,7 @@ const AboutSection = () => {
         {/* Top row: text left, cycling image right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Left: text content */}
+          <ScrollReveal>
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-6">
               <Info className="w-4 h-4 text-muted-foreground" />
@@ -55,8 +57,10 @@ const AboutSection = () => {
               </Link>
             </div>
           </div>
+          </ScrollReveal>
 
           {/* Right: cycling image */}
+          <ScrollReveal delay={200}>
           <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
             <img
               src={rightImages[currentImg]}
@@ -64,6 +68,7 @@ const AboutSection = () => {
               className={`w-full h-full object-cover transition-opacity duration-500 ${fade ? "opacity-100" : "opacity-0"}`}
             />
           </div>
+          </ScrollReveal>
         </div>
 
         {/* Bottom row: left image aligned with right card bottom */}

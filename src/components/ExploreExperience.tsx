@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Sparkles, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ScrollReveal from "@/components/ScrollReveal";
 import expFuture from "@/assets/exp-future.jpg";
 import expNature from "@/assets/exp-nature.jpg";
 import expCulture from "@/assets/exp-culture.jpg";
@@ -42,24 +43,27 @@ const ExploreExperience = () => {
     <section className="py-20 sm:py-28 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-14">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground tracking-wide">
-              Explore by Experience
-            </span>
+        <ScrollReveal>
+          <div className="text-center mb-14">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground tracking-wide">
+                Explore by Experience
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight">
+              Experience Diverse Worlds On
+              <br />
+              One Planet
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight">
-            Experience Diverse Worlds On
-            <br />
-            One Planet
-          </h2>
-        </div>
+        </ScrollReveal>
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {experiences.map((exp, i) => (
-            <div key={i} className="flex flex-col gap-4">
+            <ScrollReveal key={i} delay={i * 100}>
+            <div className="flex flex-col gap-4">
               {/* Text above image for items 1 & 3 (index 1, 3) */}
               {!exp.textBelow && (
                 <div>
@@ -93,6 +97,7 @@ const ExploreExperience = () => {
                 </div>
               )}
             </div>
+            </ScrollReveal>
           ))}
         </div>
 

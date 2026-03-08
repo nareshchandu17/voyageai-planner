@@ -715,6 +715,7 @@ export const allTours: TourData[] = [
   {
     slug: "rome-heritage-tour",
     image: romeImg,
+    heroImage: heroRomeImg,
     title: "Rome Heritage Tour",
     duration: "5 Days / 4 Nights",
     price: "1,350",

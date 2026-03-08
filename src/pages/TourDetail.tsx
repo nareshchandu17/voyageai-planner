@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Clock, Plane, Users, Tag, Info, ChevronDown, ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Footer from "@/components/Footer";

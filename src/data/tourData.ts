@@ -317,6 +317,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-trail",
     image: capetownImg,
+    heroImage: heroParisImg,
     title: "Paris Trail",
     duration: "6 Days / 5 Nights",
     price: "1,200",

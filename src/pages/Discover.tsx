@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 import toursHeroBg from "@/assets/tours-hero-bg.jpg";
@@ -45,35 +45,35 @@ const categories = [
 ];
 
 const allPackages = [
-  { image: moroccoImg, title: "Morocco Desert Journey", duration: "8 Days / 7 Nights", price: "1,600", category: "Adventure" },
-  { image: italyImg, title: "Italy Classic", duration: "7 Days / 6 Nights", price: "1,400", category: "Romantic" },
-  { image: parisImg, title: "Paris Classics", duration: "6 Days / 5 Nights", price: "1,500", category: "Romantic" },
-  { image: dubaiImg, title: "Paris Getaway", duration: "5 Days / 4 Nights", price: "1,100", category: "Adventure" },
-  { image: africaImg, title: "Africa Experience", duration: "8 Days / 7 Nights", price: "2,200", category: "Adventure" },
-  { image: nycImg, title: "New York Tour", duration: "6 Days / 5 Nights", price: "1,300", category: "Adventure" },
-  { image: capetownImg, title: "Paris Trail", duration: "6 Days / 5 Nights", price: "1,200", category: "Romantic" },
-  { image: baliImg, title: "Bali Cultural Retreat", duration: "6 Days / 5 Nights", price: "950", category: "Nature" },
-  { image: japanImg, title: "Japan Spring", duration: "7 Days / 6 Nights", price: "1,200", category: "Nature" },
-  { image: kyotoImg, title: "Switzerland Explore", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
-  { image: icelandImg, title: "Switzerland Classic", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
-  { image: tokyoImg, title: "Japan Begins Tour", duration: "7 Days / 6 Nights", price: "1,000", category: "Adventure" },
-  { image: peruImg, title: "India Heritage & Culture", duration: "8 Days / 7 Nights", price: "1,300", category: "Adventure" },
-  { image: barcelonaImg, title: "Switzerland Nature's", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
-  { image: maldivesImg, title: "Japan Nature", duration: "7 Days / 6 Nights", price: "1,200", category: "Nature" },
-  { image: heroImg, title: "Paris Begins", duration: "6 Days / 5 Nights", price: "1,500", category: "Romantic" },
-  { image: australiaImg, title: "Australia Coastline", duration: "7 Days / 6 Nights", price: "1,800", category: "Nature" },
-  { image: sydneyImg, title: "Sydney Highlights", duration: "6 Days / 5 Nights", price: "1,650", category: "Adventure" },
-  { image: egyptImg, title: "Discover Egypt", duration: "6 Days / 5 Nights", price: "1,050", category: "Adventure" },
-  { image: romeImg, title: "Rome Heritage Tour", duration: "5 Days / 4 Nights", price: "1,350", category: "Romantic" },
-  { image: santoriniImg, title: "Santorini Escape", duration: "5 Days / 4 Nights", price: "1,750", category: "Romantic" },
-  { image: singaporeImg, title: "Singapore City Tour", duration: "4 Days / 3 Nights", price: "1,100", category: "Adventure" },
-  { image: dubaiSkylineImg, title: "Dubai Skyline Tour", duration: "5 Days / 4 Nights", price: "1,400", category: "Adventure" },
-  { image: amalfiImg, title: "Amalfi Coast Dream", duration: "6 Days / 5 Nights", price: "1,900", category: "Romantic" },
-  { image: thailandImg, title: "Thailand Paradise", duration: "7 Days / 6 Nights", price: "950", category: "Nature" },
-  { image: dubaiMarinaImg, title: "Dubai Marina Luxury", duration: "5 Days / 4 Nights", price: "1,600", category: "Adventure" },
-  { image: newzealandImg, title: "New Zealand Explorer", duration: "8 Days / 7 Nights", price: "2,100", category: "Nature" },
-  { image: londonImg, title: "London Classics", duration: "5 Days / 4 Nights", price: "1,250", category: "Adventure" },
-  { image: parisEiffelImg, title: "Paris Romantic Getaway", duration: "4 Days / 3 Nights", price: "1,350", category: "Romantic" },
+  { slug: "morocco-desert-journey", image: moroccoImg, title: "Morocco Desert Journey", duration: "8 Days / 7 Nights", price: "1,600", category: "Adventure" },
+  { slug: "italy-classic", image: italyImg, title: "Italy Classic", duration: "7 Days / 6 Nights", price: "1,400", category: "Romantic" },
+  { slug: "paris-classics", image: parisImg, title: "Paris Classics", duration: "6 Days / 5 Nights", price: "1,500", category: "Romantic" },
+  { slug: "paris-getaway", image: dubaiImg, title: "Paris Getaway", duration: "5 Days / 4 Nights", price: "1,100", category: "Adventure" },
+  { slug: "africa-experience", image: africaImg, title: "Africa Experience", duration: "8 Days / 7 Nights", price: "2,200", category: "Adventure" },
+  { slug: "new-york-tour", image: nycImg, title: "New York Tour", duration: "6 Days / 5 Nights", price: "1,300", category: "Adventure" },
+  { slug: "paris-trail", image: capetownImg, title: "Paris Trail", duration: "6 Days / 5 Nights", price: "1,200", category: "Romantic" },
+  { slug: "bali-cultural-retreat", image: baliImg, title: "Bali Cultural Retreat", duration: "6 Days / 5 Nights", price: "950", category: "Nature" },
+  { slug: "japan-spring", image: japanImg, title: "Japan Spring", duration: "7 Days / 6 Nights", price: "1,200", category: "Nature" },
+  { slug: "switzerland-explore", image: kyotoImg, title: "Switzerland Explore", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
+  { slug: "switzerland-classic", image: icelandImg, title: "Switzerland Classic", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
+  { slug: "japan-begins-tour", image: tokyoImg, title: "Japan Begins Tour", duration: "7 Days / 6 Nights", price: "1,000", category: "Adventure" },
+  { slug: "india-heritage-culture", image: peruImg, title: "India Heritage & Culture", duration: "8 Days / 7 Nights", price: "1,300", category: "Adventure" },
+  { slug: "switzerland-natures", image: barcelonaImg, title: "Switzerland Nature's", duration: "5 Days / 4 Nights", price: "1,500", category: "Nature" },
+  { slug: "japan-nature", image: maldivesImg, title: "Japan Nature", duration: "7 Days / 6 Nights", price: "1,200", category: "Nature" },
+  { slug: "paris-begins", image: heroImg, title: "Paris Begins", duration: "6 Days / 5 Nights", price: "1,500", category: "Romantic" },
+  { slug: "australia-coastline", image: australiaImg, title: "Australia Coastline", duration: "7 Days / 6 Nights", price: "1,800", category: "Nature" },
+  { slug: "sydney-highlights", image: sydneyImg, title: "Sydney Highlights", duration: "6 Days / 5 Nights", price: "1,650", category: "Adventure" },
+  { slug: "discover-egypt", image: egyptImg, title: "Discover Egypt", duration: "6 Days / 5 Nights", price: "1,050", category: "Adventure" },
+  { slug: "rome-heritage-tour", image: romeImg, title: "Rome Heritage Tour", duration: "5 Days / 4 Nights", price: "1,350", category: "Romantic" },
+  { slug: "santorini-escape", image: santoriniImg, title: "Santorini Escape", duration: "5 Days / 4 Nights", price: "1,750", category: "Romantic" },
+  { slug: "singapore-city-tour", image: singaporeImg, title: "Singapore City Tour", duration: "4 Days / 3 Nights", price: "1,100", category: "Adventure" },
+  { slug: "dubai-skyline-tour", image: dubaiSkylineImg, title: "Dubai Skyline Tour", duration: "5 Days / 4 Nights", price: "1,400", category: "Adventure" },
+  { slug: "amalfi-coast-dream", image: amalfiImg, title: "Amalfi Coast Dream", duration: "6 Days / 5 Nights", price: "1,900", category: "Romantic" },
+  { slug: "thailand-paradise", image: thailandImg, title: "Thailand Paradise", duration: "7 Days / 6 Nights", price: "950", category: "Nature" },
+  { slug: "dubai-marina-luxury", image: dubaiMarinaImg, title: "Dubai Marina Luxury", duration: "5 Days / 4 Nights", price: "1,600", category: "Adventure" },
+  { slug: "new-zealand-explorer", image: newzealandImg, title: "New Zealand Explorer", duration: "8 Days / 7 Nights", price: "2,100", category: "Nature" },
+  { slug: "london-classics", image: londonImg, title: "London Classics", duration: "5 Days / 4 Nights", price: "1,250", category: "Adventure" },
+  { slug: "paris-romantic-getaway", image: parisEiffelImg, title: "Paris Romantic Getaway", duration: "4 Days / 3 Nights", price: "1,350", category: "Romantic" },
 ];
 
 const ITEMS_PER_PAGE = 8;
@@ -210,42 +210,43 @@ const Discover = () => {
                 const staggerIndex = isNewlyLoaded ? i - newlyLoadedStart : i;
 
                 return (
-                  <motion.div
-                    key={`${pkg.title}-${i}`}
-                    initial={isNewlyLoaded ? { opacity: 0, x: -40, y: 20 } : { opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, x: 0, y: 0 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: isNewlyLoaded ? staggerIndex * 0.12 : i * 0.08,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                    }}
-                    className="group cursor-pointer"
-                  >
+                  <Link to={`/discover/${pkg.slug}`} key={`${pkg.slug}-${i}`}>
                     <motion.div
-                      whileHover={{ y: -8 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      initial={isNewlyLoaded ? { opacity: 0, x: -40, y: 20 } : { opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: isNewlyLoaded ? staggerIndex * 0.12 : i * 0.08,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                      }}
+                      className="group cursor-pointer"
                     >
-                      <div className="relative h-[320px] sm:h-[380px] rounded-2xl overflow-hidden mb-4">
-                        <img
-                          src={pkg.image}
-                          alt={pkg.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 to-transparent" />
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-ocean/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full">
-                            {pkg.duration}
-                          </span>
+                      <motion.div
+                        whileHover={{ y: -8 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        <div className="relative h-[320px] sm:h-[380px] rounded-2xl overflow-hidden mb-4">
+                          <img
+                            src={pkg.image}
+                            alt={pkg.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 to-transparent" />
+                          <div className="absolute top-4 left-4">
+                            <span className="bg-ocean/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full">
+                              {pkg.duration}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <h3 className="font-display text-lg sm:text-xl font-bold text-foreground mb-1">
-                        {pkg.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        From $ <span className="text-foreground font-bold text-base">${pkg.price}</span> / Per Person
-                      </p>
+                        <h3 className="font-display text-lg sm:text-xl font-bold text-foreground mb-1">
+                          {pkg.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          From $ <span className="text-foreground font-bold text-base">${pkg.price}</span> / Per Person
+                        </p>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
+                  </Link>
                 );
               })}
             </motion.div>

@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import TourDetail from "./pages/TourDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const AnimatedRoutes = () => {
         <Route path="/plan" element={<PlanTrip />} />
         <Route path="/itinerary" element={<Itinerary />} />
         <Route path="/discover" element={<Discover />} />
+        <Route path="/discover/:slug" element={<TourDetail />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/memories" element={<TripMemories />} />
         <Route path="/about" element={<About />} />

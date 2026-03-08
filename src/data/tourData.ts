@@ -941,6 +941,7 @@ export const allTours: TourData[] = [
   {
     slug: "new-zealand-explorer",
     image: newzealandImg,
+    heroImage: heroNewzealandImg,
     title: "New Zealand Explorer",
     duration: "8 Days / 7 Nights",
     price: "2,100",

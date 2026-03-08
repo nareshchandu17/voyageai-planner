@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DestinationCard from "@/components/DestinationCard";
-import { Sparkles, Map, DollarSign, Clock, ArrowRight, Star, ChevronRight } from "lucide-react";
+import { Sparkles, Map, DollarSign, Clock, ArrowRight, Star, ChevronRight, Users, Instagram } from "lucide-react";
+import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
 import tokyoImg from "@/assets/dest-tokyo.jpg";
 import baliImg from "@/assets/dest-bali.jpg";
@@ -36,40 +37,75 @@ const testimonials = [
   { name: "Emma Watson", role: "Family Traveler", text: "Planning trips with kids is chaos. VoyageAI made our Bali vacation stress-free.", rating: 5 },
 ];
 
+const floatingPhotos = [
+  { src: heroImg, alt: "Santorini", className: "absolute top-20 left-[3%] w-48 sm:w-56 h-36 sm:h-44 -rotate-6 z-10" },
+  { src: parisImg, alt: "Paris", className: "absolute bottom-28 left-[5%] w-44 sm:w-52 h-32 sm:h-40 rotate-3 z-10" },
+  { src: tokyoImg, alt: "Tokyo", className: "absolute top-16 right-[2%] w-44 sm:w-52 h-36 sm:h-44 rotate-6 z-10" },
+  { src: peruImg, alt: "Peru", className: "absolute bottom-24 right-[4%] w-48 sm:w-56 h-32 sm:h-40 -rotate-3 z-10" },
+  { src: baliImg, alt: "Bali", className: "absolute top-1/2 -translate-y-1/2 left-[15%] w-40 sm:w-48 h-28 sm:h-36 rotate-2 z-[5] hidden lg:block" },
+  { src: nycImg, alt: "NYC", className: "absolute top-1/2 -translate-y-1/2 right-[14%] w-40 sm:w-48 h-28 sm:h-36 -rotate-4 z-[5] hidden lg:block" },
+];
+
 const Index = () => {
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* Hero — Traavellio-style collage */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* Ocean background */}
         <div className="absolute inset-0">
-          <img src={heroImg} alt="Travel destination" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
+          <img src={heroOceanBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-foreground/10" />
         </div>
-        <div className="container mx-auto px-4 sm:px-6 relative z-10 pt-20">
-          <div className="max-w-2xl animate-in">
-            <div className="inline-flex items-center gap-2 bg-card/20 backdrop-blur-sm rounded-full px-4 py-2 text-sm text-primary-foreground/90 mb-6">
-              <Sparkles className="w-4 h-4" />
-              Powered by AI
+
+        {/* Floating photo cards — hidden on mobile to keep it clean */}
+        <div className="hidden sm:block">
+          {floatingPhotos.map((photo, i) => (
+            <div
+              key={i}
+              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 transition-transform duration-500 hover:scale-105`}
+              style={{ animationDelay: `${i * 0.15}s` }}
+            >
+              <img src={photo.src} alt={photo.alt} className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold text-primary-foreground leading-tight mb-6">
-              Plan the Perfect Trip with{" "}
-              <span className="text-gradient-sunset">AI</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-primary-foreground/80 mb-8 font-body max-w-lg">
-              Your AI travel companion that creates personalized itineraries, optimizes budgets, and keeps you updated in real-time.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/plan">
-                <Button variant="sunset" size="xl" className="w-full sm:w-auto">
-                  Plan My Trip
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link to="/discover">
-                <Button variant="glass" size="xl" className="w-full sm:w-auto">
-                  Explore Destinations
-                </Button>
-              </Link>
+          ))}
+        </div>
+
+        {/* Center content */}
+        <div className="relative z-20 text-center px-4 max-w-3xl mx-auto pt-20">
+          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold text-primary-foreground leading-[1.05] mb-6 animate-in drop-shadow-lg">
+            Experience the World,
+            <br />
+            <span className="italic">Not Just the Map</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-primary-foreground/90 mb-10 font-body font-medium animate-in-delay-1 drop-shadow-md">
+            Curated Journeys Designed To Be Felt, Not Rushed.
+          </p>
+          <div className="animate-in-delay-2">
+            <Link to="/plan">
+              <Button variant="glass" size="xl" className="bg-card/90 text-foreground font-semibold shadow-glass-lg hover:bg-card gap-3 px-10">
+                Book a trip
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Social proof bar */}
+        <div className="absolute bottom-0 left-0 right-0 z-20">
+          <div className="bg-foreground/20 backdrop-blur-md border-t border-card/10">
+            <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center gap-6 sm:gap-12">
+              <div className="flex items-center gap-2 text-primary-foreground/90">
+                <Star className="w-5 h-5 fill-sunset text-sunset" />
+                <span className="text-sm font-medium"><strong>4.9</strong> stars (541k Reviews)</span>
+              </div>
+              <div className="flex items-center gap-2 text-primary-foreground/90">
+                <Users className="w-5 h-5" />
+                <span className="text-sm font-medium"><strong>50k</strong> travellers</span>
+              </div>
+              <div className="flex items-center gap-2 text-primary-foreground/90">
+                <Instagram className="w-5 h-5" />
+                <span className="text-sm font-medium"><strong>1+ million</strong> followers</span>
+              </div>
             </div>
           </div>
         </div>

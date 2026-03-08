@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -123,9 +123,56 @@ const BlogPost = () => {
         ))}
       </article>
 
+      {/* Related Posts */}
+      <RelatedPosts currentSlug={post.slug} />
+
       <CTASection />
       <Footer />
     </div>
+  );
+};
+
+// Related posts component
+const RelatedPosts = ({ currentSlug }: { currentSlug: string }) => {
+  const related = useMemo(() => {
+    const others = blogPosts.filter((b) => b.slug !== currentSlug);
+    const shuffled = [...others].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  }, [currentSlug]);
+
+  return (
+    <section className="py-20 bg-secondary/30">
+      <div className="container mx-auto px-4 sm:px-6">
+        <ScrollReveal>
+          <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground text-center mb-12">
+            Related Stories
+          </h2>
+        </ScrollReveal>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {related.map((post, i) => (
+            <ScrollReveal key={post.slug} delay={i * 100}>
+              <Link to={`/blog/${post.slug}`} className="group block">
+                <motion.div
+                  className="relative rounded-2xl overflow-hidden aspect-[4/3] mb-4"
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </motion.div>
+                <p className="text-sm text-muted-foreground mb-1">{post.date}</p>
+                <h3 className="text-lg font-display font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {post.title}
+                </h3>
+              </Link>
+            </ScrollReveal>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

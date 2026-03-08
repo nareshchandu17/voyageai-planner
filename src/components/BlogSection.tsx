@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 import blogIslandImg from "@/assets/blog-island.jpg";
 import blogEuropeImg from "@/assets/blog-europe.jpg";
@@ -72,17 +72,19 @@ const BlogSection = () => {
           ))}
         </div>
 
-        {/* Explore stories header with view all */}
+        {/* Explore stories bar */}
         <ScrollReveal>
-          <div className="flex items-center justify-between border-t border-border pt-8">
-            <h3 className="text-xl sm:text-2xl font-display font-semibold text-foreground">
+          <div className="flex items-center gap-6 mt-4">
+            <p className="text-lg sm:text-xl font-display font-medium text-foreground whitespace-nowrap">
               Explore stories that inspire travel
-            </h3>
+            </p>
+            <div className="flex-1 h-px bg-border" />
             <Link
               to="/discover"
-              className="flex items-center gap-1 text-sm font-medium text-ocean hover:gap-2 transition-all whitespace-nowrap"
+              className="inline-flex items-center gap-2 bg-foreground text-background px-6 py-3 rounded-full font-medium text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
             >
-              View all <ChevronRight className="w-4 h-4" />
+              View All
+              <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </ScrollReveal>

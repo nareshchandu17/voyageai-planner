@@ -13,15 +13,10 @@ const rightImages = [aboutRight1, aboutRight2, aboutRight3, aboutRight4];
 
 const AboutSection = () => {
   const [currentImg, setCurrentImg] = useState(0);
-  const [fade, setFade] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrentImg((prev) => (prev + 1) % rightImages.length);
-        setFade(true);
-      }, 400);
+      setCurrentImg((prev) => (prev + 1) % rightImages.length);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -62,11 +57,14 @@ const AboutSection = () => {
           {/* Right: cycling image */}
           <ScrollReveal delay={200}>
           <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
-            <img
-              src={rightImages[currentImg]}
-              alt="Travel experience"
-              className={`w-full h-full object-cover transition-opacity duration-500 ${fade ? "opacity-100" : "opacity-0"}`}
-            />
+            {rightImages.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt="Travel experience"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === currentImg ? "opacity-100" : "opacity-0"}`}
+              />
+            ))}
           </div>
           </ScrollReveal>
         </div>

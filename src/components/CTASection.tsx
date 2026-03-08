@@ -36,7 +36,7 @@ const CTASection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Background */}
       <img
         src={ctaBg}

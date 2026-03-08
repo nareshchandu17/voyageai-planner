@@ -12,6 +12,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import BlogSection from "@/components/BlogSection";
 import FAQSection from "@/components/FAQSection";
 import VibeWithUs from "@/components/VibeWithUs";
+import CTASection from "@/components/CTASection";
 import ScrollReveal from "@/components/ScrollReveal";
 import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
@@ -175,6 +176,9 @@ const Index = () => {
 
       {/* Vibe With Us */}
       <VibeWithUs />
+
+      {/* CTA - Dreams Into Reality */}
+      <CTASection />
 
       {/* Features */}
       <section className="py-20 sm:py-28 gradient-hero">

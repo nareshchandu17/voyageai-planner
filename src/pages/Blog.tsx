@@ -1,46 +1,54 @@
+import { useRef } from "react";
+import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
-import blogIslandImg from "@/assets/blog-island.jpg";
-import blogEuropeImg from "@/assets/blog-europe.jpg";
-import blogTempleImg from "@/assets/blog-temple.jpg";
-import blogDesertImg from "@/assets/blog-desert.jpg";
-import destBaliImg from "@/assets/dest-bali.jpg";
-import destParisImg from "@/assets/dest-paris.jpg";
-import destTokyoImg from "@/assets/dest-tokyo.jpg";
-import destPeruImg from "@/assets/dest-peru.jpg";
 import blogHeroBg from "@/assets/blog-hero-bg.jpg";
-
-const blogs = [
-  { image: blogIslandImg, date: "25 Feb 2026", title: "Discovering Island Life Beyond Luxury" },
-  { image: blogEuropeImg, date: "10 Mar 2026", title: "Experiencing Europe Beyond Tourist Routes" },
-  { image: blogTempleImg, date: "13 Mar 2026", title: "Ancient Temples and Hidden Spiritual Paths" },
-  { image: blogDesertImg, date: "22 Mar 2026", title: "Desert Adventures That Change Perspectives" },
-  { image: destBaliImg, date: "19 Jan 2026", title: "Discovering the Soul of Bali" },
-  { image: destParisImg, date: "05 Feb 2026", title: "A Parisian Weekend You Won't Forget" },
-  { image: destTokyoImg, date: "28 Feb 2026", title: "Tokyo After Dark: Neon & Nightlife" },
-  { image: destPeruImg, date: "12 Mar 2026", title: "Discovering the Calm of Mountain Travel" },
-];
+import { blogPosts } from "@/data/blogData";
 
 const Blog = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 500], [0, 150]);
+  const heroScale = useTransform(scrollY, [0, 500], [1, 1.12]);
+  const overlayOpacity = useTransform(scrollY, [0, 400], [0.4, 0.7]);
+
   return (
     <div className="min-h-screen">
-      {/* Hero Banner */}
-      <section className="relative h-[50vh] min-h-[380px] flex items-center justify-center overflow-hidden">
-        <img
+      {/* Parallax Hero Banner */}
+      <section
+        ref={heroRef}
+        className="relative h-[50vh] min-h-[380px] flex items-center justify-center overflow-hidden"
+      >
+        <motion.img
           src={blogHeroBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ y: heroY, scale: heroScale }}
         />
-        <div className="absolute inset-0 bg-foreground/40" />
+        <motion.div
+          className="absolute inset-0 bg-foreground"
+          style={{ opacity: overlayOpacity }}
+        />
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-primary-foreground leading-tight mb-4">
+          <motion.h1
+            className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-primary-foreground leading-tight mb-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
             Travel Stories & Guides
-          </h1>
-          <p className="text-primary-foreground/80 text-lg sm:text-xl max-w-lg mx-auto">
+          </motion.h1>
+          <motion.p
+            className="text-primary-foreground/80 text-lg sm:text-xl max-w-lg mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+          >
             Stories, Tips, And Insights To Inspire Your Journey.
-          </p>
+          </motion.p>
         </div>
       </section>
 
@@ -48,10 +56,14 @@ const Blog = () => {
       <section className="py-20 sm:py-28 bg-background">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
-            {blogs.map((blog, i) => (
+            {blogPosts.map((blog, i) => (
               <ScrollReveal key={i} delay={i * 80}>
-                <div className="group cursor-pointer">
-                  <div className="relative rounded-2xl overflow-hidden aspect-[4/3] mb-4">
+                <Link to={`/blog/${blog.slug}`} className="group cursor-pointer block">
+                  <motion.div
+                    className="relative rounded-2xl overflow-hidden aspect-[4/3] mb-4"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <img
                       src={blog.image}
                       alt={blog.title}
@@ -60,22 +72,19 @@ const Blog = () => {
                     <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
                       <ArrowUpRight className="w-5 h-5 text-foreground" />
                     </div>
-                  </div>
+                  </motion.div>
                   <p className="text-sm text-muted-foreground mb-1">{blog.date}</p>
                   <h3 className="text-lg sm:text-xl font-display font-semibold text-foreground group-hover:text-primary transition-colors">
                     {blog.title}
                   </h3>
-                </div>
+                </Link>
               </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
       <CTASection />
-
-      {/* Footer */}
       <Footer />
     </div>
   );

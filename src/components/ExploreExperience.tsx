@@ -100,7 +100,6 @@ const ExploreExperience = () => {
             </ScrollReveal>
           ))}
         </div>
-        </div>
 
         {/* Bottom bar */}
         <div className="flex items-center gap-6 mt-14">

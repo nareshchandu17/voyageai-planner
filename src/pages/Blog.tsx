@@ -17,8 +17,8 @@ const Blog = () => {
   const overlayOpacity = useTransform(scrollY, [0, 400], [0.4, 0.7]);
 
   return (
+    <PageTransition>
     <div className="min-h-screen">
-      {/* Parallax Hero Banner */}
       <section
         ref={heroRef}
         className="relative h-[50vh] min-h-[380px] flex items-center justify-center overflow-hidden"

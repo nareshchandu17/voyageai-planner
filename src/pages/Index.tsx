@@ -262,20 +262,22 @@ const Index = () => {
       {/* CTA */}
       <section className="py-20 sm:py-28">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="gradient-ocean rounded-3xl p-10 sm:p-16 text-center">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-primary-foreground mb-4">
-              Ready for your next adventure?
-            </h2>
-            <p className="text-primary-foreground/80 mb-8 max-w-md mx-auto">
-              Let AI plan the trip of a lifetime. Start free, no credit card required.
-            </p>
-            <Link to="/plan">
-              <Button variant="sunset" size="xl">
-                Start Planning Now
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
+          <ScrollReveal>
+            <div className="gradient-ocean rounded-3xl p-10 sm:p-16 text-center">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-primary-foreground mb-4">
+                Ready for your next adventure?
+              </h2>
+              <p className="text-primary-foreground/80 mb-8 max-w-md mx-auto">
+                Let AI plan the trip of a lifetime. Start free, no credit card required.
+              </p>
+              <Link to="/plan">
+                <Button variant="sunset" size="xl">
+                  Start Planning Now
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

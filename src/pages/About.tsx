@@ -10,6 +10,10 @@ import aboutRight2 from "@/assets/about-right-2.jpg";
 import aboutRight3 from "@/assets/about-right-3.jpg";
 import heroTravel from "@/assets/hero-travel.jpg";
 import ctaBg from "@/assets/cta-resort-bg.jpg";
+import teamCeo from "@/assets/team-ceo.jpg";
+import teamCreative from "@/assets/team-creative.jpg";
+import teamOperations from "@/assets/team-operations.jpg";
+import teamCommunity from "@/assets/team-community.jpg";
 import Footer from "@/components/Footer";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -345,9 +349,9 @@ const About = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: "Authenticity", desc: "Real experiences with local communities, not tourist traps. We connect you with the soul of every destination.", img: aboutRight3 },
-              { title: "Community", desc: "Travel is better together. We build connections between travelers, guides, and locals that last a lifetime.", img: aboutRight1 },
-              { title: "Sustainability", desc: "We're committed to responsible travel that preserves cultures and environments for future generations.", img: aboutRight2 },
+              { title: "Authenticity", desc: "Real experiences with local communities, not tourist traps. We connect you with the soul of every destination.", img: aboutRight3, num: "01" },
+              { title: "Community", desc: "Travel is better together. We build connections between travelers, guides, and locals that last a lifetime.", img: aboutRight1, num: "02" },
+              { title: "Sustainability", desc: "We're committed to responsible travel that preserves cultures and environments for future generations.", img: aboutRight2, num: "03" },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -355,7 +359,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.7, delay: i * 0.15 }}
-                className="group"
+                className="group relative"
               >
                 <div className="rounded-2xl overflow-hidden shadow-lg mb-6 h-[220px] sm:h-[280px]">
                   <img
@@ -364,8 +368,75 @@ const About = () => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
+                {/* Number + line accent */}
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-xs font-bold text-primary/60 font-body tracking-widest">{item.num}</span>
+                  <div className="gsap-line-draw h-px flex-1 bg-border origin-left" />
+                </div>
                 <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-3">{item.title}</h3>
                 <p className="text-muted-foreground font-body leading-relaxed">{item.desc}</p>
+                {/* Bottom decorative line */}
+                <div className="gsap-line-draw mt-6 h-px bg-gradient-to-r from-primary/30 to-transparent origin-left" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ DIVIDER ═══════════ */}
+      <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+        <div className="gsap-line-draw h-px bg-border origin-left" />
+      </div>
+
+      {/* ═══════════ TEAM ═══════════ */}
+      <section className="py-20 sm:py-28">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground text-center mb-6">
+            <BlurReveal text="The People Behind The Journey" />
+          </h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-muted-foreground text-center text-lg font-body max-w-2xl mx-auto mb-16"
+          >
+            Passionate travelers who turned their love for exploration into a mission.
+          </motion.p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { name: "Arjun Mehta", role: "Founder & CEO", img: teamCeo, quote: "Travel is the greatest teacher." },
+              { name: "Sofia Laurent", role: "Creative Director", img: teamCreative, quote: "Design shapes how we see the world." },
+              { name: "James Carter", role: "Head of Operations", img: teamOperations, quote: "Seamless journeys start behind the scenes." },
+              { name: "Maya Santos", role: "Community Lead", img: teamCommunity, quote: "Connection is the heart of every trip." },
+            ].map((member, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7, delay: i * 0.12, ease: "easeOut" }}
+                className="group text-center"
+              >
+                {/* Photo */}
+                <div className="relative mx-auto w-[180px] h-[220px] sm:w-[200px] sm:h-[260px] rounded-2xl overflow-hidden shadow-lg mb-5">
+                  <img
+                    src={member.img}
+                    alt={member.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {/* Hover quote overlay */}
+                  <div className="absolute inset-0 bg-foreground/60 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <p className="text-primary-foreground text-sm font-body italic leading-snug">"{member.quote}"</p>
+                  </div>
+                </div>
+
+                {/* Line accent */}
+                <div className="gsap-line-draw h-px w-12 mx-auto bg-primary/40 origin-center mb-4" />
+
+                <h3 className="text-lg sm:text-xl font-display font-bold text-foreground">{member.name}</h3>
+                <p className="text-sm text-muted-foreground font-body mt-1">{member.role}</p>
               </motion.div>
             ))}
           </div>

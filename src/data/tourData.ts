@@ -1008,6 +1008,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-romantic-getaway",
     image: parisEiffelImg,
+    heroImage: heroParisImg,
     title: "Paris Romantic Getaway",
     duration: "4 Days / 3 Nights",
     price: "1,350",

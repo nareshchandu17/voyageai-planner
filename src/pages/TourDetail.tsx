@@ -40,6 +40,96 @@ const SectionReveal = ({ children, className = "", delay = 0 }: { children: Reac
   </motion.div>
 );
 
+interface LightboxProps {
+  images: string[];
+  currentIndex: number;
+  onClose: () => void;
+  onChange: (index: number) => void;
+  title: string;
+}
+
+const Lightbox = ({ images, currentIndex, onClose, onChange, title }: LightboxProps) => {
+  const go = useCallback(
+    (dir: number) => {
+      const next = (currentIndex + dir + images.length) % images.length;
+      onChange(next);
+    },
+    [currentIndex, images.length, onChange]
+  );
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [go, onClose]);
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-foreground/90 backdrop-blur-xl z-[60]"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
+        className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-8 pointer-events-none"
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 sm:top-8 sm:right-8 w-11 h-11 rounded-full bg-card/20 backdrop-blur-md border border-white/15 flex items-center justify-center pointer-events-auto hover:bg-card/40 transition-colors z-10"
+        >
+          <X className="w-5 h-5 text-primary-foreground" />
+        </button>
+
+        {/* Counter */}
+        <div className="absolute top-5 left-5 sm:top-8 sm:left-8 text-primary-foreground/70 text-sm font-medium pointer-events-auto z-10">
+          {currentIndex + 1} / {images.length}
+        </div>
+
+        {/* Prev */}
+        <button
+          onClick={() => go(-1)}
+          className="absolute left-3 sm:left-6 w-11 h-11 rounded-full bg-card/20 backdrop-blur-md border border-white/15 flex items-center justify-center pointer-events-auto hover:bg-card/40 transition-colors z-10"
+        >
+          <ChevronLeft className="w-5 h-5 text-primary-foreground" />
+        </button>
+
+        {/* Image */}
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={currentIndex}
+            src={images[currentIndex]}
+            alt={`${title} photo ${currentIndex + 1}`}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl pointer-events-auto"
+          />
+        </AnimatePresence>
+
+        {/* Next */}
+        <button
+          onClick={() => go(1)}
+          className="absolute right-3 sm:right-6 w-11 h-11 rounded-full bg-card/20 backdrop-blur-md border border-white/15 flex items-center justify-center pointer-events-auto hover:bg-card/40 transition-colors z-10"
+        >
+          <ChevronRight className="w-5 h-5 text-primary-foreground" />
+        </button>
+      </motion.div>
+    </>
+  );
+};
+
 const TourDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const tour = slug ? getTourBySlug(slug) : undefined;

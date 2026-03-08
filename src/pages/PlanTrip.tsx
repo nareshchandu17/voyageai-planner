@@ -84,7 +84,10 @@ const PlanTrip = () => {
           className="w-full h-full object-cover"
           style={{ transform: `translateY(${scrollY * 0.3}px) scale(1.1)` }}
         />
-        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
+        <div
+          className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center"
+          style={{ opacity: Math.max(0, 1 - scrollY / (window.innerHeight * 0.35)) }}
+        >
           <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">Start Your Journey</h1>
           <p className="text-white/90 text-lg md:text-xl max-w-xl text-center">Tell Us Your Destination & We'll Plan The Rest.</p>
         </div>

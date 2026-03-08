@@ -23,6 +23,19 @@ import expNature from "@/assets/exp-nature.jpg";
 import expCulture from "@/assets/exp-culture.jpg";
 import expHistory from "@/assets/exp-history.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
+import australiaImg from "@/assets/dest-australia.jpg";
+import sydneyImg from "@/assets/dest-sydney.jpg";
+import egyptImg from "@/assets/dest-egypt.jpg";
+import romeImg from "@/assets/dest-rome.jpg";
+import santoriniImg from "@/assets/dest-santorini.jpg";
+import singaporeImg from "@/assets/dest-singapore.jpg";
+import dubaiSkylineImg from "@/assets/dest-dubai-skyline.jpg";
+import amalfiImg from "@/assets/dest-amalfi.jpg";
+import thailandImg from "@/assets/dest-thailand.jpg";
+import dubaiMarinaImg from "@/assets/dest-dubai-marina.jpg";
+import newzealandImg from "@/assets/dest-newzealand.jpg";
+import londonImg from "@/assets/dest-london.jpg";
+import parisEiffelImg from "@/assets/dest-paris-eiffel.jpg";
 
 const categories = [
   { label: "All", image: heroImg },

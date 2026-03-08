@@ -8,6 +8,7 @@ import ExploreExperience from "@/components/ExploreExperience";
 import MostLovedDestinations from "@/components/MostLovedDestinations";
 import TravelPackages from "@/components/TravelPackages";
 import WhyChooseUs from "@/components/WhyChooseUs";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import ScrollReveal from "@/components/ScrollReveal";
 import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
 import heroImg from "@/assets/hero-travel.jpg";

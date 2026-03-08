@@ -34,7 +34,7 @@ const Blog = () => {
           className="absolute inset-0 bg-foreground"
           style={{ opacity: overlayOpacity }}
         />
-        <div className="relative z-10 text-center px-4">
+        <motion.div className="relative z-10 text-center px-4" style={{ opacity: textOpacity }}>
           <motion.h1
             className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-primary-foreground leading-tight mb-4"
             initial={{ opacity: 0, y: 30 }}

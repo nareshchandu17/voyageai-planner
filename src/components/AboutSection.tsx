@@ -24,60 +24,62 @@ const AboutSection = () => {
   return (
     <section className="py-20 sm:py-28 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
-        {/* Top row: text left, cycling image right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          {/* Left: text content */}
-          <ScrollReveal>
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-6">
-              <Info className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground tracking-wide">About Us</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight mb-6">
-              Meaningful Travel Experiences, Thoughtfully Crafted
-            </h2>
-            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-10 max-w-lg">
-              We are passionate travel experts creating unforgettable journeys beyond sightseeing. Every itinerary combines comfort, discovery, and meaningful experiences.
-            </p>
-            <div className="flex items-center gap-0">
-              <Link to="/about">
-                <Button size="lg" className="rounded-r-none rounded-l-[2rem] gap-2 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300">
-                  Know More
-                </Button>
-              </Link>
-              <Link to="/about">
-                <Button size="lg" className="rounded-l-none rounded-r-[2rem] border-l border-white/20 px-4 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300">
-                  <ArrowUpRight className="w-5 h-5" />
-                </Button>
-              </Link>
+        {/* Desktop: use grid to align bottoms of left image and right card */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+          {/* Left column: text on top, bottom-aligned image */}
+          <div className="flex flex-col">
+            <ScrollReveal>
+              <div className="flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-6">
+                  <Info className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground tracking-wide">About Us</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight mb-6">
+                  Meaningful Travel Experiences, Thoughtfully Crafted
+                </h2>
+                <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-10 max-w-lg">
+                  We are passionate travel experts creating unforgettable journeys beyond sightseeing. Every itinerary combines comfort, discovery, and meaningful experiences.
+                </p>
+                <div className="flex items-center gap-0">
+                  <Link to="/about">
+                    <Button size="lg" className="rounded-r-none rounded-l-[2rem] gap-2 bg-[hsl(var(--ocean))] hover:bg-[hsl(var(--ocean-dark))] text-primary-foreground shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                      Know More
+                    </Button>
+                  </Link>
+                  <Link to="/about">
+                    <Button size="lg" className="rounded-l-none rounded-r-[2rem] border-l border-primary-foreground/20 px-4 bg-[hsl(var(--ocean))] hover:bg-[hsl(var(--ocean-dark))] text-primary-foreground shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                      <ArrowUpRight className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Left bottom image — mt-auto pushes it to align with right column bottom */}
+            <div className="mt-8 lg:mt-auto">
+              <div className="rounded-[2rem] overflow-hidden shadow-xl aspect-[16/9]">
+                <img
+                  src={aboutLeft}
+                  alt="Traveler on rocks at sunset"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
-          </ScrollReveal>
 
           {/* Right: cycling image */}
           <ScrollReveal delay={200}>
-          <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
-            {rightImages.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt="Travel experience"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === currentImg ? "opacity-100" : "opacity-0"}`}
-              />
-            ))}
-          </div>
+            <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
+              {rightImages.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt="Travel experience"
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === currentImg ? "opacity-100" : "opacity-0"}`}
+                />
+              ))}
+            </div>
           </ScrollReveal>
-        </div>
-
-        {/* Bottom row: left image aligned with right card bottom */}
-        <div className="mt-10 lg:mt-[-16rem] lg:w-1/2">
-          <div className="rounded-[2rem] overflow-hidden shadow-xl aspect-[16/9]">
-            <img
-              src={aboutLeft}
-              alt="Traveler on rocks at sunset"
-              className="w-full h-full object-cover"
-            />
-          </div>
         </div>
       </div>
     </section>

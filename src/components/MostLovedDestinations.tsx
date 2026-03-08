@@ -48,6 +48,9 @@ const MostLovedDestinations = () => {
     offset: ["start start", "end end"],
   });
 
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.25]);
+
   // Track scroll progress to determine active card
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (v) => {

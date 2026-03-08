@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import TourDetail from "./pages/TourDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

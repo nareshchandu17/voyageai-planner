@@ -62,7 +62,8 @@ const ExploreExperience = () => {
         {/* Bento Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {experiences.map((exp, i) => (
-            <div key={i} className="flex flex-col gap-4">
+            <ScrollReveal key={i} delay={i * 100}>
+            <div className="flex flex-col gap-4">
               {/* Text above image for items 1 & 3 (index 1, 3) */}
               {!exp.textBelow && (
                 <div>

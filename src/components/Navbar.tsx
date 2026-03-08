@@ -7,7 +7,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const hasHero = location.pathname === "/" || location.pathname === "/blog" || location.pathname.startsWith("/blog/");
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);

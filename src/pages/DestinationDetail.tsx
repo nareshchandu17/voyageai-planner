@@ -43,84 +43,72 @@ const DestinationDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <section ref={heroRef} className="relative h-screen overflow-hidden">
-        <motion.img
-          src={dest.heroImage}
-          alt={dest.name}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ scale: heroScale }}
-        />
-        <motion.div className="absolute inset-0 bg-foreground" style={{ opacity: overlayOpacity }} />
-
+      {/* Hero — single large rounded image */}
+      <section ref={heroRef} className="px-4 sm:px-6 pt-4 sm:pt-6">
         <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center z-10"
-          style={{ opacity: heroOpacity, y: titleY }}
+          initial={{ opacity: 0, scale: 0.97, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-7xl mx-auto rounded-3xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]"
         >
+          <motion.img
+            src={dest.heroImage}
+            alt={dest.name}
+            className="w-full h-[60vh] sm:h-[75vh] lg:h-[85vh] object-cover"
+            style={{ scale: heroScale }}
+          />
+        </motion.div>
+      </section>
+
+      {/* Title + Info below hero */}
+      <section className="py-12 sm:py-16 lg:py-20">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl text-center">
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className="text-primary-foreground/70 text-sm sm:text-base uppercase tracking-[0.3em] font-body mb-4"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-sm sm:text-base uppercase tracking-[0.3em] text-muted-foreground font-body mb-4"
           >
             Discover
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 40, filter: "blur(20px)" }}
+            initial={{ opacity: 0, y: 30, filter: "blur(15px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="text-6xl sm:text-8xl lg:text-9xl font-display font-bold text-primary-foreground drop-shadow-lg"
+            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold text-foreground mb-4"
           >
             {dest.name}
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-            className="text-primary-foreground/60 text-base sm:text-lg font-body mt-3 max-w-md text-center"
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="text-muted-foreground text-base sm:text-lg font-body max-w-lg mx-auto mb-12"
           >
             {dest.tagline}
           </motion.p>
-        </motion.div>
 
-        {/* Floating card image */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-[90%] max-w-6xl">
           <motion.div
-            initial={{ opacity: 0, y: 80, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="relative rounded-3xl overflow-hidden shadow-[0_25px_80px_-20px_rgba(0,0,0,0.4)]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto"
           >
-            <img
-              src={dest.cardImage}
-              alt={dest.name}
-              className="w-full h-[320px] sm:h-[460px] lg:h-[560px] object-cover"
-            />
-            {/* Glass info overlay */}
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-6 sm:p-8 lg:p-10">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="text-white/70 text-xs sm:text-sm uppercase tracking-widest mb-1">Popular Cities</p>
-                  <p className="text-white font-display font-bold text-lg sm:text-xl">{dest.popularCities}</p>
-                </div>
-                <div className="flex gap-6 sm:gap-10">
-                  <div>
-                    <p className="text-white/70 text-xs sm:text-sm uppercase tracking-widest mb-1">Duration</p>
-                    <p className="text-white font-display font-bold text-base sm:text-lg">{dest.idealDuration}</p>
-                  </div>
-                  <div>
-                    <p className="text-white/70 text-xs sm:text-sm uppercase tracking-widest mb-1">Best Time</p>
-                    <p className="text-white font-display font-bold text-base sm:text-lg">{dest.bestTime}</p>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Popular Cities</p>
+              <p className="font-display font-bold text-foreground text-lg">{dest.popularCities}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Ideal Duration</p>
+              <p className="font-display font-bold text-foreground text-lg">{dest.idealDuration}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Best Time to Visit</p>
+              <p className="font-display font-bold text-foreground text-lg">{dest.bestTime}</p>
             </div>
           </motion.div>
         </div>
       </section>
-
-      {/* Spacer for floating card */}
-      <div className="pt-[200px] sm:pt-[280px] lg:pt-[340px]" />
 
       {/* About the Destination */}
       <section className="pb-16 sm:pb-24">

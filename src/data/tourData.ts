@@ -747,6 +747,7 @@ export const allTours: TourData[] = [
   {
     slug: "santorini-escape",
     image: santoriniImg,
+    heroImage: heroSantoriniImg,
     title: "Santorini Escape",
     duration: "5 Days / 4 Nights",
     price: "1,750",

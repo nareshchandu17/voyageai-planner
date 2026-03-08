@@ -57,8 +57,10 @@ const AboutSection = () => {
               </Link>
             </div>
           </div>
+          </ScrollReveal>
 
           {/* Right: cycling image */}
+          <ScrollReveal delay={200}>
           <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
             <img
               src={rightImages[currentImg]}

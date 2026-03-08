@@ -51,7 +51,7 @@ const Blog = () => {
           >
             Stories, Tips, And Insights To Inspire Your Journey.
           </motion.p>
-        </div>
+        </motion.div>
       </section>
 
       {/* Blog Grid */}

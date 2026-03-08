@@ -615,6 +615,7 @@ export const allTours: TourData[] = [
   {
     slug: "australia-coastline",
     image: australiaImg,
+    heroImage: heroAustraliaImg,
     title: "Australia Coastline",
     duration: "7 Days / 6 Nights",
     price: "1,800",

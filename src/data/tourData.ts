@@ -150,6 +150,7 @@ export const allTours: TourData[] = [
   {
     slug: "africa-experience",
     image: africaImg,
+    heroImage: heroAfricaImg,
     title: "Africa Experience",
     duration: "8 Days / 7 Nights",
     price: "2,200",

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Sparkles, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ScrollReveal from "@/components/ScrollReveal";
 import expFuture from "@/assets/exp-future.jpg";
 import expNature from "@/assets/exp-nature.jpg";
 import expCulture from "@/assets/exp-culture.jpg";

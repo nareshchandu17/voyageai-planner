@@ -82,6 +82,7 @@ const PlanTrip = () => {
           src={planTripBanner}
           alt="Tropical paradise with boat on turquoise water"
           className="w-full h-full object-cover"
+          style={{ transform: `translateY(${scrollY * 0.3}px) scale(1.1)` }}
         />
         <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
           <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">Start Your Journey</h1>

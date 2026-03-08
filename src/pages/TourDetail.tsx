@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Clock, Plane, Users, Tag, Info, ChevronDown, ArrowUpRight } from "lucide-react";
 import Footer from "@/components/Footer";
+import BookingModal from "@/components/BookingModal";
+import TourReviews from "@/components/TourReviews";
 import { getTourBySlug, getSimilarTours } from "@/data/tourData";
 import NotFound from "./NotFound";
 
@@ -43,6 +45,7 @@ const TourDetail = () => {
   const tour = slug ? getTourBySlug(slug) : undefined;
   const heroRef = useRef<HTMLElement>(null);
   const [openDay, setOpenDay] = useState<number | null>(0);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const { scrollY } = useScroll();
   const heroScale = useTransform(scrollY, [0, 600], [1, 1.15]);
@@ -242,6 +245,11 @@ const TourDetail = () => {
                   </div>
                 </div>
               </SectionReveal>
+
+              {/* Traveler Reviews */}
+              <SectionReveal>
+                <TourReviews tourSlug={tour.slug} tourTitle={tour.title} />
+              </SectionReveal>
             </div>
 
             {/* Right Sidebar — Sticky Trip Details */}
@@ -290,13 +298,13 @@ const TourDetail = () => {
                       </div>
                     </div>
 
-                    <Link
-                      to="/plan"
+                    <button
+                      onClick={() => setBookingOpen(true)}
                       className="mt-8 flex items-center justify-center gap-3 w-full bg-foreground text-background font-semibold py-3.5 rounded-full hover:bg-foreground/90 transition-colors text-sm"
                     >
                       Book a trip
                       <ArrowUpRight className="w-4 h-4" />
-                    </Link>
+                    </button>
                   </div>
                 </SectionReveal>
               </div>
@@ -380,6 +388,14 @@ const TourDetail = () => {
       </section>
 
       <Footer />
+
+      <BookingModal
+        isOpen={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        tourTitle={tour.title}
+        tourPrice={tour.price}
+        tourDuration={tour.duration}
+      />
     </div>
   );
 };

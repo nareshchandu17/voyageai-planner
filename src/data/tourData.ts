@@ -875,6 +875,7 @@ export const allTours: TourData[] = [
   {
     slug: "thailand-paradise",
     image: thailandImg,
+    heroImage: heroThailandImg,
     title: "Thailand Paradise",
     duration: "7 Days / 6 Nights",
     price: "950",

@@ -57,11 +57,14 @@ const AboutSection = () => {
           {/* Right: cycling image */}
           <ScrollReveal delay={200}>
           <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
-            <img
-              src={rightImages[currentImg]}
-              alt="Travel experience"
-              className={`w-full h-full object-cover transition-opacity duration-500 ${fade ? "opacity-100" : "opacity-0"}`}
-            />
+            {rightImages.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt="Travel experience"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === currentImg ? "opacity-100" : "opacity-0"}`}
+              />
+            ))}
           </div>
           </ScrollReveal>
         </div>

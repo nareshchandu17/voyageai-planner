@@ -682,6 +682,7 @@ export const allTours: TourData[] = [
   {
     slug: "discover-egypt",
     image: egyptImg,
+    heroImage: heroEgyptImg,
     title: "Discover Egypt",
     duration: "6 Days / 5 Nights",
     price: "1,050",

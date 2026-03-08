@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,6 +37,13 @@ const TOTAL_STEPS = 7;
 const PlanTrip = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const [destination, setDestination] = useState("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [budget, setBudget] = useState(2000);
@@ -75,6 +82,7 @@ const PlanTrip = () => {
           src={planTripBanner}
           alt="Tropical paradise with boat on turquoise water"
           className="w-full h-full object-cover"
+          style={{ transform: `translateY(${scrollY * 0.3}px) scale(1.1)` }}
         />
         <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
           <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">Start Your Journey</h1>

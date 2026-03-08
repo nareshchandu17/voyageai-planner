@@ -57,7 +57,7 @@ const AboutSection = () => {
           </div>
 
           {/* Right: cycling image */}
-          <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-xl">
+          <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
             <img
               src={rightImages[currentImg]}
               alt="Travel experience"
@@ -66,9 +66,9 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* Bottom left image */}
-        <div className="mt-10 lg:mt-[-8rem] lg:w-1/2">
-          <div className="rounded-3xl overflow-hidden shadow-xl aspect-[16/10]">
+        {/* Bottom row: left image aligned with right card bottom */}
+        <div className="mt-10 lg:mt-[-16rem] lg:w-1/2">
+          <div className="rounded-[2rem] overflow-hidden shadow-xl aspect-[16/9]">
             <img
               src={aboutLeft}
               alt="Traveler on rocks at sunset"

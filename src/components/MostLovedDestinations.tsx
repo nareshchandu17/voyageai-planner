@@ -91,7 +91,7 @@ const MostLovedDestinations = () => {
             animate={{ opacity: activeIndex === i ? 1 : 0 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
           >
-            <img
+            <motion.img
               src={dest.bgImage}
               alt=""
               className="w-full h-full object-cover"

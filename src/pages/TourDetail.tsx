@@ -388,6 +388,14 @@ const TourDetail = () => {
       </section>
 
       <Footer />
+
+      <BookingModal
+        isOpen={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        tourTitle={tour.title}
+        tourPrice={tour.price}
+        tourDuration={tour.duration}
+      />
     </div>
   );
 };

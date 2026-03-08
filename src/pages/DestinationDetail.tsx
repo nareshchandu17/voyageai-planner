@@ -5,6 +5,7 @@ import { getDestinationBySlug } from "@/data/destinationData";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import DestinationTours from "@/components/DestinationTours";
 import NotFound from "./NotFound";
 
 const WordReveal = ({ text, delay = 0 }: { text: string; delay?: number }) => {
@@ -216,6 +217,7 @@ const DestinationDetail = () => {
         </div>
       </section>
 
+      <DestinationTours destSlug={dest.slug} />
       <CTASection />
       <Footer />
     </div>

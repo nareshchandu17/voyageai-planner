@@ -516,6 +516,7 @@ export const allTours: TourData[] = [
   {
     slug: "switzerland-natures",
     image: barcelonaImg,
+    heroImage: heroSwitzerlandImg,
     title: "Switzerland Nature's",
     duration: "5 Days / 4 Nights",
     price: "1,500",

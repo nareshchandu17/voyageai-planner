@@ -206,19 +206,23 @@ const Index = () => {
       {/* How it works */}
       <section className="py-20 sm:py-28 bg-secondary/50">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-              How it works
-            </h2>
-            <p className="text-muted-foreground">Three simple steps to your dream trip</p>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+                How it works
+              </h2>
+              <p className="text-muted-foreground">Three simple steps to your dream trip</p>
+            </div>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {steps.map((s, i) => (
-              <div key={i} className="text-center">
-                <div className="text-5xl font-display font-bold text-gradient-ocean mb-4">{s.num}</div>
-                <h3 className="font-display text-xl font-semibold text-foreground mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground">{s.desc}</p>
-              </div>
+              <ScrollReveal key={i} delay={i * 150}>
+                <div className="text-center">
+                  <div className="text-5xl font-display font-bold text-gradient-ocean mb-4">{s.num}</div>
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-2">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>

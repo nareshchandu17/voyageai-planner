@@ -23,7 +23,7 @@ const Navbar = () => {
     { href: "/memories", label: "Memories" },
   ];
 
-  const transparent = isHome && !scrolled;
+  const transparent = hasHero && !scrolled;
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${transparent ? "bg-transparent border-b border-transparent" : "glass-nav"}`}>

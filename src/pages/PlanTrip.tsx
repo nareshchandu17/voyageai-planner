@@ -68,19 +68,34 @@ const PlanTrip = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-hero pt-24 pb-16">
-      <div className="container mx-auto px-4 sm:px-6">
-        <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground text-center mb-3">Plan Your Next Journey With Us</h1>
-        <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">Share your travel details and let our travel experts design the perfect experience for you.</p>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
-          {/* Left side - Image */}
-          <div className="hidden lg:block">
-            <img
-              src={planTripHero}
-              alt="Group of travelers hiking"
-              className="w-full h-full rounded-2xl object-cover shadow-soft"
-            />
-          </div>
+    <div className="min-h-screen">
+      {/* Hero Banner - 50vh */}
+      <div className="relative h-[50vh] w-full overflow-hidden">
+        <img
+          src={planTripBanner}
+          alt="Tropical paradise with boat on turquoise water"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">Start Your Journey</h1>
+          <p className="text-white/90 text-lg md:text-xl max-w-xl text-center">Tell Us Your Destination & We'll Plan The Rest.</p>
+        </div>
+      </div>
+
+      {/* Form Section */}
+      <div className="gradient-hero py-16">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            {/* Left side - Text + Image */}
+            <div className="hidden lg:block">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">Plan Your Next Journey With Us</h2>
+              <p className="text-muted-foreground mb-8 max-w-md">Share your travel details and let our travel experts design the perfect experience for you.</p>
+              <img
+                src={planTripHero}
+                alt="Group of travelers hiking"
+                className="w-full max-h-[400px] rounded-2xl object-cover shadow-soft"
+              />
+            </div>
 
           {/* Right side - Form */}
           <div className="w-full flex flex-col">

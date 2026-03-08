@@ -119,27 +119,8 @@ const DestinationDetail = () => {
         </div>
       </section>
 
-      {/* Info Bar */}
-      <section className="pt-[180px] sm:pt-[240px] lg:pt-[300px] pb-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Popular Cities</p>
-                <p className="font-display font-bold text-foreground text-lg">{dest.popularCities}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Ideal Duration</p>
-                <p className="font-display font-bold text-foreground text-lg">{dest.idealDuration}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Best Time to Visit</p>
-                <p className="font-display font-bold text-foreground text-lg">{dest.bestTime}</p>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
+      {/* Spacer for floating card */}
+      <div className="pt-[200px] sm:pt-[280px] lg:pt-[340px]" />
 
       {/* About the Destination */}
       <section className="pb-16 sm:pb-24">

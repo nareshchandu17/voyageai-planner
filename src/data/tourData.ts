@@ -219,6 +219,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-classics",
     image: parisImg,
+    heroImage: heroParisImg,
     title: "Paris Classics",
     duration: "6 Days / 5 Nights",
     price: "1,500",

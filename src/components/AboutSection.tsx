@@ -32,6 +32,7 @@ const AboutSection = () => {
         {/* Top row: text left, cycling image right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Left: text content */}
+          <ScrollReveal>
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-6">
               <Info className="w-4 h-4 text-muted-foreground" />

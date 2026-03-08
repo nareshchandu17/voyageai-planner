@@ -10,6 +10,10 @@ import aboutRight2 from "@/assets/about-right-2.jpg";
 import aboutRight3 from "@/assets/about-right-3.jpg";
 import heroTravel from "@/assets/hero-travel.jpg";
 import ctaBg from "@/assets/cta-resort-bg.jpg";
+import teamCeo from "@/assets/team-ceo.jpg";
+import teamCreative from "@/assets/team-creative.jpg";
+import teamOperations from "@/assets/team-operations.jpg";
+import teamCommunity from "@/assets/team-community.jpg";
 import Footer from "@/components/Footer";
 
 gsap.registerPlugin(ScrollTrigger);

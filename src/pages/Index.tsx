@@ -51,12 +51,12 @@ const testimonials = [
 ];
 
 const floatingPhotos = [
-  { src: heroImg, alt: "Santorini", className: "absolute top-20 left-[3%] w-48 sm:w-56 h-36 sm:h-44 -rotate-6 z-10", speed: 0.3 },
-  { src: parisImg, alt: "Paris", className: "absolute bottom-28 left-[5%] w-44 sm:w-52 h-32 sm:h-40 rotate-3 z-10", speed: -0.2 },
-  { src: tokyoImg, alt: "Tokyo", className: "absolute top-16 right-[2%] w-44 sm:w-52 h-36 sm:h-44 rotate-6 z-10", speed: 0.4 },
-  { src: peruImg, alt: "Peru", className: "absolute bottom-24 right-[4%] w-48 sm:w-56 h-32 sm:h-40 -rotate-3 z-10", speed: -0.15 },
-  { src: baliImg, alt: "Bali", className: "absolute top-1/2 -translate-y-1/2 left-[15%] w-40 sm:w-48 h-28 sm:h-36 rotate-2 z-[5] hidden lg:block", speed: 0.25 },
-  { src: nycImg, alt: "NYC", className: "absolute top-1/2 -translate-y-1/2 right-[14%] w-40 sm:w-48 h-28 sm:h-36 -rotate-4 z-[5] hidden lg:block", speed: -0.35 },
+  { src: heroImg, alt: "Santorini", className: "absolute top-[10%] left-[2%] w-40 sm:w-48 lg:w-56 h-28 sm:h-36 lg:h-40 -rotate-6 z-10", speed: 0.3 },
+  { src: parisImg, alt: "Paris", className: "absolute bottom-[16%] left-[1%] w-36 sm:w-44 lg:w-52 h-28 sm:h-32 lg:h-38 rotate-3 z-10", speed: -0.2 },
+  { src: tokyoImg, alt: "Tokyo", className: "absolute top-[8%] right-[1%] w-40 sm:w-48 lg:w-56 h-28 sm:h-36 lg:h-40 rotate-6 z-10", speed: 0.4 },
+  { src: peruImg, alt: "Peru", className: "absolute bottom-[14%] right-[2%] w-38 sm:w-44 lg:w-52 h-28 sm:h-34 lg:h-38 -rotate-3 z-10", speed: -0.15 },
+  { src: baliImg, alt: "Bali", className: "absolute top-[45%] -translate-y-1/2 left-[0%] w-32 sm:w-40 lg:w-44 h-24 sm:h-28 lg:h-32 rotate-2 z-[5] hidden lg:block", speed: 0.25 },
+  { src: nycImg, alt: "NYC", className: "absolute top-[45%] -translate-y-1/2 right-[0%] w-32 sm:w-40 lg:w-44 h-24 sm:h-28 lg:h-32 -rotate-4 z-[5] hidden lg:block", speed: -0.35 },
 ];
 
 const Index = () => {

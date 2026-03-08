@@ -59,6 +59,21 @@ const VibeWithUs = () => {
         </h2>
       </ScrollReveal>
 
+      {/* Instagram-style story circles */}
+      <ScrollReveal>
+        <div className="flex items-center justify-center gap-6 sm:gap-8 mb-14 px-4">
+          {images.slice(0, 7).map((img, i) => (
+            <div key={i} className="flex flex-col items-center gap-2">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[3px] bg-gradient-to-br from-sunset via-accent to-ocean">
+                <div className="w-full h-full rounded-full overflow-hidden border-2 border-background">
+                  <img src={img} alt={`Story ${i + 1}`} className="w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollReveal>
+
       {/* Marquee carousel */}
       <div
         className="relative"

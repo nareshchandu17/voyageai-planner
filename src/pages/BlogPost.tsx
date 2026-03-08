@@ -131,6 +131,7 @@ const BlogPost = () => {
       <CTASection />
       <Footer />
     </div>
+    </PageTransition>
   );
 };
 

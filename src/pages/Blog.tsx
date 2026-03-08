@@ -88,7 +88,7 @@ const Blog = () => {
       <CTASection />
       <Footer />
     </div>
-  );
+    </PageTransition>
 };
 
 export default Blog;

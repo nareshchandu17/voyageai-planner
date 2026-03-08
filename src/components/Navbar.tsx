@@ -12,6 +12,7 @@ const Navbar = () => {
     { href: "/discover", label: "Discover" },
     { href: "/plan", label: "Plan Trip" },
     { href: "/dashboard", label: "My Trips" },
+    { href: "/memories", label: "Memories" },
   ];
 
   return (

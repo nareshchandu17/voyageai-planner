@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/itinerary" element={<Itinerary />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/memories" element={<TripMemories />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

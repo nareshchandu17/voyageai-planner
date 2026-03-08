@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Info, ArrowUpRight } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 import aboutLeft from "@/assets/about-left.jpg";
 import aboutRight1 from "@/assets/about-right-1.jpg";
 import aboutRight2 from "@/assets/about-right-2.jpg";

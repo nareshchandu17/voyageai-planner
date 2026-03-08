@@ -481,6 +481,7 @@ export const allTours: TourData[] = [
   {
     slug: "india-heritage-culture",
     image: peruImg,
+    heroImage: heroPeruImg,
     title: "India Heritage & Culture",
     duration: "8 Days / 7 Nights",
     price: "1,300",

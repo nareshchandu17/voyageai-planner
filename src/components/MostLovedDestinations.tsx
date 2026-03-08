@@ -125,10 +125,14 @@ const MostLovedDestinations = () => {
             onMouseLeave={() => setIsHovered(false)}
           >
             <motion.div
-              className="relative w-[320px] sm:w-[440px] h-[280px] sm:h-[340px] rounded-2xl overflow-hidden shadow-2xl cursor-pointer"
+              className={`relative w-[320px] sm:w-[440px] h-[280px] sm:h-[340px] rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-500 ${
+                isHovered
+                  ? "shadow-[0_0_40px_8px_hsl(var(--primary)/0.3),0_20px_60px_-10px_hsl(var(--foreground)/0.4)] ring-2 ring-primary-foreground/30"
+                  : "shadow-2xl"
+              }`}
               style={{
                 rotateY: isHovered ? 0 : cardRotateY,
-                scale: isHovered ? 1.03 : cardScale,
+                scale: isHovered ? 1.05 : cardScale,
                 transformStyle: "preserve-3d",
               }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -146,22 +150,30 @@ const MostLovedDestinations = () => {
                   <img
                     src={destinations[activeIndex].cardImage}
                     alt={destinations[activeIndex].name}
-                    className="w-full h-full object-cover"
+                    className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-110" : "scale-100"}`}
                   />
                   {/* Card gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" />
+                  <div className={`absolute inset-0 transition-all duration-500 ${
+                    isHovered
+                      ? "bg-gradient-to-t from-foreground/80 via-foreground/20 to-primary/10"
+                      : "bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent"
+                  }`} />
 
                   {/* Arrow icon */}
-                  <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-card/30 backdrop-blur-sm flex items-center justify-center border border-card/20">
-                    <ArrowUpRight className="w-5 h-5 text-primary-foreground" />
+                  <div className={`absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center border transition-all duration-300 ${
+                    isHovered
+                      ? "bg-card/50 border-card/40 scale-110"
+                      : "bg-card/30 border-card/20"
+                  }`}>
+                    <ArrowUpRight className={`w-5 h-5 text-primary-foreground transition-transform duration-300 ${isHovered ? "rotate-45" : ""}`} />
                   </div>
 
                   {/* Card text */}
                   <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
-                    <h3 className="font-display text-2xl sm:text-3xl font-bold text-primary-foreground mb-1">
+                    <h3 className={`font-display text-2xl sm:text-3xl font-bold text-primary-foreground mb-1 transition-transform duration-300 ${isHovered ? "translate-y-[-4px]" : ""}`}>
                       {destinations[activeIndex].name}
                     </h3>
-                    <p className="text-sm sm:text-base text-primary-foreground/80">
+                    <p className={`text-sm sm:text-base text-primary-foreground/80 transition-all duration-300 ${isHovered ? "translate-y-[-2px] text-primary-foreground/95" : ""}`}>
                       {destinations[activeIndex].desc}
                     </p>
                   </div>

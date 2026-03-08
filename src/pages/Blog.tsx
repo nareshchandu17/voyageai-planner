@@ -89,6 +89,7 @@ const Blog = () => {
       <Footer />
     </div>
     </PageTransition>
+  );
 };
 
 export default Blog;

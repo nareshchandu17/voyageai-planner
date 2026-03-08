@@ -8,7 +8,7 @@ import { format } from "date-fns";
 import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
-  TreePine, Crown, Wallet, Tag, Search
+  TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned
 } from "lucide-react";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";

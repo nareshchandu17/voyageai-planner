@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
-import { Link } from "react-router-dom";
 import ScrollReveal from "@/components/ScrollReveal";
 import blogIslandImg from "@/assets/blog-island.jpg";
 import blogEuropeImg from "@/assets/blog-europe.jpg";

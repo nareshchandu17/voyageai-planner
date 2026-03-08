@@ -3,6 +3,7 @@ import { useRef, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
+import PageTransition from "@/components/PageTransition";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/data/blogData";
@@ -32,6 +33,7 @@ const BlogPost = () => {
   const midIndex = Math.floor(post.sections.length / 2);
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Parallax Hero */}
       <section ref={heroRef} className="relative h-[85vh] min-h-[500px] overflow-hidden flex items-end justify-center">
@@ -129,6 +131,7 @@ const BlogPost = () => {
       <CTASection />
       <Footer />
     </div>
+    </PageTransition>
   );
 };
 

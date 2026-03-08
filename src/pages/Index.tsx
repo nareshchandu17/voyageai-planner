@@ -157,6 +157,9 @@ const Index = () => {
       {/* Travel Packages */}
       <TravelPackages />
 
+      {/* Why Choose Us */}
+      <WhyChooseUs />
+
       {/* Features */}
       <section className="py-20 sm:py-28 gradient-hero">
         <div className="container mx-auto px-4 sm:px-6">

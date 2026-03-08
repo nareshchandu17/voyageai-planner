@@ -298,13 +298,13 @@ const TourDetail = () => {
                       </div>
                     </div>
 
-                    <Link
-                      to="/plan"
+                    <button
+                      onClick={() => setBookingOpen(true)}
                       className="mt-8 flex items-center justify-center gap-3 w-full bg-foreground text-background font-semibold py-3.5 rounded-full hover:bg-foreground/90 transition-colors text-sm"
                     >
                       Book a trip
                       <ArrowUpRight className="w-4 h-4" />
-                    </Link>
+                    </button>
                   </div>
                 </SectionReveal>
               </div>

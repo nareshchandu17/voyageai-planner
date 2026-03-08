@@ -33,6 +33,7 @@ const BlogPost = () => {
   const midIndex = Math.floor(post.sections.length / 2);
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Parallax Hero */}
       <section ref={heroRef} className="relative h-[85vh] min-h-[500px] overflow-hidden flex items-end justify-center">

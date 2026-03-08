@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Compass } from "lucide-react";
 
@@ -14,24 +15,28 @@ import nycImg from "@/assets/dest-nyc.jpg";
 const destinations = [
   {
     name: "Japan",
+    slug: "japan",
     desc: "Technology, vibrant nightlife & traditions",
     cardImage: tokyoImg,
     bgImage: japanBg,
   },
   {
     name: "Switzerland",
+    slug: "switzerland",
     desc: "Romance, culture, and timeless charm",
     cardImage: baliImg,
     bgImage: switzerlandBg,
   },
   {
     name: "Paris",
+    slug: "paris",
     desc: "Romance, culture, and timeless charm",
     cardImage: parisImg,
     bgImage: parisBg,
   },
   {
     name: "New York",
+    slug: "new-york",
     desc: "Diverse culture, iconic skyline, & bustling streets",
     cardImage: nycImg,
     bgImage: nycBg,
@@ -119,6 +124,7 @@ const MostLovedDestinations = () => {
           </div>
 
           {/* Flip Card */}
+          <Link to={`/destinations/${destinations[activeIndex].slug}`}>
           <div
             className="perspective-[1200px]"
             onMouseEnter={() => setIsHovered(true)}
@@ -181,6 +187,7 @@ const MostLovedDestinations = () => {
               </AnimatePresence>
             </motion.div>
           </div>
+          </Link>
 
           {/* Dots indicator */}
           <div className="flex items-center gap-2 mt-8">

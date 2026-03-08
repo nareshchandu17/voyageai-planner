@@ -28,6 +28,30 @@ import londonImg from "@/assets/dest-london.jpg";
 import parisEiffelImg from "@/assets/dest-paris-eiffel.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
 
+// High-res hero images (1920x1080)
+import heroMoroccoImg from "@/assets/hero-morocco.jpg";
+import heroItalyImg from "@/assets/hero-italy.jpg";
+import heroParisImg from "@/assets/hero-paris.jpg";
+import heroAfricaImg from "@/assets/hero-africa.jpg";
+import heroBaliImg from "@/assets/hero-bali.jpg";
+import heroJapanImg from "@/assets/hero-japan.jpg";
+import heroSwitzerlandImg from "@/assets/hero-switzerland.jpg";
+import heroDubaiImg from "@/assets/hero-dubai.jpg";
+import heroNycImg from "@/assets/hero-nyc.jpg";
+import heroEgyptImg from "@/assets/hero-egypt.jpg";
+import heroSantoriniImg from "@/assets/hero-santorini.jpg";
+import heroAustraliaImg from "@/assets/hero-australia.jpg";
+import heroMaldivesImg from "@/assets/hero-maldives.jpg";
+import heroRomeImg from "@/assets/hero-rome.jpg";
+import heroThailandImg from "@/assets/hero-thailand.jpg";
+import heroNewzealandImg from "@/assets/hero-newzealand.jpg";
+import heroLondonImg from "@/assets/hero-london.jpg";
+import heroSingaporeImg from "@/assets/hero-singapore.jpg";
+import heroPeruImg from "@/assets/hero-peru.jpg";
+import heroCapetownImg from "@/assets/hero-capetown.jpg";
+import heroBarcelonaImg from "@/assets/hero-barcelona.jpg";
+import heroIcelandImg from "@/assets/hero-iceland.jpg";
+
 export interface TourItineraryDay {
   day: number;
   title: string;
@@ -37,6 +61,7 @@ export interface TourItineraryDay {
 export interface TourData {
   slug: string;
   image: string;
+  heroImage: string;
   title: string;
   duration: string;
   price: string;
@@ -56,6 +81,7 @@ export const allTours: TourData[] = [
   {
     slug: "morocco-desert-journey",
     image: moroccoImg,
+    heroImage: heroMoroccoImg,
     title: "Morocco Desert Journey",
     duration: "8 Days / 7 Nights",
     price: "1,600",
@@ -90,6 +116,7 @@ export const allTours: TourData[] = [
   {
     slug: "italy-classic",
     image: italyImg,
+    heroImage: heroItalyImg,
     title: "Italy Classic",
     duration: "7 Days / 6 Nights",
     price: "1,400",
@@ -123,6 +150,7 @@ export const allTours: TourData[] = [
   {
     slug: "africa-experience",
     image: africaImg,
+    heroImage: heroAfricaImg,
     title: "Africa Experience",
     duration: "8 Days / 7 Nights",
     price: "2,200",
@@ -157,6 +185,7 @@ export const allTours: TourData[] = [
   {
     slug: "japan-spring",
     image: japanImg,
+    heroImage: heroJapanImg,
     title: "Japan Spring",
     duration: "7 Days / 6 Nights",
     price: "1,200",
@@ -190,6 +219,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-classics",
     image: parisImg,
+    heroImage: heroParisImg,
     title: "Paris Classics",
     duration: "6 Days / 5 Nights",
     price: "1,500",
@@ -222,6 +252,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-getaway",
     image: dubaiImg,
+    heroImage: heroParisImg,
     title: "Paris Getaway",
     duration: "5 Days / 4 Nights",
     price: "1,100",
@@ -253,6 +284,7 @@ export const allTours: TourData[] = [
   {
     slug: "new-york-tour",
     image: nycImg,
+    heroImage: heroNycImg,
     title: "New York Tour",
     duration: "6 Days / 5 Nights",
     price: "1,300",
@@ -285,6 +317,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-trail",
     image: capetownImg,
+    heroImage: heroParisImg,
     title: "Paris Trail",
     duration: "6 Days / 5 Nights",
     price: "1,200",
@@ -317,6 +350,7 @@ export const allTours: TourData[] = [
   {
     slug: "bali-cultural-retreat",
     image: baliImg,
+    heroImage: heroBaliImg,
     title: "Bali Cultural Retreat",
     duration: "6 Days / 5 Nights",
     price: "950",
@@ -349,6 +383,7 @@ export const allTours: TourData[] = [
   {
     slug: "switzerland-explore",
     image: kyotoImg,
+    heroImage: heroSwitzerlandImg,
     title: "Switzerland Explore",
     duration: "5 Days / 4 Nights",
     price: "1,500",
@@ -380,6 +415,7 @@ export const allTours: TourData[] = [
   {
     slug: "switzerland-classic",
     image: icelandImg,
+    heroImage: heroSwitzerlandImg,
     title: "Switzerland Classic",
     duration: "5 Days / 4 Nights",
     price: "1,500",
@@ -411,6 +447,7 @@ export const allTours: TourData[] = [
   {
     slug: "japan-begins-tour",
     image: tokyoImg,
+    heroImage: heroJapanImg,
     title: "Japan Begins Tour",
     duration: "7 Days / 6 Nights",
     price: "1,000",
@@ -444,6 +481,7 @@ export const allTours: TourData[] = [
   {
     slug: "india-heritage-culture",
     image: peruImg,
+    heroImage: heroPeruImg,
     title: "India Heritage & Culture",
     duration: "8 Days / 7 Nights",
     price: "1,300",
@@ -478,6 +516,7 @@ export const allTours: TourData[] = [
   {
     slug: "switzerland-natures",
     image: barcelonaImg,
+    heroImage: heroSwitzerlandImg,
     title: "Switzerland Nature's",
     duration: "5 Days / 4 Nights",
     price: "1,500",
@@ -509,6 +548,7 @@ export const allTours: TourData[] = [
   {
     slug: "japan-nature",
     image: maldivesImg,
+    heroImage: heroJapanImg,
     title: "Japan Nature",
     duration: "7 Days / 6 Nights",
     price: "1,200",
@@ -542,6 +582,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-begins",
     image: heroImg,
+    heroImage: heroParisImg,
     title: "Paris Begins",
     duration: "6 Days / 5 Nights",
     price: "1,500",
@@ -574,6 +615,7 @@ export const allTours: TourData[] = [
   {
     slug: "australia-coastline",
     image: australiaImg,
+    heroImage: heroAustraliaImg,
     title: "Australia Coastline",
     duration: "7 Days / 6 Nights",
     price: "1,800",
@@ -607,6 +649,7 @@ export const allTours: TourData[] = [
   {
     slug: "sydney-highlights",
     image: sydneyImg,
+    heroImage: heroAustraliaImg,
     title: "Sydney Highlights",
     duration: "6 Days / 5 Nights",
     price: "1,650",
@@ -639,6 +682,7 @@ export const allTours: TourData[] = [
   {
     slug: "discover-egypt",
     image: egyptImg,
+    heroImage: heroEgyptImg,
     title: "Discover Egypt",
     duration: "6 Days / 5 Nights",
     price: "1,050",
@@ -671,6 +715,7 @@ export const allTours: TourData[] = [
   {
     slug: "rome-heritage-tour",
     image: romeImg,
+    heroImage: heroRomeImg,
     title: "Rome Heritage Tour",
     duration: "5 Days / 4 Nights",
     price: "1,350",
@@ -702,6 +747,7 @@ export const allTours: TourData[] = [
   {
     slug: "santorini-escape",
     image: santoriniImg,
+    heroImage: heroSantoriniImg,
     title: "Santorini Escape",
     duration: "5 Days / 4 Nights",
     price: "1,750",
@@ -733,6 +779,7 @@ export const allTours: TourData[] = [
   {
     slug: "singapore-city-tour",
     image: singaporeImg,
+    heroImage: heroSingaporeImg,
     title: "Singapore City Tour",
     duration: "4 Days / 3 Nights",
     price: "1,100",
@@ -763,6 +810,7 @@ export const allTours: TourData[] = [
   {
     slug: "dubai-skyline-tour",
     image: dubaiSkylineImg,
+    heroImage: heroDubaiImg,
     title: "Dubai Skyline Tour",
     duration: "5 Days / 4 Nights",
     price: "1,400",
@@ -794,6 +842,7 @@ export const allTours: TourData[] = [
   {
     slug: "amalfi-coast-dream",
     image: amalfiImg,
+    heroImage: heroItalyImg,
     title: "Amalfi Coast Dream",
     duration: "6 Days / 5 Nights",
     price: "1,900",
@@ -826,6 +875,7 @@ export const allTours: TourData[] = [
   {
     slug: "thailand-paradise",
     image: thailandImg,
+    heroImage: heroThailandImg,
     title: "Thailand Paradise",
     duration: "7 Days / 6 Nights",
     price: "950",
@@ -859,6 +909,7 @@ export const allTours: TourData[] = [
   {
     slug: "dubai-marina-luxury",
     image: dubaiMarinaImg,
+    heroImage: heroDubaiImg,
     title: "Dubai Marina Luxury",
     duration: "5 Days / 4 Nights",
     price: "1,600",
@@ -890,6 +941,7 @@ export const allTours: TourData[] = [
   {
     slug: "new-zealand-explorer",
     image: newzealandImg,
+    heroImage: heroNewzealandImg,
     title: "New Zealand Explorer",
     duration: "8 Days / 7 Nights",
     price: "2,100",
@@ -924,6 +976,7 @@ export const allTours: TourData[] = [
   {
     slug: "london-classics",
     image: londonImg,
+    heroImage: heroLondonImg,
     title: "London Classics",
     duration: "5 Days / 4 Nights",
     price: "1,250",
@@ -955,6 +1008,7 @@ export const allTours: TourData[] = [
   {
     slug: "paris-romantic-getaway",
     image: parisEiffelImg,
+    heroImage: heroParisImg,
     title: "Paris Romantic Getaway",
     duration: "4 Days / 3 Nights",
     price: "1,350",

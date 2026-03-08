@@ -153,7 +153,7 @@ const TourDetail = () => {
       {/* Hero — 90vh */}
       <section ref={heroRef} className="relative h-[90vh] overflow-hidden">
         <motion.img
-          src={tour.image}
+          src={tour.heroImage}
           alt={tour.title}
           className="absolute inset-0 w-full h-full object-cover"
           style={{ scale: heroScale }}

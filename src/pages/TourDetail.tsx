@@ -391,6 +391,19 @@ const TourDetail = () => {
 
       <Footer />
 
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <Lightbox
+            images={tour.galleryImages}
+            currentIndex={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onChange={setLightboxIndex}
+            title={tour.title}
+          />
+        )}
+      </AnimatePresence>
+
       <BookingModal
         isOpen={bookingOpen}
         onClose={() => setBookingOpen(false)}

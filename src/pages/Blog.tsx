@@ -29,7 +29,7 @@ const Blog = () => {
       {/* Hero Banner */}
       <section className="relative h-[50vh] min-h-[380px] flex items-center justify-center overflow-hidden">
         <img
-          src={heroOceanBg}
+          src={blogHeroBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />

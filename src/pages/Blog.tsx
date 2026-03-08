@@ -10,7 +10,7 @@ import destBaliImg from "@/assets/dest-bali.jpg";
 import destParisImg from "@/assets/dest-paris.jpg";
 import destTokyoImg from "@/assets/dest-tokyo.jpg";
 import destPeruImg from "@/assets/dest-peru.jpg";
-import heroOceanBg from "@/assets/hero-ocean-bg.jpg";
+import blogHeroBg from "@/assets/blog-hero-bg.jpg";
 
 const blogs = [
   { image: blogIslandImg, date: "25 Feb 2026", title: "Discovering Island Life Beyond Luxury" },
@@ -29,7 +29,7 @@ const Blog = () => {
       {/* Hero Banner */}
       <section className="relative h-[50vh] min-h-[380px] flex items-center justify-center overflow-hidden">
         <img
-          src={heroOceanBg}
+          src={blogHeroBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />

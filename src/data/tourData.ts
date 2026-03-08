@@ -28,6 +28,30 @@ import londonImg from "@/assets/dest-london.jpg";
 import parisEiffelImg from "@/assets/dest-paris-eiffel.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
 
+// High-res hero images (1920x1080)
+import heroMoroccoImg from "@/assets/hero-morocco.jpg";
+import heroItalyImg from "@/assets/hero-italy.jpg";
+import heroParisImg from "@/assets/hero-paris.jpg";
+import heroAfricaImg from "@/assets/hero-africa.jpg";
+import heroBaliImg from "@/assets/hero-bali.jpg";
+import heroJapanImg from "@/assets/hero-japan.jpg";
+import heroSwitzerlandImg from "@/assets/hero-switzerland.jpg";
+import heroDubaiImg from "@/assets/hero-dubai.jpg";
+import heroNycImg from "@/assets/hero-nyc.jpg";
+import heroEgyptImg from "@/assets/hero-egypt.jpg";
+import heroSantoriniImg from "@/assets/hero-santorini.jpg";
+import heroAustraliaImg from "@/assets/hero-australia.jpg";
+import heroMaldivesImg from "@/assets/hero-maldives.jpg";
+import heroRomeImg from "@/assets/hero-rome.jpg";
+import heroThailandImg from "@/assets/hero-thailand.jpg";
+import heroNewzealandImg from "@/assets/hero-newzealand.jpg";
+import heroLondonImg from "@/assets/hero-london.jpg";
+import heroSingaporeImg from "@/assets/hero-singapore.jpg";
+import heroPeruImg from "@/assets/hero-peru.jpg";
+import heroCapetownImg from "@/assets/hero-capetown.jpg";
+import heroBarcelonaImg from "@/assets/hero-barcelona.jpg";
+import heroIcelandImg from "@/assets/hero-iceland.jpg";
+
 export interface TourItineraryDay {
   day: number;
   title: string;

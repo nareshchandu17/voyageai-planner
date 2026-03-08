@@ -68,6 +68,7 @@ const AboutSection = () => {
               className={`w-full h-full object-cover transition-opacity duration-500 ${fade ? "opacity-100" : "opacity-0"}`}
             />
           </div>
+          </ScrollReveal>
         </div>
 
         {/* Bottom row: left image aligned with right card bottom */}

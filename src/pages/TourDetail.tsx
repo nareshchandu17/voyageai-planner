@@ -480,6 +480,7 @@ const TourDetail = () => {
         </div>
       </section>
 
+      <CTASection />
       <Footer />
 
       {/* Lightbox */}

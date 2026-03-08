@@ -44,12 +44,12 @@ const AboutSection = () => {
             </p>
             <div className="flex items-center gap-0">
               <Link to="/about">
-                <Button variant="ocean" size="lg" className="rounded-r-none gap-2">
+                <Button size="lg" className="rounded-r-none rounded-l-[2rem] gap-2 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300">
                   Know More
                 </Button>
               </Link>
               <Link to="/about">
-                <Button variant="ocean" size="lg" className="rounded-l-none border-l border-primary-foreground/20 px-4">
+                <Button size="lg" className="rounded-l-none rounded-r-[2rem] border-l border-white/20 px-4 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300">
                   <ArrowUpRight className="w-5 h-5" />
                 </Button>
               </Link>
@@ -57,7 +57,7 @@ const AboutSection = () => {
           </div>
 
           {/* Right: cycling image */}
-          <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-xl">
+          <div className="relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl">
             <img
               src={rightImages[currentImg]}
               alt="Travel experience"
@@ -66,9 +66,9 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* Bottom left image */}
-        <div className="mt-10 lg:mt-[-8rem] lg:w-1/2">
-          <div className="rounded-3xl overflow-hidden shadow-xl aspect-[16/10]">
+        {/* Bottom row: left image aligned with right card bottom */}
+        <div className="mt-10 lg:mt-[-16rem] lg:w-1/2">
+          <div className="rounded-[2rem] overflow-hidden shadow-xl aspect-[16/9]">
             <img
               src={aboutLeft}
               alt="Traveler on rocks at sunset"

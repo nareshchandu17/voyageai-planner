@@ -51,10 +51,10 @@ const testimonials = [
 ];
 
 const floatingPhotos = [
-  { src: heroImg, alt: "Santorini", className: "absolute top-[10%] left-[2%] w-40 sm:w-48 lg:w-56 h-28 sm:h-36 lg:h-40 -rotate-12 z-10", speed: 0.3 },
-  { src: parisImg, alt: "Paris", className: "absolute bottom-[16%] left-[1%] w-36 sm:w-44 lg:w-52 h-28 sm:h-32 lg:h-38 rotate-6 z-10", speed: -0.2 },
-  { src: tokyoImg, alt: "Tokyo", className: "absolute top-[8%] right-[1%] w-40 sm:w-48 lg:w-56 h-28 sm:h-36 lg:h-40 rotate-12 z-10", speed: 0.4 },
-  { src: peruImg, alt: "Peru", className: "absolute bottom-[14%] right-[2%] w-38 sm:w-44 lg:w-52 h-28 sm:h-34 lg:h-38 -rotate-6 z-10", speed: -0.15 },
+  { src: heroImg, alt: "Santorini", className: "absolute top-[10%] left-[2%] w-40 sm:w-48 lg:w-56 h-28 sm:h-36 lg:h-40 -rotate-[18deg] z-10", speed: 0.3 },
+  { src: parisImg, alt: "Paris", className: "absolute bottom-[16%] left-[1%] w-36 sm:w-44 lg:w-52 h-28 sm:h-32 lg:h-38 rotate-[14deg] z-10", speed: -0.2 },
+  { src: tokyoImg, alt: "Tokyo", className: "absolute top-[8%] right-[1%] w-40 sm:w-48 lg:w-56 h-28 sm:h-36 lg:h-40 rotate-[18deg] z-10", speed: 0.4 },
+  { src: peruImg, alt: "Peru", className: "absolute bottom-[14%] right-[2%] w-38 sm:w-44 lg:w-52 h-28 sm:h-34 lg:h-38 -rotate-[14deg] z-10", speed: -0.15 },
 ];
 
 const Index = () => {
@@ -87,6 +87,17 @@ const Index = () => {
             style={{ transform: `scale(${1 + scrollY * 0.0003}) translateY(${scrollY * 0.15}px)` }}
           />
           <div className="absolute inset-0 bg-foreground/10" />
+
+          {/* Animated sea waves */}
+          <svg className="hero-wave hero-wave-1" viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path d="M0,60 C360,120 720,0 1080,60 C1260,90 1380,30 1440,60 L1440,120 L0,120 Z" fill="hsl(var(--primary-foreground))" />
+          </svg>
+          <svg className="hero-wave hero-wave-2" viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ bottom: '10px' }}>
+            <path d="M0,40 C240,100 480,0 720,50 C960,100 1200,10 1440,40 L1440,100 L0,100 Z" fill="hsl(var(--primary-foreground))" />
+          </svg>
+          <svg className="hero-wave hero-wave-3" viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ bottom: '5px' }}>
+            <path d="M0,30 C180,80 540,0 900,40 C1080,60 1320,20 1440,30 L1440,80 L0,80 Z" fill="hsl(var(--primary-foreground))" />
+          </svg>
         </div>
 
         {/* Floating photo cards with parallax */}
@@ -94,7 +105,7 @@ const Index = () => {
           {floatingPhotos.map((photo, i) => (
             <div
               key={i}
-              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 transition-transform duration-100 hover:scale-105 will-change-transform`}
+              className={`${photo.className} rounded-2xl overflow-hidden shadow-2xl transition-transform duration-100 hover:scale-105 will-change-transform`}
               style={{
                 transform: `translateY(${scrollY * photo.speed}px)`,
                 animationDelay: `${i * 0.15}s`,

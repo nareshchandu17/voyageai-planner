@@ -1,33 +1,9 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
-import blogIslandImg from "@/assets/blog-island.jpg";
-import blogEuropeImg from "@/assets/blog-europe.jpg";
-import blogTempleImg from "@/assets/blog-temple.jpg";
-import blogDesertImg from "@/assets/blog-desert.jpg";
+import { blogPosts } from "@/data/blogData";
 
-const blogs = [
-  {
-    image: blogIslandImg,
-    date: "25 Feb 2026",
-    title: "Discovering Island Life Beyond Luxury",
-  },
-  {
-    image: blogEuropeImg,
-    date: "10 Mar 2026",
-    title: "Experiencing Europe Beyond Tourist Routes",
-  },
-  {
-    image: blogTempleImg,
-    date: "18 Mar 2026",
-    title: "Ancient Temples and Hidden Spiritual Paths",
-  },
-  {
-    image: blogDesertImg,
-    date: "22 Mar 2026",
-    title: "Desert Adventures That Change Perspectives",
-  },
-];
+const blogs = blogPosts.slice(0, 4);
 
 const BlogSection = () => {
   return (

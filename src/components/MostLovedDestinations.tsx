@@ -48,6 +48,9 @@ const MostLovedDestinations = () => {
     offset: ["start start", "end end"],
   });
 
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.25]);
+
   // Track scroll progress to determine active card
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (v) => {
@@ -88,10 +91,11 @@ const MostLovedDestinations = () => {
             animate={{ opacity: activeIndex === i ? 1 : 0 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
           >
-            <img
+            <motion.img
               src={dest.bgImage}
               alt=""
               className="w-full h-full object-cover"
+              style={{ y: bgY, scale: bgScale }}
             />
             <div className="absolute inset-0 bg-foreground/30" />
           </motion.div>

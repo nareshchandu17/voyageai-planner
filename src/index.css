@@ -221,3 +221,45 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* Sea wave animations */
+@keyframes waveMove1 {
+  0% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(-25%) scaleY(0.85); }
+  100% { transform: translateX(0) scaleY(1); }
+}
+
+@keyframes waveMove2 {
+  0% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(20%) scaleY(0.9); }
+  100% { transform: translateX(0) scaleY(1); }
+}
+
+@keyframes waveMove3 {
+  0% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(-15%) scaleY(0.95); }
+  100% { transform: translateX(0) scaleY(1); }
+}
+
+.hero-wave {
+  position: absolute;
+  bottom: 0;
+  left: -50%;
+  width: 200%;
+  pointer-events: none;
+}
+
+.hero-wave-1 {
+  animation: waveMove1 8s ease-in-out infinite;
+  opacity: 0.15;
+}
+
+.hero-wave-2 {
+  animation: waveMove2 6s ease-in-out infinite;
+  opacity: 0.1;
+}
+
+.hero-wave-3 {
+  animation: waveMove3 10s ease-in-out infinite;
+  opacity: 0.08;
+}

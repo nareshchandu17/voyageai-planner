@@ -87,6 +87,17 @@ const Index = () => {
             style={{ transform: `scale(${1 + scrollY * 0.0003}) translateY(${scrollY * 0.15}px)` }}
           />
           <div className="absolute inset-0 bg-foreground/10" />
+
+          {/* Animated sea waves */}
+          <svg className="hero-wave hero-wave-1" viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path d="M0,60 C360,120 720,0 1080,60 C1260,90 1380,30 1440,60 L1440,120 L0,120 Z" fill="hsl(var(--primary-foreground))" />
+          </svg>
+          <svg className="hero-wave hero-wave-2" viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ bottom: '10px' }}>
+            <path d="M0,40 C240,100 480,0 720,50 C960,100 1200,10 1440,40 L1440,100 L0,100 Z" fill="hsl(var(--primary-foreground))" />
+          </svg>
+          <svg className="hero-wave hero-wave-3" viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ bottom: '5px' }}>
+            <path d="M0,30 C180,80 540,0 900,40 C1080,60 1320,20 1440,30 L1440,80 L0,80 Z" fill="hsl(var(--primary-foreground))" />
+          </svg>
         </div>
 
         {/* Floating photo cards with parallax */}

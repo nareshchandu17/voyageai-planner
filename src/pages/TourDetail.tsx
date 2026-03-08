@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Clock, Plane, Users, Tag, Info, ChevronDown, ArrowUpRight } from "lucide-react";
 import Footer from "@/components/Footer";
+import BookingModal from "@/components/BookingModal";
+import TourReviews from "@/components/TourReviews";
 import { getTourBySlug, getSimilarTours } from "@/data/tourData";
 import NotFound from "./NotFound";
 

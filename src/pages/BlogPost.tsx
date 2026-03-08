@@ -36,7 +36,7 @@ const BlogPost = () => {
     <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Parallax Hero */}
-      <section ref={heroRef} className="relative h-[85vh] min-h-[500px] overflow-hidden flex items-end justify-center">
+      <section ref={heroRef} className="relative h-[90vh] min-h-[500px] overflow-hidden flex items-end justify-center">
         <motion.img
           src={post.image}
           alt={post.title}

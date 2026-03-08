@@ -80,7 +80,7 @@ const BlogSection = () => {
             </p>
             <div className="flex-1 h-px bg-border" />
             <Link
-              to="/discover"
+              to="/blog"
               className="inline-flex items-center gap-2 bg-foreground text-background px-6 py-3 rounded-full font-medium text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               View All

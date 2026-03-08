@@ -28,11 +28,7 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 pt-4">
-      <div className={`w-full max-w-5xl transition-all duration-500 rounded-full px-5 sm:px-8 border ${
-        transparent
-          ? "bg-white/10 backdrop-blur-xl border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
-          : "bg-card/75 backdrop-blur-xl border-border/40 shadow-glass-lg"
-      }`}>
+      <div className={`w-full max-w-5xl transition-all duration-500 rounded-full px-5 sm:px-8 border bg-white/15 backdrop-blur-2xl border-white/25 shadow-[0_8px_32px_rgba(0,0,0,0.15)]`}>
         <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full gradient-ocean flex items-center justify-center">

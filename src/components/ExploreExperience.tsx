@@ -95,6 +95,26 @@ const ExploreExperience = () => {
             </div>
           ))}
         </div>
+
+        {/* Bottom bar */}
+        <div className="flex items-center gap-6 mt-14">
+          <span className="text-muted-foreground text-sm sm:text-base font-medium whitespace-nowrap">
+            Explore more journeys waiting for you
+          </span>
+          <div className="flex-1 h-px bg-border" />
+          <div className="flex items-center gap-0 shrink-0">
+            <Link to="/discover">
+              <Button size="lg" className="rounded-r-none rounded-l-[2rem] gap-2 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300">
+                View Packages
+              </Button>
+            </Link>
+            <Link to="/discover">
+              <Button size="lg" className="rounded-l-none rounded-r-[2rem] border-l border-white/20 px-4 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300">
+                <ArrowUpRight className="w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );

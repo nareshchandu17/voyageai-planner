@@ -46,6 +46,7 @@ const TourDetail = () => {
   const heroRef = useRef<HTMLElement>(null);
   const [openDay, setOpenDay] = useState<number | null>(0);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const { scrollY } = useScroll();
   const heroScale = useTransform(scrollY, [0, 600], [1, 1.15]);

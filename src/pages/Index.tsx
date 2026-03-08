@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DestinationCard from "@/components/DestinationCard";
 import { Sparkles, Map, DollarSign, Clock, ArrowRight, Star, ChevronRight, Users, Instagram } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import AboutSection from "@/components/AboutSection";
 import ExploreExperience from "@/components/ExploreExperience";
 import MostLovedDestinations from "@/components/MostLovedDestinations";
@@ -22,6 +25,8 @@ import baliImg from "@/assets/dest-bali.jpg";
 import parisImg from "@/assets/dest-paris.jpg";
 import nycImg from "@/assets/dest-nyc.jpg";
 import peruImg from "@/assets/dest-peru.jpg";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const features = [
   { icon: Sparkles, title: "AI Trip Planner", desc: "Generate personalized itineraries in seconds with our smart AI engine" },
@@ -55,13 +60,21 @@ const floatingPhotos = [
   { src: parisImg, alt: "Paris", className: "absolute bottom-28 left-[5%] w-44 sm:w-52 h-32 sm:h-40 rotate-3 z-10", speed: -0.2 },
   { src: tokyoImg, alt: "Tokyo", className: "absolute top-16 right-[2%] w-44 sm:w-52 h-36 sm:h-44 rotate-6 z-10", speed: 0.4 },
   { src: peruImg, alt: "Peru", className: "absolute bottom-24 right-[4%] w-48 sm:w-56 h-32 sm:h-40 -rotate-3 z-10", speed: -0.15 },
-  { src: baliImg, alt: "Bali", className: "absolute top-1/2 -translate-y-1/2 left-[15%] w-40 sm:w-48 h-28 sm:h-36 rotate-2 z-[5] hidden lg:block", speed: 0.25 },
-  { src: nycImg, alt: "NYC", className: "absolute top-1/2 -translate-y-1/2 right-[14%] w-40 sm:w-48 h-28 sm:h-36 -rotate-4 z-[5] hidden lg:block", speed: -0.35 },
 ];
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
+  const oceanRef = useRef<HTMLImageElement>(null);
+  const heroOverlayRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Framer Motion transforms for cinematic ocean depth
+  const vignetteOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 0.25, 0.6]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,34 +89,84 @@ const Index = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  /* GSAP cinematic entrance — ocean surge forward */
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Initial cinematic zoom-in on the ocean
+      gsap.fromTo(
+        oceanRef.current,
+        { scale: 1.35, filter: "blur(8px) brightness(0.6)" },
+        {
+          scale: 1,
+          filter: "blur(0px) brightness(1)",
+          duration: 3,
+          ease: "power3.out",
+        }
+      );
+
+      // Vignette overlay entrance
+      gsap.fromTo(
+        heroOverlayRef.current,
+        { opacity: 0.6 },
+        { opacity: 0.1, duration: 3, ease: "power3.out" }
+      );
+
+      // Scroll-driven deep zoom into the ocean — "move forward into the sea"
+      gsap.to(oceanRef.current, {
+        scale: 1.55,
+        y: -80,
+        filter: "brightness(0.85)",
+        ease: "none",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.5,
+        },
+      });
+    });
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Hero — Cinematic parallax collage */}
       <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* Ocean background with cinematic zoom-forward animation */}
-        <div className="absolute inset-0 hero-cinematic-container">
+        <div className="absolute inset-0 hero-cinematic-container overflow-hidden">
           <img
+            ref={oceanRef}
             src={heroOceanBg}
             alt=""
-            className="w-full h-full object-cover hero-cinematic-zoom"
-            style={{ transform: `scale(${1 + scrollY * 0.0003}) translateY(${scrollY * 0.15}px)` }}
+            className="w-full h-full object-cover will-change-transform origin-[50%_60%]"
+          />
+          {/* Dynamic radial vignette for depth-of-field feel */}
+          <motion.div
+            ref={heroOverlayRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              opacity: vignetteOpacity,
+              background: "radial-gradient(ellipse at 50% 70%, transparent 25%, hsl(var(--foreground)) 100%)",
+            }}
           />
           <div className="absolute inset-0 bg-foreground/10" />
         </div>
 
-        {/* Floating photo cards with parallax */}
+        {/* Floating photo cards with parallax — 4 cards */}
         <div className="hidden sm:block">
           {floatingPhotos.map((photo, i) => (
-            <div
+            <motion.div
               key={i}
-              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 transition-transform duration-100 hover:scale-105 will-change-transform`}
+              initial={{ opacity: 0, scale: 0.8, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 1, delay: 1.5 + i * 0.2, ease: "easeOut" }}
+              className={`${photo.className} rounded-2xl overflow-hidden shadow-glass-lg border-4 border-card/80 will-change-transform`}
               style={{
                 transform: `translateY(${scrollY * photo.speed}px)`,
-                animationDelay: `${i * 0.15}s`,
               }}
             >
               <img src={photo.src} alt={photo.alt} className="w-full h-full object-cover" />
-            </div>
+            </motion.div>
           ))}
         </div>
 

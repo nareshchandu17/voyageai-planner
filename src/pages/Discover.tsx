@@ -210,42 +210,43 @@ const Discover = () => {
                 const staggerIndex = isNewlyLoaded ? i - newlyLoadedStart : i;
 
                 return (
-                  <motion.div
-                    key={`${pkg.title}-${i}`}
-                    initial={isNewlyLoaded ? { opacity: 0, x: -40, y: 20 } : { opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, x: 0, y: 0 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: isNewlyLoaded ? staggerIndex * 0.12 : i * 0.08,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                    }}
-                    className="group cursor-pointer"
-                  >
+                  <Link to={`/discover/${pkg.slug}`} key={`${pkg.slug}-${i}`}>
                     <motion.div
-                      whileHover={{ y: -8 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      initial={isNewlyLoaded ? { opacity: 0, x: -40, y: 20 } : { opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: isNewlyLoaded ? staggerIndex * 0.12 : i * 0.08,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                      }}
+                      className="group cursor-pointer"
                     >
-                      <div className="relative h-[320px] sm:h-[380px] rounded-2xl overflow-hidden mb-4">
-                        <img
-                          src={pkg.image}
-                          alt={pkg.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 to-transparent" />
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-ocean/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full">
-                            {pkg.duration}
-                          </span>
+                      <motion.div
+                        whileHover={{ y: -8 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        <div className="relative h-[320px] sm:h-[380px] rounded-2xl overflow-hidden mb-4">
+                          <img
+                            src={pkg.image}
+                            alt={pkg.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 to-transparent" />
+                          <div className="absolute top-4 left-4">
+                            <span className="bg-ocean/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full">
+                              {pkg.duration}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <h3 className="font-display text-lg sm:text-xl font-bold text-foreground mb-1">
-                        {pkg.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        From $ <span className="text-foreground font-bold text-base">${pkg.price}</span> / Per Person
-                      </p>
+                        <h3 className="font-display text-lg sm:text-xl font-bold text-foreground mb-1">
+                          {pkg.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          From $ <span className="text-foreground font-bold text-base">${pkg.price}</span> / Per Person
+                        </p>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
+                  </Link>
                 );
               })}
             </motion.div>

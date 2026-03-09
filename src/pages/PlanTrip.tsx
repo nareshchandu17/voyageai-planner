@@ -37,7 +37,6 @@ const popularDestinations = [
 const TOTAL_STEPS = 7;
 
 const PlanTrip = () => {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [scrollY, setScrollY] = useState(0);
 
@@ -53,6 +52,11 @@ const PlanTrip = () => {
   const [groupSize, setGroupSize] = useState(2);
   const [interests, setInterests] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [generationPhase, setGenerationPhase] = useState<"weather" | "ai" | "done">("weather");
+  const [weatherData, setWeatherData] = useState<any>(null);
+  const [rawStream, setRawStream] = useState("");
+  const [itineraryData, setItineraryData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleStyle = (id: string) => {
     setStyles((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
@@ -62,11 +66,54 @@ const PlanTrip = () => {
     setInterests((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setGenerating(true);
-    setTimeout(() => {
-      navigate("/itinerary");
-    }, 3000);
+    setError(null);
+    setRawStream("");
+    setItineraryData(null);
+    setGenerationPhase("weather");
+
+    const startDate = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+    const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+
+    // Step 1: Fetch weather
+    let weather = null;
+    try {
+      weather = await fetchWeather(destination, startDate, endDate);
+      setWeatherData(weather);
+      toast.success("Weather data loaded!");
+    } catch (e) {
+      console.warn("Weather fetch failed, continuing without:", e);
+      toast.info("Weather unavailable, generating without forecast");
+    }
+
+    // Step 2: Stream AI itinerary
+    setGenerationPhase("ai");
+    let fullText = "";
+
+    await streamItinerary({
+      params: { destination, startDate, endDate, budget, styles, groupSize, interests },
+      weatherData: weather,
+      onDelta: (chunk) => {
+        fullText += chunk;
+        setRawStream(fullText);
+      },
+      onDone: () => {
+        setGenerationPhase("done");
+        const parsed = parseItineraryJSON(fullText);
+        if (parsed) {
+          setItineraryData(parsed);
+        } else {
+          setError("Failed to parse itinerary. Please try again.");
+        }
+        setGenerating(false);
+      },
+      onError: (err) => {
+        setError(err);
+        setGenerating(false);
+        toast.error(err);
+      },
+    });
   };
 
   const canNext = () => {

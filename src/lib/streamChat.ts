@@ -2,6 +2,7 @@ const PLANNER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-travel
 const WEATHER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather`;
 const GOOGLE_MAPS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps`;
 const TICKETMASTER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ticketmaster`;
+const UNSPLASH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unsplash`;
 
 export interface TripParams {
   destination: string;

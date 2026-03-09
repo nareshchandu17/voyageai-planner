@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
-  Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane
+  Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import PlaceCard from "./PlaceCard";
 import EventCard from "./EventCard";
 import BeforeTripSection from "./BeforeTripSection";
 import DuringTripSection from "./DuringTripSection";
+import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
 
 interface ItineraryDay {

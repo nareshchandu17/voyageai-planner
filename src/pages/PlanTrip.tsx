@@ -516,33 +516,21 @@ const PlanTrip = () => {
                   {/* Ticketmaster Events */}
                   {!enrichmentLoading && upcomingEvents?.events?.length > 0 && (
                     <div className="text-left">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <Ticket className="w-4 h-4 text-accent" /> Local Events During Your Trip
+                          <Ticket className="w-4 h-4 text-accent" /> Upcoming Events
                           <span className="text-xs font-normal text-muted-foreground ml-1">via Ticketmaster</span>
                         </h3>
-                        <span className="text-xs text-muted-foreground">{upcomingEvents.events.length} found</span>
+                        <span className="text-xs text-muted-foreground">{upcomingEvents.events.length} happening</span>
                       </div>
-                      <div className="grid grid-cols-1 gap-1.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {upcomingEvents.events.slice(0, 4).map((ev: any, i: number) => (
-                          <div key={i} className="flex items-start gap-2 bg-secondary/50 rounded-lg px-3 py-2">
-                            <Ticket className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{ev.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {ev.date && `${ev.date}${ev.time ? ` · ${ev.time.slice(0, 5)}` : ""}`}
-                                {ev.venue && ` · ${ev.venue}`}
-                              </p>
-                            </div>
-                            {ev.priceRange && (
-                              <span className="text-xs text-accent shrink-0">${ev.priceRange.min}+</span>
-                            )}
-                          </div>
+                          <EventCard key={i} {...ev} compact />
                         ))}
-                        {upcomingEvents.events.length > 4 && (
-                          <p className="text-xs text-muted-foreground text-right">+{upcomingEvents.events.length - 4} more events</p>
-                        )}
                       </div>
+                      {upcomingEvents.events.length > 4 && (
+                        <p className="text-xs text-muted-foreground text-right mt-2">+{upcomingEvents.events.length - 4} more events</p>
+                      )}
                     </div>
                   )}
 

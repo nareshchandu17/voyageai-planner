@@ -69,7 +69,7 @@ interface Props {
   upcomingEvents?: any;
 }
 
-const AIItineraryResult = ({ data, weatherData }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents }: Props) => {
   return (
     <div className="space-y-8">
       {/* Header */}

@@ -78,15 +78,28 @@ const PlanTrip = () => {
     const startDate = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
     const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
 
-    // Step 1: Fetch weather
+    // Step 1: Fetch weather, places & events in parallel
     let weather = null;
+    let places = null;
+    let events = null;
+
     try {
-      weather = await fetchWeather(destination, startDate, endDate);
-      setWeatherData(weather);
-      toast.success("Weather data loaded!");
+      [weather, places, events] = await Promise.allSettled([
+        fetchWeather(destination, startDate, endDate),
+        fetchNearbyPlaces(destination),
+        fetchEvents(destination, startDate, endDate),
+      ]).then(([w, p, e]) => [
+        w.status === "fulfilled" ? w.value : null,
+        p.status === "fulfilled" ? p.value : null,
+        e.status === "fulfilled" ? e.value : null,
+      ]);
+
+      if (weather) { setWeatherData(weather); toast.success("Weather data loaded!"); }
+      if (places) { setNearbyPlaces(places); toast.success(`Found ${places.length} verified attractions!`); }
+      if (events?.events?.length) { setUpcomingEvents(events); toast.success(`Found ${events.events.length} local events!`); }
+      if (!weather && !places && !events) toast.info("Enrichment data unavailable, generating from AI knowledge");
     } catch (e) {
-      console.warn("Weather fetch failed, continuing without:", e);
-      toast.info("Weather unavailable, generating without forecast");
+      console.warn("Data fetch failed, continuing:", e);
     }
 
     // Step 2: Stream AI itinerary
@@ -96,6 +109,8 @@ const PlanTrip = () => {
     await streamItinerary({
       params: { destination, startDate, endDate, budget, styles, groupSize, interests },
       weatherData: weather,
+      nearbyPlaces: places,
+      upcomingEvents: events,
       onDelta: (chunk) => {
         fullText += chunk;
         setRawStream(fullText);

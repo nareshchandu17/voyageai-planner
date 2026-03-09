@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
-  TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned
+  TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned,
+  CloudSun, AlertCircle
 } from "lucide-react";
+import { toast } from "sonner";
+import { fetchWeather, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import AIItineraryResult from "@/components/AIItineraryResult";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
 

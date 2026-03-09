@@ -86,8 +86,8 @@ export default {
       boxShadow: {
         glass: "0 8px 32px hsl(var(--glass-shadow))",
         "glass-lg": "0 16px 48px hsl(var(--glass-shadow))",
-        soft: "0 2px 16px hsl(210 70% 28% / 0.06)",
-        "soft-lg": "0 8px 32px hsl(210 70% 28% / 0.1)",
+        soft: "0 2px 16px hsl(199 89% 60% / 0.06)",
+        "soft-lg": "0 8px 32px hsl(199 89% 60% / 0.1)",
       },
       keyframes: {
         "accordion-down": {

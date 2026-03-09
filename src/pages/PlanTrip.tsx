@@ -52,8 +52,10 @@ const PlanTrip = () => {
   const [groupSize, setGroupSize] = useState(2);
   const [interests, setInterests] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
-  const [generationPhase, setGenerationPhase] = useState<"weather" | "ai" | "done">("weather");
+  const [generationPhase, setGenerationPhase] = useState<"weather" | "places" | "events" | "ai" | "done">("weather");
   const [weatherData, setWeatherData] = useState<any>(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState<any>(null);
+  const [upcomingEvents, setUpcomingEvents] = useState<any>(null);
   const [rawStream, setRawStream] = useState("");
   const [itineraryData, setItineraryData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);

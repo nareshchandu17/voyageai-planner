@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
-  Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane
+  Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import PlaceCard from "./PlaceCard";
 import EventCard from "./EventCard";
 import BeforeTripSection from "./BeforeTripSection";
 import DuringTripSection from "./DuringTripSection";
+import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
 
 interface ItineraryDay {
@@ -173,7 +175,7 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
       {/* Phase Toggle */}
       {(hasBeforeTrip || hasDuringTrip) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="flex justify-center">
+          className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <div className="inline-flex bg-secondary/80 backdrop-blur-sm rounded-2xl p-1.5 gap-1">
             <button
               onClick={() => setActivePhase("before")}
@@ -198,6 +200,14 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
               <Plane className="w-4 h-4" /> During Trip
             </button>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportBeforeTripPDF(data)}
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" /> Download PDF
+          </Button>
         </motion.div>
       )}
 

@@ -67,9 +67,10 @@ interface Props {
   weatherData?: any;
   nearbyPlaces?: any;
   upcomingEvents?: any;
+  destinationPhotos?: Array<{ id: string; url: string; small: string; thumb: string; alt: string; credit?: string; creditLink?: string }>;
 }
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [] }: Props) => {
   return (
     <div className="space-y-8">
       {/* Header */}

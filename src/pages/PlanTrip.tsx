@@ -456,7 +456,7 @@ const PlanTrip = () => {
                   )}
                 </div>
               ) : itineraryData ? (
-                <AIItineraryResult data={itineraryData} weatherData={weatherData} />
+                <AIItineraryResult data={itineraryData} weatherData={weatherData} nearbyPlaces={nearbyPlaces} upcomingEvents={upcomingEvents} />
               ) : error ? (
                 <div className="text-center animate-in">
                   <AlertCircle className="w-16 h-16 mx-auto text-destructive mb-4" />

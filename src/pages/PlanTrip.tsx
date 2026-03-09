@@ -74,14 +74,16 @@ const PlanTrip = () => {
     const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
 
     try {
-      const [weather, places, events] = await Promise.allSettled([
+      const [weather, places, events, photos] = await Promise.allSettled([
         fetchWeather(destination, startDate, endDate),
         fetchNearbyPlaces(destination),
         fetchEvents(destination, startDate, endDate),
-      ]).then(([w, p, e]) => [
+        fetchUnsplashPhotos(`${destination} travel landmark`, 8),
+      ]).then(([w, p, e, ph]) => [
         w.status === "fulfilled" ? w.value : null,
         p.status === "fulfilled" ? p.value : null,
         e.status === "fulfilled" ? e.value : null,
+        ph.status === "fulfilled" ? ph.value : null,
       ]);
 
       if (weather) setWeatherData(weather);

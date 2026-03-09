@@ -7,7 +7,7 @@ import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
   TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned,
-  CloudSun, AlertCircle, Star, Ticket, RefreshCw
+  CloudSun, AlertCircle, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";

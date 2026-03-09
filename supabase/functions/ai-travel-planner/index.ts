@@ -88,9 +88,9 @@ Budget: $${budget} per person
 Group size: ${groupSize} travelers
 Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
-${weatherContext}
+${weatherContext}${placesContext}${eventsContext}
 
-Create a detailed day-by-day itinerary with REAL places, restaurants, and attractions. Ensure all recommendations are genuine, well-known establishments.`;
+Create a detailed day-by-day itinerary with REAL places, restaurants, and attractions. Ensure all recommendations are genuine, well-known establishments. If local events are listed above, consider incorporating relevant ones into the itinerary.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

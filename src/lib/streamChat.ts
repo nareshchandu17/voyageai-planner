@@ -174,6 +174,24 @@ export async function streamItinerary({
   }
 }
 
+export async function fetchUnsplashPhotos(query: string, count = 5): Promise<any[] | null> {
+  try {
+    const resp = await fetch(UNSPLASH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ query, count }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.photos || null;
+  } catch {
+    return null;
+  }
+}
+
 export function parseItineraryJSON(raw: string): any | null {
   // Strip markdown code fences if present
   let cleaned = raw.trim();

@@ -225,22 +225,37 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           transition={{ delay: 0.2 + idx * 0.1 }}
           className="glass-card overflow-hidden"
         >
-          {/* Day header */}
-          <div className="gradient-ocean p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-display text-xl font-bold text-primary-foreground">
-                Day {day.day}: {day.theme}
-              </h3>
-              <p className="text-sm text-primary-foreground/70">
-                {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
-              </p>
-            </div>
-            {day.weather && (
-              <div className="flex items-center gap-2 text-primary-foreground/80 text-sm">
-                {weatherIcon(day.weather.condition)}
-                <span>{day.weather.temp}</span>
-              </div>
+          {/* Day header with photo */}
+          <div className="relative overflow-hidden">
+            {destinationPhotos[idx + 1] ? (
+              <>
+                <img
+                  src={destinationPhotos[idx + 1]?.small || destinationPhotos[idx + 1]?.url}
+                  alt={day.theme}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+              </>
+            ) : (
+              <div className="absolute inset-0 gradient-ocean" />
             )}
+            <div className="relative p-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-display text-xl font-bold text-white">
+                  Day {day.day}: {day.theme}
+                </h3>
+                <p className="text-sm text-white/70">
+                  {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
+                </p>
+              </div>
+              {day.weather && (
+                <div className="flex items-center gap-2 text-white/80 text-sm">
+                  {weatherIcon(day.weather.condition)}
+                  <span>{day.weather.temp}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="p-5 space-y-4">

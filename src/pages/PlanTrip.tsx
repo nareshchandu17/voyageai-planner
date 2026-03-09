@@ -495,32 +495,21 @@ const PlanTrip = () => {
                   {/* Google Maps Places */}
                   {!enrichmentLoading && nearbyPlaces?.length > 0 && (
                     <div className="text-left">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <MapPin className="w-4 h-4 text-primary" /> Verified Attractions
+                          <MapPin className="w-4 h-4 text-primary" /> Top Attractions
                           <span className="text-xs font-normal text-muted-foreground ml-1">via Google Maps</span>
                         </h3>
-                        <span className="text-xs text-muted-foreground">{nearbyPlaces.length} found</span>
+                        <span className="text-xs text-muted-foreground">{nearbyPlaces.length} verified</span>
                       </div>
-                      <div className="grid grid-cols-1 gap-1.5">
-                        {nearbyPlaces.slice(0, 5).map((place: any, i: number) => (
-                          <div key={i} className="flex items-start gap-2 bg-secondary/50 rounded-lg px-3 py-2">
-                            <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{place.name}</p>
-                              {place.address && <p className="text-xs text-muted-foreground truncate">{place.address}</p>}
-                            </div>
-                            {place.rating && (
-                              <span className="text-xs text-amber-500 flex items-center gap-0.5 shrink-0">
-                                <Star className="w-3 h-3 fill-amber-500" />{place.rating}
-                              </span>
-                            )}
-                          </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {nearbyPlaces.slice(0, 4).map((place: any, i: number) => (
+                          <PlaceCard key={i} {...place} compact />
                         ))}
-                        {nearbyPlaces.length > 5 && (
-                          <p className="text-xs text-muted-foreground text-right">+{nearbyPlaces.length - 5} more</p>
-                        )}
                       </div>
+                      {nearbyPlaces.length > 4 && (
+                        <p className="text-xs text-muted-foreground text-right mt-2">+{nearbyPlaces.length - 4} more places</p>
+                      )}
                     </div>
                   )}
 

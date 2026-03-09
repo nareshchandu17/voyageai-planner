@@ -89,6 +89,7 @@ const PlanTrip = () => {
       if (weather) setWeatherData(weather);
       if (places) setNearbyPlaces(places);
       if (events) setUpcomingEvents(events);
+      if (photos) setDestinationPhotos(photos);
     } catch (e) {
       console.warn("Enrichment fetch failed:", e);
     } finally {

@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Plane } from "lucide-react";
-
+import { Menu, X, Plane, LogOut, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const hasHero = location.pathname === "/" || location.pathname === "/blog" || location.pathname.startsWith("/blog/") || location.pathname === "/plan" || location.pathname.startsWith("/discover");
 
   useEffect(() => {
@@ -25,6 +27,9 @@ const Navbar = () => {
   ];
 
   const transparent = hasHero && !scrolled;
+
+  // Hide navbar on auth page
+  if (location.pathname === "/auth") return null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 pt-4">
@@ -54,8 +59,38 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" size="sm" className={`rounded-full ${transparent ? "text-primary-foreground hover:bg-white/10" : ""}`}>Sign in</Button>
-            <Button variant="ocean" size="sm" className="rounded-full">Get Started</Button>
+            {user ? (
+              <>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${transparent ? "text-primary-foreground" : "text-foreground"}`}>
+                  <div className="w-7 h-7 rounded-full gradient-sunset flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-accent-foreground" />
+                  </div>
+                  <span className="text-sm font-medium max-w-[100px] truncate">{user.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`rounded-full ${transparent ? "text-primary-foreground hover:bg-white/10" : ""}`}
+                  onClick={signOut}
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`rounded-full ${transparent ? "text-primary-foreground hover:bg-white/10" : ""}`}
+                  onClick={() => navigate("/auth")}
+                >
+                  Sign in
+                </Button>
+                <Button variant="ocean" size="sm" className="rounded-full" onClick={() => navigate("/auth")}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           <button
@@ -80,8 +115,24 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="flex gap-2 mt-3 pt-3 border-t border-border">
-            <Button variant="ghost" size="sm" className="flex-1">Sign in</Button>
-            <Button variant="ocean" size="sm" className="flex-1">Get Started</Button>
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 flex-1 px-3">
+                  <div className="w-7 h-7 rounded-full gradient-sunset flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-accent-foreground" />
+                  </div>
+                  <span className="text-sm font-medium truncate">{user.name}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => { signOut(); setIsOpen(false); }}>
+                  <LogOut className="w-4 h-4 mr-1" /> Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" className="flex-1" onClick={() => { navigate("/auth"); setIsOpen(false); }}>Sign in</Button>
+                <Button variant="ocean" size="sm" className="flex-1" onClick={() => { navigate("/auth"); setIsOpen(false); }}>Get Started</Button>
+              </>
+            )}
           </div>
         </div>
       )}

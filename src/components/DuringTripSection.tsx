@@ -241,7 +241,7 @@ const DuringTripSection = ({ data }: { data: DuringTripData }) => {
 
           {/* Scams */}
           {data.safety.scamsToWatch?.length ? (
-            <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3">
+            <div className="bg-accent/5 border border-accent/10 rounded-xl p-3">
               <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-amber-500" /> Scams to Watch Out For
               </p>

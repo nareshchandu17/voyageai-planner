@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
-  Lightbulb, AlertTriangle, Luggage
+  Lightbulb, AlertTriangle, Luggage, Ticket
 } from "lucide-react";
+import PlaceCard from "./PlaceCard";
+import EventCard from "./EventCard";
 
 interface ItineraryDay {
   day: number;

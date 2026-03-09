@@ -126,7 +126,7 @@ const DuringTripSection = ({ data }: { data: DuringTripData }) => {
                   <MapPin className="w-3 h-3" /> {r.location}
                 </p>
                 <p className="text-xs text-foreground mt-2 flex items-center gap-1">
-                  <Star className="w-3 h-3 text-amber-500" /> Famous for: {r.famousFor}
+                  <Star className="w-3 h-3 text-accent" /> Famous for: {r.famousFor}
                 </p>
                 {r.tip && <p className="text-xs text-primary mt-1">💡 {r.tip}</p>}
               </div>

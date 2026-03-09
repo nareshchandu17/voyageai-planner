@@ -32,21 +32,119 @@ serve(async (req) => {
         ).join("\n")}`
       : "";
 
-    const systemPrompt = `You are VoyageAI, an expert travel planner that creates REAL, verified, high-quality travel itineraries. You MUST:
+    const systemPrompt = `You are VoyageAI, an expert travel planner. You create comprehensive travel plans with TWO phases:
+1. BEFORE TRIP — preparation intelligence so the user is fully ready
+2. DURING TRIP — a live travel companion with practical info for while traveling
 
-1. Only recommend REAL places that exist — real restaurant names, real attraction names, real neighborhoods
-2. Include realistic opening hours and travel times between locations
-3. Ensure daily schedules are achievable (not too packed, realistic distances)
-4. Adapt to weather conditions when forecast data is provided
-5. Stay within the specified budget
-6. Match the traveler's style and interests
+You MUST only recommend REAL places, restaurants, and attractions. Keep recommendations practical and verified.
 
 OUTPUT FORMAT: Return a valid JSON object with this exact structure:
+
 {
   "title": "Trip title",
   "summary": "2-3 sentence trip summary",
   "totalBudgetEstimate": number,
   "currency": "USD",
+  "beforeTrip": {
+    "destinationOverview": {
+      "country": "Country name",
+      "language": "Primary language",
+      "timezone": "UTC+X",
+      "currency": "Local currency (code)",
+      "bestMonths": ["Month1", "Month2"],
+      "topAttractions": ["Attraction 1", "Attraction 2", "Attraction 3", "Attraction 4", "Attraction 5"],
+      "cultureTips": ["Cultural tip 1", "Cultural tip 2", "Cultural tip 3"]
+    },
+    "weatherForecast": {
+      "overview": "General weather summary for trip dates",
+      "avgTemp": "XX°C",
+      "rainChance": "XX%",
+      "bestTimeToExplore": "Morning/Afternoon/Evening",
+      "dailyForecast": [
+        { "date": "YYYY-MM-DD", "condition": "Sunny/Rainy/etc", "tempHigh": "XX°C", "tempLow": "XX°C", "advisory": "optional note" }
+      ]
+    },
+    "budgetEstimation": {
+      "flights": { "estimate": number, "notes": "Budget airline tips" },
+      "hotels": { "estimate": number, "notes": "Accommodation type recommendation" },
+      "food": { "estimate": number, "notes": "Daily food budget tip" },
+      "transport": { "estimate": number, "notes": "Local transport cost info" },
+      "activities": { "estimate": number, "notes": "Activity costs overview" },
+      "total": number
+    },
+    "packingChecklist": {
+      "clothing": ["item1", "item2", "item3"],
+      "documents": ["item1", "item2"],
+      "electronics": ["item1", "item2"],
+      "essentials": ["item1", "item2", "item3"]
+    },
+    "visaAndDocuments": {
+      "visaRequired": true,
+      "visaType": "Tourist visa / Visa-free / eVisa",
+      "passportValidity": "6 months minimum",
+      "entryRules": ["Rule 1", "Rule 2"],
+      "additionalDocs": ["Doc 1"]
+    },
+    "itineraryPreview": [
+      { "day": 1, "highlights": ["Highlight 1", "Highlight 2", "Highlight 3"] }
+    ]
+  },
+  "duringTrip": {
+    "localTransport": {
+      "overview": "Transport system overview",
+      "options": [
+        { "type": "Metro/Bus/Taxi/etc", "description": "How it works", "costRange": "$X-$Y", "tip": "Practical tip" }
+      ],
+      "travelCard": "Recommended travel card or pass if available"
+    },
+    "restaurants": [
+      {
+        "name": "Real restaurant name",
+        "cuisine": "Cuisine type",
+        "priceRange": "$-$$$$",
+        "location": "Neighborhood/area",
+        "famousFor": "Signature dish or specialty",
+        "mealType": "breakfast/lunch/dinner",
+        "tip": "Insider tip"
+      }
+    ],
+    "experiences": [
+      {
+        "name": "Experience name",
+        "type": "hidden_gem/festival/photo_spot/activity",
+        "description": "What makes it special",
+        "location": "Where to find it",
+        "bestTime": "When to go",
+        "cost": "Free/$X",
+        "tip": "Insider tip"
+      }
+    ],
+    "safety": {
+      "emergencyNumber": "Local emergency number",
+      "policeNumber": "Police number",
+      "nearbyHospitals": ["Hospital name 1"],
+      "safeAreas": ["Safe area 1", "Safe area 2"],
+      "areasToAvoid": ["Area to avoid at night"],
+      "travelInsurance": "Recommendation",
+      "currencyExchange": "Where and how to exchange",
+      "atmTips": "ATM usage tips",
+      "scamsToWatch": ["Common scam 1"]
+    },
+    "hotelInfo": {
+      "checkInTip": "Standard check-in info",
+      "wifiTip": "WiFi availability",
+      "nearbyServices": ["Pharmacy", "Convenience store", "ATM"],
+      "restaurantsNearHotel": "Dining options near typical hotel areas"
+    },
+    "navigation": {
+      "recommendedApps": ["App 1", "App 2"],
+      "offlineMaps": "Offline maps recommendation",
+      "walkingTips": "General walking/navigation tips",
+      "keyRoutes": [
+        { "from": "Location A", "to": "Location B", "method": "Walk/Metro/Taxi", "duration": "XX mins", "cost": "$X" }
+      ]
+    }
+  },
   "days": [
     {
       "day": 1,
@@ -62,7 +160,6 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
           "duration": "2 hours",
           "cost": 0,
           "type": "attraction|restaurant|transport|free|shopping|nightlife",
-          "weatherSensitive": false,
           "tip": "Optional insider tip"
         }
       ],
@@ -75,12 +172,10 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
       "travelTip": "Practical tip for the day"
     }
   ],
-  "packingTips": ["tip1", "tip2"],
-  "budgetBreakdown": { "accommodation": number, "food": number, "activities": number, "transport": number },
   "warnings": ["any important travel warnings"]
 }
 
-ONLY output the JSON object, nothing else.`;
+ONLY output the JSON object, nothing else. Ensure all data is realistic and verified.`;
 
     const userPrompt = `Plan a trip to ${destination}
 Dates: ${startDate} to ${endDate}
@@ -90,7 +185,11 @@ Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
 ${weatherContext}${placesContext}${eventsContext}
 
-Create a detailed day-by-day itinerary with REAL places, restaurants, and attractions. Ensure all recommendations are genuine, well-known establishments. If local events are listed above, consider incorporating relevant ones into the itinerary.`;
+Create a comprehensive two-phase travel plan:
+1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview.
+2. DURING TRIP: Include local transport guide, restaurant recommendations (6-8 restaurants), unique experiences (5-6), safety information, hotel tips, and navigation guide with key routes.
+
+All recommendations must be REAL, verified places and establishments. If local events are listed above, incorporate relevant ones.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

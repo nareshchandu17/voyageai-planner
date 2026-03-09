@@ -463,30 +463,135 @@ const PlanTrip = () => {
                   <Button variant="ocean" onClick={handleGenerate}>Try Again</Button>
                 </div>
               ) : (
-                <div className="animate-in text-center">
-                  <div className="w-20 h-20 rounded-3xl gradient-ocean flex items-center justify-center mx-auto mb-6 animate-float">
-                    <Sparkles className="w-10 h-10 text-primary-foreground" />
+                <div className="animate-in space-y-5 text-center">
+                  <div>
+                    <div className="w-20 h-20 rounded-3xl gradient-ocean flex items-center justify-center mx-auto mb-4 animate-float">
+                      <Sparkles className="w-10 h-10 text-primary-foreground" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold text-foreground mb-1">Ready to generate!</h2>
+                    <p className="text-sm text-muted-foreground">Here's a preview of what the AI will use to plan your trip</p>
                   </div>
-                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">Ready to generate!</h2>
-                  <p className="text-muted-foreground mb-2">Here's your trip summary:</p>
-                  <div className="glass-card p-5 text-left space-y-2 mb-6 text-sm">
+
+                  {/* Trip summary */}
+                  <div className="glass-card p-4 text-left space-y-1.5 text-sm">
                     <p><span className="text-muted-foreground">Destination:</span> <span className="font-medium text-foreground">{destination}</span></p>
                     {dateRange.from && dateRange.to && (
                       <p><span className="text-muted-foreground">Dates:</span> <span className="font-medium text-foreground">{format(dateRange.from, "MMM d")} — {format(dateRange.to, "MMM d")}</span></p>
                     )}
-                    <p><span className="text-muted-foreground">Budget:</span> <span className="font-medium text-foreground">${budget.toLocaleString()}/person</span></p>
+                    <p><span className="text-muted-foreground">Budget:</span> <span className="font-medium text-foreground">${budget.toLocaleString()}/person · {groupSize} travelers</span></p>
                     <p><span className="text-muted-foreground">Style:</span> <span className="font-medium text-foreground">{styles.join(", ") || "Any"}</span></p>
-                    <p><span className="text-muted-foreground">Group:</span> <span className="font-medium text-foreground">{groupSize} travelers</span></p>
-                    <p><span className="text-muted-foreground">Interests:</span> <span className="font-medium text-foreground">{interests.join(", ") || "Any"}</span></p>
                   </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-4">
-                    <CloudSun className="w-4 h-4 text-primary" />
-                    <span>Real weather data will adapt your itinerary</span>
+
+                  {/* Enrichment data loading state */}
+                  {enrichmentLoading && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-4">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span>Loading real-world data for {destination}…</span>
+                    </div>
+                  )}
+
+                  {/* Google Maps Places */}
+                  {!enrichmentLoading && nearbyPlaces?.length > 0 && (
+                    <div className="text-left">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                          <MapPin className="w-4 h-4 text-primary" /> Verified Attractions
+                          <span className="text-xs font-normal text-muted-foreground ml-1">via Google Maps</span>
+                        </h3>
+                        <span className="text-xs text-muted-foreground">{nearbyPlaces.length} found</span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {nearbyPlaces.slice(0, 5).map((place: any, i: number) => (
+                          <div key={i} className="flex items-start gap-2 bg-secondary/50 rounded-lg px-3 py-2">
+                            <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate">{place.name}</p>
+                              {place.address && <p className="text-xs text-muted-foreground truncate">{place.address}</p>}
+                            </div>
+                            {place.rating && (
+                              <span className="text-xs text-amber-500 flex items-center gap-0.5 shrink-0">
+                                <Star className="w-3 h-3 fill-amber-500" />{place.rating}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        {nearbyPlaces.length > 5 && (
+                          <p className="text-xs text-muted-foreground text-right">+{nearbyPlaces.length - 5} more</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ticketmaster Events */}
+                  {!enrichmentLoading && upcomingEvents?.events?.length > 0 && (
+                    <div className="text-left">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                          <Ticket className="w-4 h-4 text-accent" /> Local Events During Your Trip
+                          <span className="text-xs font-normal text-muted-foreground ml-1">via Ticketmaster</span>
+                        </h3>
+                        <span className="text-xs text-muted-foreground">{upcomingEvents.events.length} found</span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {upcomingEvents.events.slice(0, 4).map((ev: any, i: number) => (
+                          <div key={i} className="flex items-start gap-2 bg-secondary/50 rounded-lg px-3 py-2">
+                            <Ticket className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate">{ev.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {ev.date && `${ev.date}${ev.time ? ` · ${ev.time.slice(0, 5)}` : ""}`}
+                                {ev.venue && ` · ${ev.venue}`}
+                              </p>
+                            </div>
+                            {ev.priceRange && (
+                              <span className="text-xs text-accent shrink-0">${ev.priceRange.min}+</span>
+                            )}
+                          </div>
+                        ))}
+                        {upcomingEvents.events.length > 4 && (
+                          <p className="text-xs text-muted-foreground text-right">+{upcomingEvents.events.length - 4} more events</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Weather preview */}
+                  {!enrichmentLoading && weatherData?.forecast?.length > 0 && (
+                    <div className="text-left">
+                      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-2">
+                        <CloudSun className="w-4 h-4 text-primary" /> Weather Forecast
+                      </h3>
+                      <div className="flex gap-2 overflow-x-auto pb-1">
+                        {weatherData.forecast.slice(0, 5).map((f: any) => (
+                          <div key={f.date} className="flex flex-col items-center gap-1 min-w-[60px] bg-secondary/50 rounded-lg p-2 shrink-0">
+                            <span className="text-[10px] text-muted-foreground">{new Date(f.date).toLocaleDateString("en", { weekday: "short" })}</span>
+                            <span className="text-sm font-semibold text-foreground">{f.temp}°C</span>
+                            <span className="text-[10px] text-muted-foreground capitalize">{f.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No data state */}
+                  {!enrichmentLoading && enrichmentFetched && !nearbyPlaces && !upcomingEvents?.events?.length && !weatherData && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center py-2">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>Enrichment unavailable — AI will plan from its own knowledge</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    {enrichmentFetched && (
+                      <Button variant="outline" size="sm" onClick={handleRefreshEnrichment}>
+                        <RefreshCw className="w-4 h-4" /> Refresh Data
+                      </Button>
+                    )}
+                    <Button variant="ocean" size="lg" onClick={handleGenerate} disabled={enrichmentLoading} className="px-8">
+                      <Sparkles className="w-5 h-5" />
+                      Generate AI Itinerary
+                    </Button>
                   </div>
-                  <Button variant="ocean" size="lg" onClick={handleGenerate} className="px-8">
-                    <Sparkles className="w-5 h-5" />
-                    Generate AI Itinerary
-                  </Button>
                 </div>
               )}
             </div>

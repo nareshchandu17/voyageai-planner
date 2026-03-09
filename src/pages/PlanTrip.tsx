@@ -12,6 +12,8 @@ import {
 import { toast } from "sonner";
 import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
+import PlaceCard from "@/components/PlaceCard";
+import EventCard from "@/components/EventCard";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
 

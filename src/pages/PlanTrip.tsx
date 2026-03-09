@@ -157,6 +157,7 @@ const PlanTrip = () => {
     setWeatherData(null);
     setNearbyPlaces(null);
     setUpcomingEvents(null);
+    setDestinationPhotos([]);
   };
 
   const canNext = () => {

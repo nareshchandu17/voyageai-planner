@@ -73,21 +73,87 @@ interface Props {
 const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [] }: Props) => {
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
-        <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">{data.title}</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">{data.summary}</p>
-        {data.totalBudgetEstimate && (
-          <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-accent/10 text-accent">
-            <DollarSign className="w-4 h-4" />
-            <span className="font-semibold">Estimated: ${data.totalBudgetEstimate.toLocaleString()} {data.currency || "USD"}</span>
+      {/* Hero photo banner */}
+      {destinationPhotos.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative rounded-2xl overflow-hidden h-64 md:h-80"
+        >
+          <img
+            src={destinationPhotos[0].url}
+            alt={destinationPhotos[0].alt}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">{data.title}</h2>
+            <p className="text-white/80 max-w-2xl">{data.summary}</p>
+            {data.totalBudgetEstimate && (
+              <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm text-white">
+                <DollarSign className="w-4 h-4" />
+                <span className="font-semibold">Estimated: ${data.totalBudgetEstimate.toLocaleString()} {data.currency || "USD"}</span>
+              </div>
+            )}
           </div>
-        )}
-      </motion.div>
+          {destinationPhotos[0].credit && (
+            <a
+              href={destinationPhotos[0].creditLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute top-3 right-3 text-[10px] text-white/60 bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-md hover:text-white/90 transition-colors"
+            >
+              📷 {destinationPhotos[0].credit}
+            </a>
+          )}
+        </motion.div>
+      )}
+
+      {/* Header (fallback when no photos) */}
+      {destinationPhotos.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">{data.title}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{data.summary}</p>
+          {data.totalBudgetEstimate && (
+            <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-accent/10 text-accent">
+              <DollarSign className="w-4 h-4" />
+              <span className="font-semibold">Estimated: ${data.totalBudgetEstimate.toLocaleString()} {data.currency || "USD"}</span>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Destination photo gallery */}
+      {destinationPhotos.length > 1 && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {destinationPhotos.slice(1, 5).map((photo) => (
+              <div key={photo.id} className="relative aspect-[4/3] rounded-xl overflow-hidden group">
+                <img
+                  src={photo.small}
+                  alt={photo.alt}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                {photo.credit && (
+                  <a
+                    href={photo.creditLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-1 right-1 text-[9px] text-white/50 bg-black/30 px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    {photo.credit}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Warnings */}
       {data.warnings?.length ? (

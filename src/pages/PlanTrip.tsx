@@ -59,6 +59,44 @@ const PlanTrip = () => {
   const [rawStream, setRawStream] = useState("");
   const [itineraryData, setItineraryData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [enrichmentLoading, setEnrichmentLoading] = useState(false);
+  const [enrichmentFetched, setEnrichmentFetched] = useState(false);
+
+  // Fetch enrichment data when reaching step 7
+  const fetchEnrichmentData = useCallback(async () => {
+    if (enrichmentFetched || enrichmentLoading) return;
+    setEnrichmentLoading(true);
+
+    const startDate = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+    const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+
+    try {
+      const [weather, places, events] = await Promise.allSettled([
+        fetchWeather(destination, startDate, endDate),
+        fetchNearbyPlaces(destination),
+        fetchEvents(destination, startDate, endDate),
+      ]).then(([w, p, e]) => [
+        w.status === "fulfilled" ? w.value : null,
+        p.status === "fulfilled" ? p.value : null,
+        e.status === "fulfilled" ? e.value : null,
+      ]);
+
+      if (weather) setWeatherData(weather);
+      if (places) setNearbyPlaces(places);
+      if (events) setUpcomingEvents(events);
+    } catch (e) {
+      console.warn("Enrichment fetch failed:", e);
+    } finally {
+      setEnrichmentLoading(false);
+      setEnrichmentFetched(true);
+    }
+  }, [destination, dateRange, enrichmentFetched, enrichmentLoading]);
+
+  useEffect(() => {
+    if (step === 7 && !enrichmentFetched && !enrichmentLoading) {
+      fetchEnrichmentData();
+    }
+  }, [step, enrichmentFetched, enrichmentLoading, fetchEnrichmentData]);
 
   const toggleStyle = (id: string) => {
     setStyles((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);

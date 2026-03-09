@@ -1,1 +1,7 @@
 project_id = "frectozraqrohunkniqr"
+
+[functions.ai-travel-planner]
+verify_jwt = false
+
+[functions.weather]
+verify_jwt = false

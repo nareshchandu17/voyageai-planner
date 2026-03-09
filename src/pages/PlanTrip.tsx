@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
-  TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned
+  TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned,
+  CloudSun, AlertCircle
 } from "lucide-react";
+import { toast } from "sonner";
+import { fetchWeather, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import AIItineraryResult from "@/components/AIItineraryResult";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
 
@@ -35,7 +37,6 @@ const popularDestinations = [
 const TOTAL_STEPS = 7;
 
 const PlanTrip = () => {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [scrollY, setScrollY] = useState(0);
 
@@ -51,6 +52,11 @@ const PlanTrip = () => {
   const [groupSize, setGroupSize] = useState(2);
   const [interests, setInterests] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [generationPhase, setGenerationPhase] = useState<"weather" | "ai" | "done">("weather");
+  const [weatherData, setWeatherData] = useState<any>(null);
+  const [rawStream, setRawStream] = useState("");
+  const [itineraryData, setItineraryData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleStyle = (id: string) => {
     setStyles((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
@@ -60,11 +66,54 @@ const PlanTrip = () => {
     setInterests((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setGenerating(true);
-    setTimeout(() => {
-      navigate("/itinerary");
-    }, 3000);
+    setError(null);
+    setRawStream("");
+    setItineraryData(null);
+    setGenerationPhase("weather");
+
+    const startDate = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+    const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+
+    // Step 1: Fetch weather
+    let weather = null;
+    try {
+      weather = await fetchWeather(destination, startDate, endDate);
+      setWeatherData(weather);
+      toast.success("Weather data loaded!");
+    } catch (e) {
+      console.warn("Weather fetch failed, continuing without:", e);
+      toast.info("Weather unavailable, generating without forecast");
+    }
+
+    // Step 2: Stream AI itinerary
+    setGenerationPhase("ai");
+    let fullText = "";
+
+    await streamItinerary({
+      params: { destination, startDate, endDate, budget, styles, groupSize, interests },
+      weatherData: weather,
+      onDelta: (chunk) => {
+        fullText += chunk;
+        setRawStream(fullText);
+      },
+      onDone: () => {
+        setGenerationPhase("done");
+        const parsed = parseItineraryJSON(fullText);
+        if (parsed) {
+          setItineraryData(parsed);
+        } else {
+          setError("Failed to parse itinerary. Please try again.");
+        }
+        setGenerating(false);
+      },
+      onError: (err) => {
+        setError(err);
+        setGenerating(false);
+        toast.error(err);
+      },
+    });
   };
 
   const canNext = () => {
@@ -349,19 +398,37 @@ const PlanTrip = () => {
 
           {/* Step 7: Generate */}
           {step === 7 && (
-            <div className="text-center py-6">
+            <div className="py-6">
               {generating ? (
-                <div className="animate-in">
-                  <Loader2 className="w-16 h-16 mx-auto text-ocean animate-spin mb-6" />
+                <div className="animate-in text-center">
+                  <Loader2 className="w-16 h-16 mx-auto text-primary animate-spin mb-6" />
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    Crafting your perfect trip...
+                    {generationPhase === "weather" ? "Fetching weather data..." : "AI is crafting your itinerary..."}
                   </h2>
-                  <p className="text-muted-foreground">Our AI is analyzing thousands of options</p>
+                  <p className="text-muted-foreground">
+                    {generationPhase === "weather"
+                      ? "Getting real-time weather for your destination"
+                      : "Analyzing real places, restaurants & attractions"}
+                  </p>
+                  {generationPhase === "ai" && rawStream.length > 0 && (
+                    <div className="mt-4 text-left max-h-40 overflow-y-auto bg-secondary/50 rounded-xl p-4">
+                      <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{rawStream.slice(-500)}</p>
+                    </div>
+                  )}
+                </div>
+              ) : itineraryData ? (
+                <AIItineraryResult data={itineraryData} weatherData={weatherData} />
+              ) : error ? (
+                <div className="text-center animate-in">
+                  <AlertCircle className="w-16 h-16 mx-auto text-destructive mb-4" />
+                  <h2 className="font-display text-2xl font-bold text-foreground mb-2">Something went wrong</h2>
+                  <p className="text-muted-foreground mb-6">{error}</p>
+                  <Button variant="ocean" onClick={handleGenerate}>Try Again</Button>
                 </div>
               ) : (
-                <div className="animate-in">
-                  <div className="w-20 h-20 rounded-3xl gradient-sunset flex items-center justify-center mx-auto mb-6 animate-float">
-                    <Sparkles className="w-10 h-10 text-accent-foreground" />
+                <div className="animate-in text-center">
+                  <div className="w-20 h-20 rounded-3xl gradient-ocean flex items-center justify-center mx-auto mb-6 animate-float">
+                    <Sparkles className="w-10 h-10 text-primary-foreground" />
                   </div>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">Ready to generate!</h2>
                   <p className="text-muted-foreground mb-2">Here's your trip summary:</p>
@@ -375,9 +442,13 @@ const PlanTrip = () => {
                     <p><span className="text-muted-foreground">Group:</span> <span className="font-medium text-foreground">{groupSize} travelers</span></p>
                     <p><span className="text-muted-foreground">Interests:</span> <span className="font-medium text-foreground">{interests.join(", ") || "Any"}</span></p>
                   </div>
-                  <Button variant="sunset" size="xl" onClick={handleGenerate}>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-4">
+                    <CloudSun className="w-4 h-4 text-primary" />
+                    <span>Real weather data will adapt your itinerary</span>
+                  </div>
+                  <Button variant="ocean" size="lg" onClick={handleGenerate} className="px-8">
                     <Sparkles className="w-5 h-5" />
-                    Generate My Itinerary
+                    Generate AI Itinerary
                   </Button>
                 </div>
               )}
@@ -385,7 +456,7 @@ const PlanTrip = () => {
           )}
 
           {/* Navigation */}
-          {!generating && (
+          {!generating && !itineraryData && (
             <div className="flex justify-between mt-8 pt-6 border-t border-border">
               <Button
                 variant="ghost"

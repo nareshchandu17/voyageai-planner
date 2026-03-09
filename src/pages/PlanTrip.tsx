@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -7,7 +7,7 @@ import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
   TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned,
-  CloudSun, AlertCircle
+  CloudSun, AlertCircle, Star, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";

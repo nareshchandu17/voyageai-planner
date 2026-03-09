@@ -10,7 +10,7 @@ import {
   CloudSun, AlertCircle, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
 import PlaceCard from "@/components/PlaceCard";
 import EventCard from "@/components/EventCard";
@@ -57,6 +57,7 @@ const PlanTrip = () => {
   const [generationPhase, setGenerationPhase] = useState<"weather" | "places" | "events" | "ai" | "done">("weather");
   const [weatherData, setWeatherData] = useState<any>(null);
   const [nearbyPlaces, setNearbyPlaces] = useState<any>(null);
+  const [destinationPhotos, setDestinationPhotos] = useState<any[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<any>(null);
   const [rawStream, setRawStream] = useState("");
   const [itineraryData, setItineraryData] = useState<any>(null);
@@ -73,19 +74,22 @@ const PlanTrip = () => {
     const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
 
     try {
-      const [weather, places, events] = await Promise.allSettled([
+      const [weather, places, events, photos] = await Promise.allSettled([
         fetchWeather(destination, startDate, endDate),
         fetchNearbyPlaces(destination),
         fetchEvents(destination, startDate, endDate),
-      ]).then(([w, p, e]) => [
+        fetchUnsplashPhotos(`${destination} travel landmark`, 8),
+      ]).then(([w, p, e, ph]) => [
         w.status === "fulfilled" ? w.value : null,
         p.status === "fulfilled" ? p.value : null,
         e.status === "fulfilled" ? e.value : null,
+        ph.status === "fulfilled" ? ph.value : null,
       ]);
 
       if (weather) setWeatherData(weather);
       if (places) setNearbyPlaces(places);
       if (events) setUpcomingEvents(events);
+      if (photos) setDestinationPhotos(photos);
     } catch (e) {
       console.warn("Enrichment fetch failed:", e);
     } finally {
@@ -153,6 +157,7 @@ const PlanTrip = () => {
     setWeatherData(null);
     setNearbyPlaces(null);
     setUpcomingEvents(null);
+    setDestinationPhotos([]);
   };
 
   const canNext = () => {
@@ -456,7 +461,7 @@ const PlanTrip = () => {
                   )}
                 </div>
               ) : itineraryData ? (
-                <AIItineraryResult data={itineraryData} weatherData={weatherData} nearbyPlaces={nearbyPlaces} upcomingEvents={upcomingEvents} />
+                <AIItineraryResult data={itineraryData} weatherData={weatherData} nearbyPlaces={nearbyPlaces} upcomingEvents={upcomingEvents} destinationPhotos={destinationPhotos} />
               ) : error ? (
                 <div className="text-center animate-in">
                   <AlertCircle className="w-16 h-16 mx-auto text-destructive mb-4" />

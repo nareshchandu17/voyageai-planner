@@ -2,6 +2,7 @@ const PLANNER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-travel
 const WEATHER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather`;
 const GOOGLE_MAPS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps`;
 const TICKETMASTER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ticketmaster`;
+const UNSPLASH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unsplash`;
 
 export interface TripParams {
   destination: string;
@@ -170,6 +171,24 @@ export async function streamItinerary({
     onDone();
   } catch (e) {
     onError(e instanceof Error ? e.message : "Unknown error");
+  }
+}
+
+export async function fetchUnsplashPhotos(query: string, count = 5): Promise<any[] | null> {
+  try {
+    const resp = await fetch(UNSPLASH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ query, count }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.photos || null;
+  } catch {
+    return null;
   }
 }
 

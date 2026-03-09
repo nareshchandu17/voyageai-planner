@@ -1,5 +1,7 @@
 const PLANNER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-travel-planner`;
 const WEATHER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather`;
+const GOOGLE_MAPS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps`;
+const TICKETMASTER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ticketmaster`;
 
 export interface TripParams {
   destination: string;
@@ -27,15 +29,60 @@ export async function fetchWeather(destination: string, startDate: string, endDa
   return resp.json();
 }
 
+export async function fetchNearbyPlaces(destination: string) {
+  try {
+    const resp = await fetch(GOOGLE_MAPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "search", query: `top attractions in ${destination}` }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return (data.results || []).slice(0, 8).map((p: any) => ({
+      name: p.name,
+      address: p.formatted_address,
+      rating: p.rating,
+      types: p.types?.slice(0, 3),
+      location: p.geometry?.location,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchEvents(destination: string, startDate: string, endDate: string) {
+  try {
+    const resp = await fetch(TICKETMASTER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ destination, startDate, endDate, size: 8 }),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function streamItinerary({
   params,
   weatherData,
+  nearbyPlaces,
+  upcomingEvents,
   onDelta,
   onDone,
   onError,
 }: {
   params: TripParams;
   weatherData?: any;
+  nearbyPlaces?: any;
+  upcomingEvents?: any;
   onDelta: (chunk: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
@@ -47,7 +94,7 @@ export async function streamItinerary({
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ ...params, weatherForecast: weatherData }),
+      body: JSON.stringify({ ...params, weatherForecast: weatherData, nearbyPlaces, upcomingEvents }),
     });
 
     if (!resp.ok) {

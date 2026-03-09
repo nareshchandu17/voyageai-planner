@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { destination, startDate, endDate, budget, styles, groupSize, interests, weatherForecast } = await req.json();
+    const { destination, startDate, endDate, budget, styles, groupSize, interests, weatherForecast, nearbyPlaces, upcomingEvents } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -18,6 +18,18 @@ serve(async (req) => {
       ? `\n\nWEATHER FORECAST for the trip dates:\n${weatherForecast.forecast.map((d: any) =>
           `${d.date}: ${d.weather} (${d.tempMin}°C-${d.tempMax}°C), humidity ${d.humidity}%, wind ${d.wind}km/h${d.rain ? " ⚠️ RAIN expected" : ""}`
         ).join("\n")}\n\nIMPORTANT: Use this weather data to adapt the itinerary. Move outdoor activities away from rainy days. Suggest indoor alternatives on bad weather days.`
+      : "";
+
+    const placesContext = nearbyPlaces?.length
+      ? `\n\nVERIFIED ATTRACTIONS (from Google Maps - prioritize these real places):\n${nearbyPlaces.map((p: any) => 
+          `- ${p.name} (${p.rating ? `★${p.rating}` : "unrated"}) - ${p.address || "address unavailable"}`
+        ).join("\n")}`
+      : "";
+
+    const eventsContext = upcomingEvents?.events?.length
+      ? `\n\nLOCAL EVENTS during trip dates (from Ticketmaster - recommend relevant ones):\n${upcomingEvents.events.map((e: any) =>
+          `- ${e.date}: ${e.name} at ${e.venue || "TBA"} (${e.category || "Event"}${e.priceRange ? ` - $${e.priceRange.min}-$${e.priceRange.max}` : ""})`
+        ).join("\n")}`
       : "";
 
     const systemPrompt = `You are VoyageAI, an expert travel planner that creates REAL, verified, high-quality travel itineraries. You MUST:
@@ -76,9 +88,9 @@ Budget: $${budget} per person
 Group size: ${groupSize} travelers
 Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
-${weatherContext}
+${weatherContext}${placesContext}${eventsContext}
 
-Create a detailed day-by-day itinerary with REAL places, restaurants, and attractions. Ensure all recommendations are genuine, well-known establishments.`;
+Create a detailed day-by-day itinerary with REAL places, restaurants, and attractions. Ensure all recommendations are genuine, well-known establishments. If local events are listed above, consider incorporating relevant ones into the itinerary.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

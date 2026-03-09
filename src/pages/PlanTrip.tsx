@@ -10,7 +10,7 @@ import {
   CloudSun, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchWeather, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
@@ -52,8 +52,10 @@ const PlanTrip = () => {
   const [groupSize, setGroupSize] = useState(2);
   const [interests, setInterests] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
-  const [generationPhase, setGenerationPhase] = useState<"weather" | "ai" | "done">("weather");
+  const [generationPhase, setGenerationPhase] = useState<"weather" | "places" | "events" | "ai" | "done">("weather");
   const [weatherData, setWeatherData] = useState<any>(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState<any>(null);
+  const [upcomingEvents, setUpcomingEvents] = useState<any>(null);
   const [rawStream, setRawStream] = useState("");
   const [itineraryData, setItineraryData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,15 +78,28 @@ const PlanTrip = () => {
     const startDate = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
     const endDate = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
 
-    // Step 1: Fetch weather
+    // Step 1: Fetch weather, places & events in parallel
     let weather = null;
+    let places = null;
+    let events = null;
+
     try {
-      weather = await fetchWeather(destination, startDate, endDate);
-      setWeatherData(weather);
-      toast.success("Weather data loaded!");
+      [weather, places, events] = await Promise.allSettled([
+        fetchWeather(destination, startDate, endDate),
+        fetchNearbyPlaces(destination),
+        fetchEvents(destination, startDate, endDate),
+      ]).then(([w, p, e]) => [
+        w.status === "fulfilled" ? w.value : null,
+        p.status === "fulfilled" ? p.value : null,
+        e.status === "fulfilled" ? e.value : null,
+      ]);
+
+      if (weather) { setWeatherData(weather); toast.success("Weather data loaded!"); }
+      if (places) { setNearbyPlaces(places); toast.success(`Found ${places.length} verified attractions!`); }
+      if (events?.events?.length) { setUpcomingEvents(events); toast.success(`Found ${events.events.length} local events!`); }
+      if (!weather && !places && !events) toast.info("Enrichment data unavailable, generating from AI knowledge");
     } catch (e) {
-      console.warn("Weather fetch failed, continuing without:", e);
-      toast.info("Weather unavailable, generating without forecast");
+      console.warn("Data fetch failed, continuing:", e);
     }
 
     // Step 2: Stream AI itinerary
@@ -94,6 +109,8 @@ const PlanTrip = () => {
     await streamItinerary({
       params: { destination, startDate, endDate, budget, styles, groupSize, interests },
       weatherData: weather,
+      nearbyPlaces: places,
+      upcomingEvents: events,
       onDelta: (chunk) => {
         fullText += chunk;
         setRawStream(fullText);
@@ -403,12 +420,12 @@ const PlanTrip = () => {
                 <div className="animate-in text-center">
                   <Loader2 className="w-16 h-16 mx-auto text-primary animate-spin mb-6" />
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    {generationPhase === "weather" ? "Fetching weather data..." : "AI is crafting your itinerary..."}
+                    {generationPhase === "weather" ? "Gathering enrichment data..." : "AI is crafting your itinerary..."}
                   </h2>
                   <p className="text-muted-foreground">
                     {generationPhase === "weather"
-                      ? "Getting real-time weather for your destination"
-                      : "Analyzing real places, restaurants & attractions"}
+                      ? "Fetching weather, verified places & local events"
+                      : "Analyzing real places, restaurants, events & attractions"}
                   </p>
                   {generationPhase === "ai" && rawStream.length > 0 && (
                     <div className="mt-4 text-left max-h-40 overflow-y-auto bg-secondary/50 rounded-xl p-4">

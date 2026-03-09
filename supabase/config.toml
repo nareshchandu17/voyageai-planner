@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.ticketmaster]
 verify_jwt = false
+
+[functions.google-maps-photo]
+verify_jwt = false

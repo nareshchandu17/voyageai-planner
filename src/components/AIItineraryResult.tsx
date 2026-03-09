@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
-  Lightbulb, AlertTriangle, Luggage
+  Lightbulb, AlertTriangle, Luggage, Ticket
 } from "lucide-react";
+import PlaceCard from "./PlaceCard";
+import EventCard from "./EventCard";
 
 interface ItineraryDay {
   day: number;
@@ -63,9 +65,11 @@ const activityIcon = (type: string) => {
 interface Props {
   data: ItineraryData;
   weatherData?: any;
+  nearbyPlaces?: any;
+  upcomingEvents?: any;
 }
 
-const AIItineraryResult = ({ data, weatherData }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents }: Props) => {
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -114,6 +118,36 @@ const AIItineraryResult = ({ data, weatherData }: Props) => {
           </div>
         </motion.div>
       ) : null}
+
+      {/* Verified Places Grid */}
+      {nearbyPlaces?.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+          className="glass-card p-5">
+          <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" /> Top Recommended Places
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {nearbyPlaces.slice(0, 6).map((place: any, i: number) => (
+              <PlaceCard key={i} {...place} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Local Events Grid */}
+      {upcomingEvents?.events?.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.19 }}
+          className="glass-card p-5">
+          <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <Ticket className="w-5 h-5 text-accent" /> Local Events During Your Trip
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {upcomingEvents.events.slice(0, 4).map((ev: any, i: number) => (
+              <EventCard key={i} {...ev} />
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Days */}
       {data.days.map((day, idx) => (

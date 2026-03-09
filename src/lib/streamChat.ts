@@ -29,6 +29,10 @@ export async function fetchWeather(destination: string, startDate: string, endDa
   return resp.json();
 }
 
+export function getPlacePhotoUrl(photoReference: string, maxWidth = 400): string {
+  return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-photo?photo_reference=${photoReference}&maxwidth=${maxWidth}`;
+}
+
 export async function fetchNearbyPlaces(destination: string) {
   try {
     const resp = await fetch(GOOGLE_MAPS_URL, {
@@ -41,12 +45,15 @@ export async function fetchNearbyPlaces(destination: string) {
     });
     if (!resp.ok) return null;
     const data = await resp.json();
-    return (data.results || []).slice(0, 8).map((p: any) => ({
+    return (data.results || []).slice(0, 10).map((p: any) => ({
       name: p.name,
       address: p.formatted_address,
       rating: p.rating,
+      userRatingsTotal: p.user_ratings_total,
       types: p.types?.slice(0, 3),
       location: p.geometry?.location,
+      photoReference: p.photos?.[0]?.photo_reference,
+      placeId: p.place_id,
     }));
   } catch {
     return null;

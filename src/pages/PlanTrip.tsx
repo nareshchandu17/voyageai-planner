@@ -7,11 +7,13 @@ import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
   TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned,
-  CloudSun, AlertCircle, Star, Ticket, RefreshCw
+  CloudSun, AlertCircle, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
+import PlaceCard from "@/components/PlaceCard";
+import EventCard from "@/components/EventCard";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
 
@@ -454,7 +456,7 @@ const PlanTrip = () => {
                   )}
                 </div>
               ) : itineraryData ? (
-                <AIItineraryResult data={itineraryData} weatherData={weatherData} />
+                <AIItineraryResult data={itineraryData} weatherData={weatherData} nearbyPlaces={nearbyPlaces} upcomingEvents={upcomingEvents} />
               ) : error ? (
                 <div className="text-center animate-in">
                   <AlertCircle className="w-16 h-16 mx-auto text-destructive mb-4" />
@@ -493,65 +495,42 @@ const PlanTrip = () => {
                   {/* Google Maps Places */}
                   {!enrichmentLoading && nearbyPlaces?.length > 0 && (
                     <div className="text-left">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <MapPin className="w-4 h-4 text-primary" /> Verified Attractions
+                          <MapPin className="w-4 h-4 text-primary" /> Top Attractions
                           <span className="text-xs font-normal text-muted-foreground ml-1">via Google Maps</span>
                         </h3>
-                        <span className="text-xs text-muted-foreground">{nearbyPlaces.length} found</span>
+                        <span className="text-xs text-muted-foreground">{nearbyPlaces.length} verified</span>
                       </div>
-                      <div className="grid grid-cols-1 gap-1.5">
-                        {nearbyPlaces.slice(0, 5).map((place: any, i: number) => (
-                          <div key={i} className="flex items-start gap-2 bg-secondary/50 rounded-lg px-3 py-2">
-                            <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{place.name}</p>
-                              {place.address && <p className="text-xs text-muted-foreground truncate">{place.address}</p>}
-                            </div>
-                            {place.rating && (
-                              <span className="text-xs text-amber-500 flex items-center gap-0.5 shrink-0">
-                                <Star className="w-3 h-3 fill-amber-500" />{place.rating}
-                              </span>
-                            )}
-                          </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {nearbyPlaces.slice(0, 4).map((place: any, i: number) => (
+                          <PlaceCard key={i} {...place} compact />
                         ))}
-                        {nearbyPlaces.length > 5 && (
-                          <p className="text-xs text-muted-foreground text-right">+{nearbyPlaces.length - 5} more</p>
-                        )}
                       </div>
+                      {nearbyPlaces.length > 4 && (
+                        <p className="text-xs text-muted-foreground text-right mt-2">+{nearbyPlaces.length - 4} more places</p>
+                      )}
                     </div>
                   )}
 
                   {/* Ticketmaster Events */}
                   {!enrichmentLoading && upcomingEvents?.events?.length > 0 && (
                     <div className="text-left">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <Ticket className="w-4 h-4 text-accent" /> Local Events During Your Trip
+                          <Ticket className="w-4 h-4 text-accent" /> Upcoming Events
                           <span className="text-xs font-normal text-muted-foreground ml-1">via Ticketmaster</span>
                         </h3>
-                        <span className="text-xs text-muted-foreground">{upcomingEvents.events.length} found</span>
+                        <span className="text-xs text-muted-foreground">{upcomingEvents.events.length} happening</span>
                       </div>
-                      <div className="grid grid-cols-1 gap-1.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {upcomingEvents.events.slice(0, 4).map((ev: any, i: number) => (
-                          <div key={i} className="flex items-start gap-2 bg-secondary/50 rounded-lg px-3 py-2">
-                            <Ticket className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{ev.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {ev.date && `${ev.date}${ev.time ? ` · ${ev.time.slice(0, 5)}` : ""}`}
-                                {ev.venue && ` · ${ev.venue}`}
-                              </p>
-                            </div>
-                            {ev.priceRange && (
-                              <span className="text-xs text-accent shrink-0">${ev.priceRange.min}+</span>
-                            )}
-                          </div>
+                          <EventCard key={i} {...ev} compact />
                         ))}
-                        {upcomingEvents.events.length > 4 && (
-                          <p className="text-xs text-muted-foreground text-right">+{upcomingEvents.events.length - 4} more events</p>
-                        )}
                       </div>
+                      {upcomingEvents.events.length > 4 && (
+                        <p className="text-xs text-muted-foreground text-right mt-2">+{upcomingEvents.events.length - 4} more events</p>
+                      )}
                     </div>
                   )}
 

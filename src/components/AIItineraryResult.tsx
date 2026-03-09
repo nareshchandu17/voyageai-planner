@@ -65,6 +65,8 @@ const activityIcon = (type: string) => {
 interface Props {
   data: ItineraryData;
   weatherData?: any;
+  nearbyPlaces?: any;
+  upcomingEvents?: any;
 }
 
 const AIItineraryResult = ({ data, weatherData }: Props) => {

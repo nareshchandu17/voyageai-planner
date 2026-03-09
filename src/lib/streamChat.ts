@@ -29,6 +29,47 @@ export async function fetchWeather(destination: string, startDate: string, endDa
   return resp.json();
 }
 
+export async function fetchNearbyPlaces(destination: string) {
+  try {
+    const resp = await fetch(GOOGLE_MAPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "search", query: `top attractions in ${destination}` }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return (data.results || []).slice(0, 8).map((p: any) => ({
+      name: p.name,
+      address: p.formatted_address,
+      rating: p.rating,
+      types: p.types?.slice(0, 3),
+      location: p.geometry?.location,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchEvents(destination: string, startDate: string, endDate: string) {
+  try {
+    const resp = await fetch(TICKETMASTER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ destination, startDate, endDate, size: 8 }),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function streamItinerary({
   params,
   weatherData,

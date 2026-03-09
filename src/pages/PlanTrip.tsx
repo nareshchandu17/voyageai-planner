@@ -10,7 +10,7 @@ import {
   CloudSun, AlertCircle, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchWeather, fetchNearbyPlaces, fetchEvents, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
 import PlaceCard from "@/components/PlaceCard";
 import EventCard from "@/components/EventCard";

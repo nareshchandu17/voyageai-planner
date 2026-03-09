@@ -420,12 +420,12 @@ const PlanTrip = () => {
                 <div className="animate-in text-center">
                   <Loader2 className="w-16 h-16 mx-auto text-primary animate-spin mb-6" />
                   <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                    {generationPhase === "weather" ? "Fetching weather data..." : "AI is crafting your itinerary..."}
+                    {generationPhase === "weather" ? "Gathering enrichment data..." : "AI is crafting your itinerary..."}
                   </h2>
                   <p className="text-muted-foreground">
                     {generationPhase === "weather"
-                      ? "Getting real-time weather for your destination"
-                      : "Analyzing real places, restaurants & attractions"}
+                      ? "Fetching weather, verified places & local events"
+                      : "Analyzing real places, restaurants, events & attractions"}
                   </p>
                   {generationPhase === "ai" && rawStream.length > 0 && (
                     <div className="mt-4 text-left max-h-40 overflow-y-auto bg-secondary/50 rounded-xl p-4">

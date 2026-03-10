@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupaUser, Session } from "@supabase/supabase-js";
 
 interface User {
   id: string;
@@ -9,6 +11,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
@@ -17,37 +20,55 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const mapUser = (u: SupaUser): User => ({
+  id: u.id,
+  name: u.user_metadata?.name || u.email?.split("@")[0] || "Traveler",
+  email: u.email || "",
+  avatar: u.user_metadata?.avatar_url,
+});
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("voyageai_user");
-    if (stored) setUser(JSON.parse(stored));
-    setIsLoading(false);
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user ? mapUser(s.user) : null);
+      setIsLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      setUser(s?.user ? mapUser(s.user) : null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, _password: string) => {
-    await new Promise((r) => setTimeout(r, 800));
-    const u: User = { id: crypto.randomUUID(), name: email.split("@")[0], email };
-    localStorage.setItem("voyageai_user", JSON.stringify(u));
-    setUser(u);
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
-  const signUp = async (name: string, email: string, _password: string) => {
-    await new Promise((r) => setTimeout(r, 800));
-    const u: User = { id: crypto.randomUUID(), name, email };
-    localStorage.setItem("voyageai_user", JSON.stringify(u));
-    setUser(u);
+  const signUp = async (name: string, email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) throw error;
   };
 
-  const signOut = () => {
-    localStorage.removeItem("voyageai_user");
+  const signOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

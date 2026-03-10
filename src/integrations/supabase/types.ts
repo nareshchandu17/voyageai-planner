@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      trips: {
+        Row: {
+          budget: number | null
+          created_at: string
+          currency: string | null
+          destination: string
+          destination_photos: Json | null
+          duration: string | null
+          end_date: string | null
+          group_size: number | null
+          id: string
+          image_url: string | null
+          interests: string[] | null
+          itinerary_data: Json | null
+          nearby_places: Json | null
+          start_date: string | null
+          status: string
+          styles: string[] | null
+          title: string
+          upcoming_events: Json | null
+          updated_at: string
+          user_id: string
+          weather_data: Json | null
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string
+          currency?: string | null
+          destination: string
+          destination_photos?: Json | null
+          duration?: string | null
+          end_date?: string | null
+          group_size?: number | null
+          id?: string
+          image_url?: string | null
+          interests?: string[] | null
+          itinerary_data?: Json | null
+          nearby_places?: Json | null
+          start_date?: string | null
+          status?: string
+          styles?: string[] | null
+          title: string
+          upcoming_events?: Json | null
+          updated_at?: string
+          user_id: string
+          weather_data?: Json | null
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string
+          currency?: string | null
+          destination?: string
+          destination_photos?: Json | null
+          duration?: string | null
+          end_date?: string | null
+          group_size?: number | null
+          id?: string
+          image_url?: string | null
+          interests?: string[] | null
+          itinerary_data?: Json | null
+          nearby_places?: Json | null
+          start_date?: string | null
+          status?: string
+          styles?: string[] | null
+          title?: string
+          upcoming_events?: Json | null
+          updated_at?: string
+          user_id?: string
+          weather_data?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

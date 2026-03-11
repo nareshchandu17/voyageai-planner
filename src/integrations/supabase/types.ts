@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      trip_memories: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          title: string | null
+          trip_id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          trip_id: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          trip_id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_memories_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           budget: number | null
@@ -33,6 +74,7 @@ export type Database = {
           status: string
           styles: string[] | null
           title: string
+          travel_story: string | null
           upcoming_events: Json | null
           updated_at: string
           user_id: string
@@ -56,6 +98,7 @@ export type Database = {
           status?: string
           styles?: string[] | null
           title: string
+          travel_story?: string | null
           upcoming_events?: Json | null
           updated_at?: string
           user_id: string
@@ -79,6 +122,7 @@ export type Database = {
           status?: string
           styles?: string[] | null
           title?: string
+          travel_story?: string | null
           upcoming_events?: Json | null
           updated_at?: string
           user_id?: string

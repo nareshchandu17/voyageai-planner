@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
 import WidgetDetailModal from "@/components/WidgetDetailModal";
+import CompletedTripDetail from "@/components/CompletedTripDetail";
 import heroTravel from "@/assets/hero-travel.jpg";
 import { toast } from "sonner";
 
@@ -39,7 +40,7 @@ const statusLabel: Record<string, string> = {
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TripTab>("planned");
   const { user } = useAuth();
-  const { planned, active, completed, loading, updateStatus } = useTrips();
+  const { planned, active, completed, loading, updateStatus, updateTrip, fetchTrips } = useTrips();
   const navigate = useNavigate();
 
   const counts = { planned: planned.length, active: active.length, completed: completed.length };
@@ -112,7 +113,7 @@ const Dashboard = () => {
             <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
               {activeTab === "planned" && <TripGrid trips={planned} tab="planned" updateStatus={updateStatus} navigate={navigate} />}
               {activeTab === "active" && <TripGrid trips={active} tab="active" updateStatus={updateStatus} navigate={navigate} />}
-              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} />}
+              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} onStoryGenerated={async () => { await fetchTrips(); }} />}
             </motion.div>
           </AnimatePresence>
         )}
@@ -139,11 +140,12 @@ const Dashboard = () => {
 // ═══════════════════════════════════════
 // TRIP GRID — handles all three tabs
 // ═══════════════════════════════════════
-const TripGrid = ({ trips, tab, updateStatus, navigate }: {
+const TripGrid = ({ trips, tab, updateStatus, navigate, onStoryGenerated }: {
   trips: Trip[];
   tab: TripTab;
   updateStatus: (id: string, status: "planned" | "active" | "completed") => Promise<boolean>;
   navigate: (path: string) => void;
+  onStoryGenerated?: (tripId: string, story: string) => void;
 }) => {
   const [widgetModal, setWidgetModal] = useState<{ open: boolean; title: string; icon: any; items: any[] }>({ open: false, title: "", icon: "restaurants", items: [] });
 
@@ -263,20 +265,18 @@ const TripGrid = ({ trips, tab, updateStatus, navigate }: {
                 </div>
               )}
 
-              {/* Completed: summary */}
-              {trip.status === "completed" && trip.itinerary_data && (
+              {/* Completed: stats + memories */}
+              {trip.status === "completed" && (
                 <div className="space-y-3">
-                  {trip.itinerary_data.summary && (
-                    <div className="bg-primary/5 border border-primary/10 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2"><Sparkles className="w-4 h-4 text-primary" /><span className="font-display font-bold text-sm text-foreground">Trip Summary</span></div>
-                      <p className="text-sm text-muted-foreground italic">{trip.itinerary_data.summary}</p>
-                    </div>
-                  )}
                   <div className="grid grid-cols-3 gap-3">
                     <div className="bg-secondary/50 rounded-xl p-3 text-center"><DollarSign className="w-4 h-4 mx-auto text-accent mb-1" /><p className="text-lg font-display font-bold text-foreground">${trip.budget?.toLocaleString()}</p><p className="text-[10px] text-muted-foreground">Budget</p></div>
-                    <div className="bg-secondary/50 rounded-xl p-3 text-center"><MapPin className="w-4 h-4 mx-auto text-primary mb-1" /><p className="text-lg font-display font-bold text-foreground">{trip.itinerary_data.days?.length || 0}</p><p className="text-[10px] text-muted-foreground">Days</p></div>
+                    <div className="bg-secondary/50 rounded-xl p-3 text-center"><MapPin className="w-4 h-4 mx-auto text-primary mb-1" /><p className="text-lg font-display font-bold text-foreground">{trip.itinerary_data?.days?.length || 0}</p><p className="text-[10px] text-muted-foreground">Days</p></div>
                     <div className="bg-secondary/50 rounded-xl p-3 text-center"><Star className="w-4 h-4 mx-auto text-accent mb-1" /><p className="text-lg font-display font-bold text-foreground">{trip.group_size}</p><p className="text-[10px] text-muted-foreground">Travelers</p></div>
                   </div>
+                  <CompletedTripDetail
+                    trip={trip}
+                    onStoryGenerated={(id, story) => onStoryGenerated?.(id, story)}
+                  />
                 </div>
               )}
 

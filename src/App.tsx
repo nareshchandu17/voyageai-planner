@@ -18,6 +18,7 @@ import BlogPost from "./pages/BlogPost";
 import TourDetail from "./pages/TourDetail";
 import DestinationDetail from "./pages/DestinationDetail";
 import Auth from "./pages/Auth";
+import SharedStory from "./pages/SharedStory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

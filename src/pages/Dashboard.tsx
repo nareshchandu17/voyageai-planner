@@ -40,7 +40,7 @@ const statusLabel: Record<string, string> = {
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TripTab>("planned");
   const { user } = useAuth();
-  const { planned, active, completed, loading, updateStatus } = useTrips();
+  const { planned, active, completed, loading, updateStatus, updateTrip, fetchTrips } = useTrips();
   const navigate = useNavigate();
 
   const counts = { planned: planned.length, active: active.length, completed: completed.length };

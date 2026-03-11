@@ -23,6 +23,7 @@ export interface Trip {
   upcoming_events: any;
   destination_photos: any;
   image_url: string | null;
+  travel_story: string | null;
   created_at: string;
   updated_at: string;
 }

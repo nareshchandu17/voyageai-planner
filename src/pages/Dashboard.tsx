@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
 import WidgetDetailModal from "@/components/WidgetDetailModal";
+import CompletedTripDetail from "@/components/CompletedTripDetail";
 import heroTravel from "@/assets/hero-travel.jpg";
 import { toast } from "sonner";
 

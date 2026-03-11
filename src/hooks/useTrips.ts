@@ -24,6 +24,7 @@ export interface Trip {
   destination_photos: any;
   image_url: string | null;
   travel_story: string | null;
+  share_token: string | null;
   created_at: string;
   updated_at: string;
 }

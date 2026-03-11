@@ -113,7 +113,7 @@ const Dashboard = () => {
             <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
               {activeTab === "planned" && <TripGrid trips={planned} tab="planned" updateStatus={updateStatus} navigate={navigate} />}
               {activeTab === "active" && <TripGrid trips={active} tab="active" updateStatus={updateStatus} navigate={navigate} />}
-              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} />}
+              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} onStoryGenerated={async () => { await fetchTrips(); }} />}
             </motion.div>
           </AnimatePresence>
         )}

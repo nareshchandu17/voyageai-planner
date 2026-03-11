@@ -140,11 +140,12 @@ const Dashboard = () => {
 // ═══════════════════════════════════════
 // TRIP GRID — handles all three tabs
 // ═══════════════════════════════════════
-const TripGrid = ({ trips, tab, updateStatus, navigate }: {
+const TripGrid = ({ trips, tab, updateStatus, navigate, onStoryGenerated }: {
   trips: Trip[];
   tab: TripTab;
   updateStatus: (id: string, status: "planned" | "active" | "completed") => Promise<boolean>;
   navigate: (path: string) => void;
+  onStoryGenerated?: (tripId: string, story: string) => void;
 }) => {
   const [widgetModal, setWidgetModal] = useState<{ open: boolean; title: string; icon: any; items: any[] }>({ open: false, title: "", icon: "restaurants", items: [] });
 

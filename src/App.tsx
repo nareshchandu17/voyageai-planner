@@ -40,6 +40,7 @@ const AnimatedRoutes = () => {
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/shared/:token" element={<SharedStory />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>

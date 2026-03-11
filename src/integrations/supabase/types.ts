@@ -70,6 +70,7 @@ export type Database = {
           interests: string[] | null
           itinerary_data: Json | null
           nearby_places: Json | null
+          share_token: string | null
           start_date: string | null
           status: string
           styles: string[] | null
@@ -94,6 +95,7 @@ export type Database = {
           interests?: string[] | null
           itinerary_data?: Json | null
           nearby_places?: Json | null
+          share_token?: string | null
           start_date?: string | null
           status?: string
           styles?: string[] | null
@@ -118,6 +120,7 @@ export type Database = {
           interests?: string[] | null
           itinerary_data?: Json | null
           nearby_places?: Json | null
+          share_token?: string | null
           start_date?: string | null
           status?: string
           styles?: string[] | null

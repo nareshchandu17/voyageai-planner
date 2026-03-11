@@ -275,6 +275,7 @@ const TripGrid = ({ trips, tab, updateStatus, navigate, onStoryGenerated }: {
                   </div>
                   <CompletedTripDetail
                     trip={trip}
+                    allCompleted={trips}
                     onStoryGenerated={(id, story) => onStoryGenerated?.(id, story)}
                   />
                 </div>

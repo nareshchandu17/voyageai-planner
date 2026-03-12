@@ -274,3 +274,40 @@
   animation: waveMove3 10s ease-in-out infinite;
   opacity: 0.08;
 }
+
+/* Discover page premium styles */
+@keyframes particleFloat {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(30px); opacity: 0; }
+}
+
+@keyframes subtleGlow {
+  0%, 100% { box-shadow: 0 0 20px hsl(var(--ocean) / 0.15); }
+  50% { box-shadow: 0 0 40px hsl(var(--ocean) / 0.3); }
+}
+
+.discover-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: hsl(var(--primary-foreground) / 0.4);
+  animation: particleFloat linear infinite;
+  pointer-events: none;
+}
+
+.discover-tile-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.discover-glass-overlay {
+  background: linear-gradient(180deg, transparent 0%, hsl(var(--discover-night) / 0.3) 40%, hsl(var(--discover-night) / 0.85) 100%);
+  backdrop-filter: blur(2px);
+}
+
+.discover-prompt-glow {
+  animation: subtleGlow 3s ease-in-out infinite;
+}

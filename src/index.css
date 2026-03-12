@@ -55,6 +55,12 @@
     --glass-border: 0 0% 100% / 0.3;
     --glass-shadow: 199 89% 60% / 0.08;
 
+    --discover-night: 220 30% 6%;
+    --discover-graphite: 220 18% 11%;
+    --discover-mist: 220 20% 97%;
+    --discover-coral: 8 100% 68%;
+    --discover-aurora: 252 100% 69%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 204 98% 40%;

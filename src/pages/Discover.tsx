@@ -1,9 +1,14 @@
-import { useState, useMemo, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import Lenis from "lenis";
 import Footer from "@/components/Footer";
+import DiscoverHero from "@/components/discover/DiscoverHero";
+import AIPromptBar from "@/components/discover/AIPromptBar";
+import CategoryFilter from "@/components/discover/CategoryFilter";
+import DestinationTile from "@/components/discover/DestinationTile";
+import EditorialSection from "@/components/discover/EditorialSection";
+import PopularCarousel from "@/components/discover/PopularCarousel";
 
-import toursHeroBg from "@/assets/tours-hero-bg.jpg";
 import moroccoImg from "@/assets/pkg-morocco.jpg";
 import italyImg from "@/assets/pkg-italy.jpg";
 import africaImg from "@/assets/pkg-africa.jpg";
@@ -19,9 +24,6 @@ import dubaiImg from "@/assets/dest-dubai.jpg";
 import kyotoImg from "@/assets/dest-kyoto.jpg";
 import capetownImg from "@/assets/dest-capetown.jpg";
 import icelandImg from "@/assets/dest-iceland.jpg";
-import expNature from "@/assets/exp-nature.jpg";
-import expCulture from "@/assets/exp-culture.jpg";
-import expHistory from "@/assets/exp-history.jpg";
 import heroImg from "@/assets/hero-travel.jpg";
 import australiaImg from "@/assets/dest-australia.jpg";
 import sydneyImg from "@/assets/dest-sydney.jpg";
@@ -36,13 +38,6 @@ import dubaiMarinaImg from "@/assets/dest-dubai-marina.jpg";
 import newzealandImg from "@/assets/dest-newzealand.jpg";
 import londonImg from "@/assets/dest-london.jpg";
 import parisEiffelImg from "@/assets/dest-paris-eiffel.jpg";
-
-const categories = [
-  { label: "All", image: heroImg },
-  { label: "Nature", image: expNature },
-  { label: "Romantic", image: expCulture },
-  { label: "Adventure", image: expHistory },
-];
 
 const allPackages = [
   { slug: "morocco-desert-journey", image: moroccoImg, title: "Morocco Desert Journey", duration: "8 Days / 7 Nights", price: "1,600", category: "Adventure" },
@@ -67,10 +62,10 @@ const allPackages = [
   { slug: "rome-heritage-tour", image: romeImg, title: "Rome Heritage Tour", duration: "5 Days / 4 Nights", price: "1,350", category: "Romantic" },
   { slug: "santorini-escape", image: santoriniImg, title: "Santorini Escape", duration: "5 Days / 4 Nights", price: "1,750", category: "Romantic" },
   { slug: "singapore-city-tour", image: singaporeImg, title: "Singapore City Tour", duration: "4 Days / 3 Nights", price: "1,100", category: "Adventure" },
-  { slug: "dubai-skyline-tour", image: dubaiSkylineImg, title: "Dubai Skyline Tour", duration: "5 Days / 4 Nights", price: "1,400", category: "Adventure" },
+  { slug: "dubai-skyline-tour", image: dubaiSkylineImg, title: "Dubai Skyline Tour", duration: "5 Days / 4 Nights", price: "1,400", category: "Luxury" },
   { slug: "amalfi-coast-dream", image: amalfiImg, title: "Amalfi Coast Dream", duration: "6 Days / 5 Nights", price: "1,900", category: "Romantic" },
   { slug: "thailand-paradise", image: thailandImg, title: "Thailand Paradise", duration: "7 Days / 6 Nights", price: "950", category: "Nature" },
-  { slug: "dubai-marina-luxury", image: dubaiMarinaImg, title: "Dubai Marina Luxury", duration: "5 Days / 4 Nights", price: "1,600", category: "Adventure" },
+  { slug: "dubai-marina-luxury", image: dubaiMarinaImg, title: "Dubai Marina Luxury", duration: "5 Days / 4 Nights", price: "1,600", category: "Luxury" },
   { slug: "new-zealand-explorer", image: newzealandImg, title: "New Zealand Explorer", duration: "8 Days / 7 Nights", price: "2,100", category: "Nature" },
   { slug: "london-classics", image: londonImg, title: "London Classics", duration: "5 Days / 4 Nights", price: "1,250", category: "Adventure" },
   { slug: "paris-romantic-getaway", image: parisEiffelImg, title: "Paris Romantic Getaway", duration: "4 Days / 3 Nights", price: "1,350", category: "Romantic" },
@@ -80,196 +75,125 @@ const ITEMS_PER_PAGE = 8;
 
 const Discover = () => {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [newlyLoadedStart, setNewlyLoadedStart] = useState<number | null>(null);
-  const heroRef = useRef<HTMLElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const { scrollY } = useScroll();
-  const textOpacity = useTransform(scrollY, [0, typeof window !== "undefined" ? window.innerHeight * 0.35 : 300], [1, 0]);
-  const textBlur = useTransform(scrollY, [0, typeof window !== "undefined" ? window.innerHeight * 0.35 : 300], [0, 12]);
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    const raf = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+    return () => lenis.destroy();
+  }, []);
 
   const filtered = useMemo(() => {
-    return allPackages.filter((pkg) =>
-      activeCategory === "All" || pkg.category === activeCategory
-    );
-  }, [activeCategory]);
+    let result = allPackages;
+    if (activeCategory !== "All") {
+      result = result.filter((pkg) => pkg.category === activeCategory);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (pkg) =>
+          pkg.title.toLowerCase().includes(q) ||
+          pkg.category.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [activeCategory, searchQuery]);
 
-  // Reset visible count on category change
+  // Reset on filter change
   useEffect(() => {
     setVisibleCount(ITEMS_PER_PAGE);
-    setNewlyLoadedStart(null);
-  }, [activeCategory]);
+  }, [activeCategory, searchQuery]);
 
   const visiblePackages = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
-  const handleLoadMore = () => {
-    setLoadingMore(true);
-    const prevCount = visibleCount;
-    setTimeout(() => {
-      setNewlyLoadedStart(prevCount);
-      setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filtered.length));
-      setLoadingMore(false);
-    }, 300);
-  };
+  // Infinite scroll
+  useEffect(() => {
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filtered.length));
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, filtered.length]);
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    setActiveCategory("All");
+    document.getElementById("discover-grid")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const handleCategoryChange = useCallback((cat: string) => {
+    setActiveCategory(cat);
+    setSearchQuery("");
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative h-[65vh] flex items-center justify-center overflow-hidden">
-        <img
-          src={toursHeroBg}
-          alt="Curated Tours"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-foreground/20" />
+      <DiscoverHero />
+      <AIPromptBar onSearch={handleSearch} />
+      <CategoryFilter active={activeCategory} onChange={handleCategoryChange} />
 
-        <motion.div
-          className="relative z-10 text-center px-4"
-          style={{ opacity: textOpacity }}
-        >
-          <motion.h1
-            initial={{ opacity: 0, y: 30, filter: "blur(20px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-primary-foreground leading-tight mb-5 drop-shadow-lg"
-            style={{ filter: useTransform(textBlur, (v) => `blur(${v}px)`) }}
-          >
-            Curated Tours
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20, filter: "blur(15px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-            className="text-lg sm:text-xl text-primary-foreground/90 font-body font-medium drop-shadow-md"
-          >
-            Curated Journeys Designed To Be Felt, Not Rushed.
-          </motion.p>
-        </motion.div>
-      </section>
-
-      {/* Category Filters */}
-      <section className="py-16 sm:py-20">
+      {/* Destination Grid */}
+      <section id="discover-grid" className="pb-8">
         <div className="container mx-auto px-4 sm:px-6">
+          {/* Results count */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex justify-center gap-8 sm:gap-12 mb-16 sm:mb-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-between mb-8"
           >
-            {categories.map((cat, i) => (
-              <motion.button
-                key={cat.label}
-                onClick={() => setActiveCategory(cat.label)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex flex-col items-center gap-3 group"
-              >
-                <div
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden transition-all duration-300 ${
-                    activeCategory === cat.label
-                      ? "ring-[3px] ring-ocean ring-offset-[3px] ring-offset-background shadow-glass-lg"
-                      : "ring-1 ring-border/50 opacity-75 group-hover:opacity-100 group-hover:ring-border"
-                  }`}
-                >
-                  <img
-                    src={cat.image}
-                    alt={cat.label}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span
-                  className={`text-sm font-medium transition-colors duration-200 ${
-                    activeCategory === cat.label
-                      ? "text-foreground font-semibold"
-                      : "text-muted-foreground group-hover:text-foreground"
-                  }`}
-                >
-                  {cat.label}
+            <p className="text-sm text-muted-foreground font-body">
+              <span className="text-foreground font-semibold">{filtered.length}</span> destinations found
+              {searchQuery && (
+                <span>
+                  {" "}for "<span className="text-ocean font-medium">{searchQuery}</span>"
                 </span>
-              </motion.button>
-            ))}
+              )}
+            </p>
           </motion.div>
 
-          {/* Package Grid */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeCategory}
+              key={`${activeCategory}-${searchQuery}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-7"
             >
-              {visiblePackages.map((pkg, i) => {
-                const isNewlyLoaded = newlyLoadedStart !== null && i >= newlyLoadedStart;
-                const staggerIndex = isNewlyLoaded ? i - newlyLoadedStart : i;
-
-                return (
-                  <Link to={`/discover/${pkg.slug}`} key={`${pkg.slug}-${i}`}>
-                    <motion.div
-                      initial={isNewlyLoaded ? { opacity: 0, x: -40, y: 20 } : { opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, x: 0, y: 0 }}
-                      transition={{
-                        duration: 0.5,
-                        delay: isNewlyLoaded ? staggerIndex * 0.12 : i * 0.08,
-                        ease: [0.25, 0.46, 0.45, 0.94],
-                      }}
-                      className="group cursor-pointer"
-                    >
-                      <motion.div
-                        whileHover={{ y: -8 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      >
-                        <div className="relative h-[320px] sm:h-[380px] rounded-2xl overflow-hidden mb-4">
-                          <img
-                            src={pkg.image}
-                            alt={pkg.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 to-transparent" />
-                          <div className="absolute top-4 left-4">
-                            <span className="bg-ocean/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full">
-                              {pkg.duration}
-                            </span>
-                          </div>
-                        </div>
-                        <h3 className="font-display text-lg sm:text-xl font-bold text-foreground mb-1">
-                          {pkg.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          From $ <span className="text-foreground font-bold text-base">${pkg.price}</span> / Per Person
-                        </p>
-                      </motion.div>
-                    </motion.div>
-                  </Link>
-                );
-              })}
+              {visiblePackages.map((pkg, i) => (
+                <DestinationTile key={pkg.slug} index={i} {...pkg} />
+              ))}
             </motion.div>
           </AnimatePresence>
 
-          {/* Load More */}
+          {/* Infinite scroll sentinel */}
           {hasMore && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex justify-center mt-14"
-            >
-              <motion.button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-foreground text-background font-semibold px-10 py-3.5 rounded-full text-sm hover:bg-foreground/90 transition-colors disabled:opacity-60 shadow-soft"
-              >
-                {loadingMore ? "Loading..." : "Load More"}
-              </motion.button>
-            </motion.div>
+            <div ref={sentinelRef} className="flex justify-center py-12">
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-2 h-2 rounded-full bg-ocean"
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 1.2, delay: i * 0.2, repeat: Infinity }}
+                  />
+                ))}
+              </div>
+            </div>
           )}
 
           {filtered.length === 0 && (
@@ -278,12 +202,14 @@ const Discover = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-20"
             >
-              <p className="text-muted-foreground text-lg">No tours found for this category.</p>
+              <p className="text-muted-foreground text-lg font-body">No destinations found. Try a different search.</p>
             </motion.div>
           )}
         </div>
       </section>
 
+      <EditorialSection />
+      <PopularCarousel />
       <Footer />
     </div>
   );

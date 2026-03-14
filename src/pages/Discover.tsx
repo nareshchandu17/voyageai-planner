@@ -135,13 +135,26 @@ const Discover = () => {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
+    setAIQuery(query);
     setActiveCategory("All");
     document.getElementById("discover-grid")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const handleAIResults = useCallback((results: AIDestinationResult[]) => {
+    setAIResults(results);
+  }, []);
+
+  const handleClearAI = useCallback(() => {
+    setAIResults([]);
+    setAIQuery("");
+    setSearchQuery("");
   }, []);
 
   const handleCategoryChange = useCallback((cat: string) => {
     setActiveCategory(cat);
     setSearchQuery("");
+    setAIResults([]);
+    setAIQuery("");
   }, []);
 
   return (

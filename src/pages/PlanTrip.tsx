@@ -172,6 +172,51 @@ const PlanTrip = () => {
         setGenerationPhase("done");
         const parsed = parseItineraryJSON(fullText);
         if (parsed) {
+          // Extract image queries from itinerary
+          const imageQueries: string[] = [];
+          parsed.days?.forEach((day: any) => {
+            if (day.imageQuery) imageQueries.push(day.imageQuery);
+            day.activities?.forEach((act: any) => {
+              if (act.imageQuery) imageQueries.push(act.imageQuery);
+            });
+            if (day.meals) {
+              ["breakfast", "lunch", "dinner"].forEach(m => {
+                if (day.meals[m]?.imageQuery) imageQueries.push(day.meals[m].imageQuery);
+              });
+            }
+          });
+
+          // Batch fetch images
+          let imageMap: Record<string, any> | null = null;
+          if (imageQueries.length > 0) {
+            try {
+              imageMap = await fetchUnsplashBatch(imageQueries);
+            } catch (e) {
+              console.warn("Batch image fetch failed:", e);
+            }
+          }
+
+          // Merge images into itinerary data
+          if (imageMap) {
+            parsed.days?.forEach((day: any) => {
+              if (day.imageQuery && imageMap![day.imageQuery]) {
+                day.imageUrl = imageMap![day.imageQuery].url || imageMap![day.imageQuery].small;
+              }
+              day.activities?.forEach((act: any) => {
+                if (act.imageQuery && imageMap![act.imageQuery]) {
+                  act.imageUrl = imageMap![act.imageQuery].url || imageMap![act.imageQuery].small;
+                }
+              });
+              if (day.meals) {
+                ["breakfast", "lunch", "dinner"].forEach(m => {
+                  if (day.meals[m]?.imageQuery && imageMap![day.meals[m].imageQuery]) {
+                    day.meals[m].imageUrl = imageMap![day.meals[m].imageQuery].small || imageMap![day.meals[m].imageQuery].url;
+                  }
+                });
+              }
+            });
+          }
+
           setItineraryData(parsed);
           // Save to database
           if (user) {

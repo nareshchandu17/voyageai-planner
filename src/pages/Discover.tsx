@@ -4,11 +4,12 @@ import Lenis from "lenis";
 import Footer from "@/components/Footer";
 import DiscoverHero from "@/components/discover/DiscoverHero";
 import AIPromptBar from "@/components/discover/AIPromptBar";
+import type { AIDestinationResult } from "@/components/discover/AIPromptBar";
+import AIResultsGrid from "@/components/discover/AIResultsGrid";
 import CategoryFilter from "@/components/discover/CategoryFilter";
 import DestinationTile from "@/components/discover/DestinationTile";
 import EditorialSection from "@/components/discover/EditorialSection";
 import PopularCarousel from "@/components/discover/PopularCarousel";
-
 import moroccoImg from "@/assets/pkg-morocco.jpg";
 import italyImg from "@/assets/pkg-italy.jpg";
 import africaImg from "@/assets/pkg-africa.jpg";
@@ -77,6 +78,9 @@ const Discover = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [aiResults, setAIResults] = useState<AIDestinationResult[]>([]);
+  const [aiQuery, setAIQuery] = useState("");
+  const [aiLoading, setAILoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Lenis smooth scroll
@@ -131,19 +135,33 @@ const Discover = () => {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
+    setAIQuery(query);
     setActiveCategory("All");
     document.getElementById("discover-grid")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const handleAIResults = useCallback((results: AIDestinationResult[]) => {
+    setAIResults(results);
+  }, []);
+
+  const handleClearAI = useCallback(() => {
+    setAIResults([]);
+    setAIQuery("");
+    setSearchQuery("");
   }, []);
 
   const handleCategoryChange = useCallback((cat: string) => {
     setActiveCategory(cat);
     setSearchQuery("");
+    setAIResults([]);
+    setAIQuery("");
   }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <DiscoverHero />
-      <AIPromptBar onSearch={handleSearch} />
+      <AIPromptBar onSearch={handleSearch} onAIResults={handleAIResults} isLoading={aiLoading} setIsLoading={setAILoading} />
+      {aiResults.length > 0 && <AIResultsGrid results={aiResults} query={aiQuery} onClear={handleClearAI} />}
       <CategoryFilter active={activeCategory} onChange={handleCategoryChange} />
 
       {/* Destination Grid */}

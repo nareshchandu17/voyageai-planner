@@ -1,9 +1,22 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, MapPin, ArrowRight } from "lucide-react";
+import { Search, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+
+export interface AIDestinationResult {
+  title: string;
+  destination: string;
+  category: string;
+  duration: string;
+  price: string;
+  reason: string;
+  highlights: string[];
+}
 
 interface AIPromptBarProps {
   onSearch: (query: string) => void;
+  onAIResults: (results: AIDestinationResult[]) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 const suggestions = [
@@ -22,7 +35,7 @@ const placeholders = [
   "Try: Hidden gems in Southeast Asia",
 ];
 
-const AIPromptBar = ({ onSearch }: AIPromptBarProps) => {
+const AIPromptBar = ({ onSearch, onAIResults, isLoading, setIsLoading }: AIPromptBarProps) => {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -39,11 +52,39 @@ const AIPromptBar = ({ onSearch }: AIPromptBarProps) => {
     ? suggestions.filter((s) => s.text.toLowerCase().includes(query.toLowerCase()))
     : suggestions;
 
-  const handleSubmit = (value: string) => {
-    onSearch(value);
+  const handleSubmit = async (value: string) => {
+    if (!value.trim() || isLoading) return;
     setQuery(value);
     setFocused(false);
     inputRef.current?.blur();
+    onSearch(value);
+    setIsLoading(true);
+
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/ai-discover`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({ query: value }),
+        }
+      );
+
+      if (!res.ok) throw new Error("AI request failed");
+      const data = await res.json();
+      onAIResults(data.results || []);
+    } catch (err) {
+      console.error("AI discover error:", err);
+      onAIResults([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -60,7 +101,11 @@ const AIPromptBar = ({ onSearch }: AIPromptBarProps) => {
           <div className="relative glass-card rounded-2xl overflow-hidden border-ocean/20">
             <div className="flex items-center gap-3 px-6 py-4">
               <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-ocean shrink-0">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 text-primary-foreground animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
+                )}
               </div>
               <input
                 ref={inputRef}
@@ -71,12 +116,14 @@ const AIPromptBar = ({ onSearch }: AIPromptBarProps) => {
                 onBlur={() => setTimeout(() => setFocused(false), 200)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit(query)}
                 placeholder={placeholders[placeholderIdx]}
-                className="flex-1 bg-transparent text-foreground text-lg font-body placeholder:text-muted-foreground/60 focus:outline-none"
-                aria-label="Search destinations"
+                disabled={isLoading}
+                className="flex-1 bg-transparent text-foreground text-lg font-body placeholder:text-muted-foreground/60 focus:outline-none disabled:opacity-50"
+                aria-label="Search destinations with AI"
               />
               <button
                 onClick={() => handleSubmit(query)}
-                className="flex items-center justify-center w-10 h-10 rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-colors shrink-0"
+                disabled={isLoading}
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-colors shrink-0 disabled:opacity-50"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5" />
@@ -85,7 +132,7 @@ const AIPromptBar = ({ onSearch }: AIPromptBarProps) => {
 
             {/* Suggestions dropdown */}
             <AnimatePresence>
-              {focused && (
+              {focused && !isLoading && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}

@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.unsplash]
 verify_jwt = false
+
+[functions.ai-discover]
+verify_jwt = false

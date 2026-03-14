@@ -4,11 +4,12 @@ import Lenis from "lenis";
 import Footer from "@/components/Footer";
 import DiscoverHero from "@/components/discover/DiscoverHero";
 import AIPromptBar from "@/components/discover/AIPromptBar";
+import type { AIDestinationResult } from "@/components/discover/AIPromptBar";
+import AIResultsGrid from "@/components/discover/AIResultsGrid";
 import CategoryFilter from "@/components/discover/CategoryFilter";
 import DestinationTile from "@/components/discover/DestinationTile";
 import EditorialSection from "@/components/discover/EditorialSection";
 import PopularCarousel from "@/components/discover/PopularCarousel";
-
 import moroccoImg from "@/assets/pkg-morocco.jpg";
 import italyImg from "@/assets/pkg-italy.jpg";
 import africaImg from "@/assets/pkg-africa.jpg";

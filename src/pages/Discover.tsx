@@ -78,6 +78,9 @@ const Discover = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [aiResults, setAIResults] = useState<AIDestinationResult[]>([]);
+  const [aiQuery, setAIQuery] = useState("");
+  const [aiLoading, setAILoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Lenis smooth scroll

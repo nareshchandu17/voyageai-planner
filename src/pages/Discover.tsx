@@ -160,7 +160,8 @@ const Discover = () => {
   return (
     <div className="min-h-screen bg-background">
       <DiscoverHero />
-      <AIPromptBar onSearch={handleSearch} />
+      <AIPromptBar onSearch={handleSearch} onAIResults={handleAIResults} isLoading={aiLoading} setIsLoading={setAILoading} />
+      {aiResults.length > 0 && <AIResultsGrid results={aiResults} query={aiQuery} onClear={handleClearAI} />}
       <CategoryFilter active={activeCategory} onChange={handleCategoryChange} />
 
       {/* Destination Grid */}

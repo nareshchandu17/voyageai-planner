@@ -174,6 +174,26 @@ export async function streamItinerary({
   }
 }
 
+const UNSPLASH_BATCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unsplash-batch`;
+
+export async function fetchUnsplashBatch(queries: string[]): Promise<Record<string, any> | null> {
+  try {
+    const resp = await fetch(UNSPLASH_BATCH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ queries }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.results || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchUnsplashPhotos(query: string, count = 5): Promise<any[] | null> {
   try {
     const resp = await fetch(UNSPLASH_URL, {

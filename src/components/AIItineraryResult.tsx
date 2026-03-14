@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
-  Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download
+  Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download,
+  ChevronRight, Star, Sunrise, Sunset as SunsetIcon, Moon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlaceCard from "./PlaceCard";
@@ -13,25 +14,40 @@ import DuringTripSection from "./DuringTripSection";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
 
+interface Activity {
+  time: string;
+  title: string;
+  description: string;
+  location: string;
+  duration: string;
+  cost: number;
+  type: string;
+  tip?: string;
+  imageQuery?: string;
+  imageUrl?: string;
+}
+
+interface MealInfo {
+  name: string;
+  cuisine: string;
+  priceRange: string;
+  location: string;
+  imageQuery?: string;
+  imageUrl?: string;
+}
+
 interface ItineraryDay {
   day: number;
   date: string;
   theme: string;
+  imageQuery?: string;
+  imageUrl?: string;
   weather?: { condition: string; temp: string; advisory?: string };
-  activities: Array<{
-    time: string;
-    title: string;
-    description: string;
-    location: string;
-    duration: string;
-    cost: number;
-    type: string;
-    tip?: string;
-  }>;
+  activities: Activity[];
   meals?: {
-    breakfast?: { name: string; cuisine: string; priceRange: string; location: string };
-    lunch?: { name: string; cuisine: string; priceRange: string; location: string };
-    dinner?: { name: string; cuisine: string; priceRange: string; location: string };
+    breakfast?: MealInfo;
+    lunch?: MealInfo;
+    dinner?: MealInfo;
   };
   dailyBudget?: number;
   travelTip?: string;
@@ -70,6 +86,25 @@ const activityIcon = (type: string) => {
   }
 };
 
+const getTimeOfDay = (time: string): "morning" | "afternoon" | "evening" => {
+  const hour = parseInt(time.split(":")[0], 10);
+  if (hour < 12) return "morning";
+  if (hour < 17) return "afternoon";
+  return "evening";
+};
+
+const timeOfDayIcon = (tod: string) => {
+  if (tod === "morning") return <Sunrise className="w-4 h-4" />;
+  if (tod === "afternoon") return <Sun className="w-4 h-4" />;
+  return <Moon className="w-4 h-4" />;
+};
+
+const timeOfDayLabel = (tod: string) => {
+  if (tod === "morning") return "Morning";
+  if (tod === "afternoon") return "Afternoon";
+  return "Evening";
+};
+
 interface Props {
   data: ItineraryData;
   weatherData?: any;
@@ -82,88 +117,104 @@ interface Props {
 type Phase = "before" | "during";
 
 const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate }: Props) => {
-  // Auto-detect phase based on trip start date
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";
   }, [tripStartDate]);
 
   const [activePhase, setActivePhase] = useState<Phase>(autoPhase);
+  const [activeDay, setActiveDay] = useState(1);
+  const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
-  // Update when auto-phase changes
-  useEffect(() => {
-    setActivePhase(autoPhase);
-  }, [autoPhase]);
+  useEffect(() => { setActivePhase(autoPhase); }, [autoPhase]);
 
   const hasBeforeTrip = !!data.beforeTrip;
   const hasDuringTrip = !!data.duringTrip;
 
+  const scrollToDay = (dayNum: number) => {
+    setActiveDay(dayNum);
+    dayRefs.current[dayNum]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // Group activities by time of day
+  const groupActivities = (activities: Activity[]) => {
+    const groups: Record<string, Activity[]> = { morning: [], afternoon: [], evening: [] };
+    activities.forEach(a => {
+      const tod = getTimeOfDay(a.time);
+      groups[tod].push(a);
+    });
+    return groups;
+  };
+
+  const heroPhoto = destinationPhotos[0];
+  const totalDays = data.days.length;
+  const totalBudget = data.totalBudgetEstimate || data.days.reduce((sum, d) => sum + (d.dailyBudget || 0), 0);
+
   return (
-    <div className="space-y-8">
-      {/* Hero photo banner */}
-      {destinationPhotos.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative rounded-2xl overflow-hidden h-64 md:h-80"
-        >
-          <img src={destinationPhotos[0].url} alt={destinationPhotos[0].alt} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">{data.title}</h2>
-            <p className="text-white/80 max-w-2xl">{data.summary}</p>
-            {data.totalBudgetEstimate && (
-              <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm text-white">
-                <DollarSign className="w-4 h-4" />
-                <span className="font-semibold">Estimated: ${data.totalBudgetEstimate.toLocaleString()} {data.currency || "USD"}</span>
-              </div>
+    <div className="space-y-6">
+      {/* ===== CINEMATIC TRIP HERO ===== */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative rounded-3xl overflow-hidden"
+        style={{ height: "clamp(280px, 45vh, 420px)" }}
+      >
+        {heroPhoto ? (
+          <img src={heroPhoto.url} alt={heroPhoto.alt} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full gradient-ocean" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="font-display text-3xl md:text-5xl font-bold text-white mb-2 leading-tight"
+          >
+            {data.title}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="text-white/75 max-w-2xl text-sm md:text-base mb-5"
+          >
+            {data.summary}
+          </motion.p>
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="flex flex-wrap gap-3"
+          >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
+              📅 {totalDays} Days
+            </span>
+            {totalBudget > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
+                <DollarSign className="w-3.5 h-3.5" /> ${totalBudget.toLocaleString()} {data.currency || "USD"}
+              </span>
             )}
-          </div>
-          {destinationPhotos[0].credit && (
-            <a href={destinationPhotos[0].creditLink} target="_blank" rel="noopener noreferrer"
-              className="absolute top-3 right-3 text-[10px] text-white/60 bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-md hover:text-white/90 transition-colors">
-              📷 {destinationPhotos[0].credit}
-            </a>
-          )}
-        </motion.div>
-      )}
-
-      {/* Header fallback */}
-      {destinationPhotos.length === 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">{data.title}</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">{data.summary}</p>
-          {data.totalBudgetEstimate && (
-            <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-accent/10 text-accent">
-              <DollarSign className="w-4 h-4" />
-              <span className="font-semibold">Estimated: ${data.totalBudgetEstimate.toLocaleString()} {data.currency || "USD"}</span>
-            </div>
-          )}
-        </motion.div>
-      )}
-
-      {/* Photo gallery */}
-      {destinationPhotos.length > 1 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {destinationPhotos.slice(1, 5).map((photo) => (
-              <div key={photo.id} className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-                <img src={photo.small} alt={photo.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                {photo.credit && (
-                  <a href={photo.creditLink} target="_blank" rel="noopener noreferrer"
-                    className="absolute bottom-1 right-1 text-[9px] text-white/50 bg-black/30 px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    {photo.credit}
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
+            {data.days[0]?.weather && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
+                {weatherIcon(data.days[0].weather.condition)} {data.days[0].weather.temp}
+              </span>
+            )}
+          </motion.div>
+        </div>
+        {heroPhoto?.credit && (
+          <a href={heroPhoto.creditLink} target="_blank" rel="noopener noreferrer"
+            className="absolute top-3 right-3 text-[10px] text-white/50 bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-md hover:text-white/80 transition-colors">
+            📷 {heroPhoto.credit}
+          </a>
+        )}
+      </motion.div>
 
       {/* Warnings */}
       {data.warnings?.length ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
           <div className="space-y-1">
@@ -181,9 +232,7 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
               onClick={() => setActivePhase("before")}
               className={cn(
                 "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all",
-                activePhase === "before"
-                  ? "gradient-ocean text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:text-foreground"
+                activePhase === "before" ? "gradient-ocean text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Compass className="w-4 h-4" /> Before Trip
@@ -192,64 +241,47 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
               onClick={() => setActivePhase("during")}
               className={cn(
                 "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all",
-                activePhase === "during"
-                  ? "gradient-ocean text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:text-foreground"
+                activePhase === "during" ? "gradient-ocean text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Plane className="w-4 h-4" /> During Trip
             </button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exportBeforeTripPDF(data)}
-            className="flex items-center gap-2"
-          >
+          <Button variant="outline" size="sm" onClick={() => exportBeforeTripPDF(data)} className="flex items-center gap-2">
             <Download className="w-4 h-4" /> Download PDF
           </Button>
         </motion.div>
       )}
 
-      {/* Before Trip Phase */}
+      {/* ===== BEFORE TRIP PHASE ===== */}
       {activePhase === "before" && (
         <>
           {hasBeforeTrip && <BeforeTripSection data={data.beforeTrip} />}
 
-          {/* Verified Places Grid */}
           {nearbyPlaces?.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-              className="glass-card p-5">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-5">
               <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary" /> Top Recommended Places
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {nearbyPlaces.slice(0, 6).map((place: any, i: number) => (
-                  <PlaceCard key={i} {...place} />
-                ))}
+                {nearbyPlaces.slice(0, 6).map((place: any, i: number) => <PlaceCard key={i} {...place} />)}
               </div>
             </motion.div>
           )}
 
-          {/* Local Events */}
           {upcomingEvents?.events?.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.19 }}
-              className="glass-card p-5">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-5">
               <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <Ticket className="w-5 h-5 text-accent" /> Local Events During Your Trip
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {upcomingEvents.events.slice(0, 4).map((ev: any, i: number) => (
-                  <EventCard key={i} {...ev} />
-                ))}
+                {upcomingEvents.events.slice(0, 4).map((ev: any, i: number) => <EventCard key={i} {...ev} />)}
               </div>
             </motion.div>
           )}
 
-          {/* Weather strip from API */}
           {weatherData?.forecast?.length ? (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="glass-card p-4">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4">
               <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                 <Sun className="w-4 h-4 text-primary" /> Live Weather Forecast
               </h3>
@@ -266,18 +298,16 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             </motion.div>
           ) : null}
 
-          {/* Itinerary Preview - Day cards */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
-            <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              📅 Day-by-Day Itinerary
-            </h3>
-          </motion.div>
+          {/* Day-by-Day Itinerary */}
+          <DayByDaySection
+            days={data.days}
+            activeDay={activeDay}
+            dayRefs={dayRefs}
+            scrollToDay={scrollToDay}
+            groupActivities={groupActivities}
+            destinationPhotos={destinationPhotos}
+          />
 
-          {data.days.map((day, idx) => (
-            <DayCard key={day.day} day={day} idx={idx} destinationPhotos={destinationPhotos} />
-          ))}
-
-          {/* Legacy packing tips & budget breakdown */}
           {!hasBeforeTrip && data.budgetBreakdown && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-5">
               <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -309,132 +339,292 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         </>
       )}
 
-      {/* During Trip Phase */}
+      {/* ===== DURING TRIP PHASE ===== */}
       {activePhase === "during" && (
         <>
           {hasDuringTrip && <DuringTripSection data={data.duringTrip} />}
-
-          {/* Day-by-day itinerary also shown during trip */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-            <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              📅 Your Daily Schedule
-            </h3>
-          </motion.div>
-
-          {data.days.map((day, idx) => (
-            <DayCard key={day.day} day={day} idx={idx} destinationPhotos={destinationPhotos} />
-          ))}
+          <DayByDaySection
+            days={data.days}
+            activeDay={activeDay}
+            dayRefs={dayRefs}
+            scrollToDay={scrollToDay}
+            groupActivities={groupActivities}
+            destinationPhotos={destinationPhotos}
+          />
         </>
       )}
     </div>
   );
 };
 
-// Extracted Day Card component
-const DayCard = ({ day, idx, destinationPhotos }: { day: any; idx: number; destinationPhotos: any[] }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.3 + idx * 0.08 }}
-    className="glass-card overflow-hidden"
-  >
-    {/* Day header with photo */}
-    <div className="relative overflow-hidden">
-      {destinationPhotos[idx + 1] ? (
-        <>
-          <img src={destinationPhotos[idx + 1]?.small || destinationPhotos[idx + 1]?.url} alt={day.theme}
-            className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-        </>
-      ) : (
-        <div className="absolute inset-0 gradient-ocean" />
-      )}
-      <div className="relative p-4 flex items-center justify-between">
-        <div>
-          <h3 className="font-display text-xl font-bold text-white">Day {day.day}: {day.theme}</h3>
-          <p className="text-sm text-white/70">
-            {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
-          </p>
+/* ============================================================
+   DAY-BY-DAY SECTION with sticky nav + premium day cards
+   ============================================================ */
+interface DayByDaySectionProps {
+  days: ItineraryDay[];
+  activeDay: number;
+  dayRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
+  scrollToDay: (dayNum: number) => void;
+  groupActivities: (activities: Activity[]) => Record<string, Activity[]>;
+  destinationPhotos: any[];
+}
+
+const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos }: DayByDaySectionProps) => {
+  const navRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+      {/* Header */}
+      <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        📅 Day-by-Day Itinerary
+      </h3>
+
+      {/* Sticky Day Navigation */}
+      <div className="sticky top-16 z-30 -mx-4 px-4 py-3 bg-background/80 backdrop-blur-xl border-b border-border/50 mb-6" ref={navRef}>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {days.map(day => (
+            <button
+              key={day.day}
+              onClick={() => scrollToDay(day.day)}
+              className={cn(
+                "shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+                activeDay === day.day
+                  ? "gradient-ocean text-primary-foreground shadow-md"
+                  : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
+              )}
+            >
+              Day {day.day}
+            </button>
+          ))}
         </div>
-        {day.weather && (
-          <div className="flex items-center gap-2 text-white/80 text-sm">
-            {weatherIcon(day.weather.condition)}
-            <span>{day.weather.temp}</span>
-          </div>
-        )}
       </div>
-    </div>
 
-    <div className="p-5 space-y-4">
-      {day.weather?.advisory && (
-        <div className="text-sm bg-primary/5 text-primary rounded-lg p-3 flex items-start gap-2">
-          <Cloud className="w-4 h-4 mt-0.5 shrink-0" />
-          {day.weather.advisory}
-        </div>
-      )}
+      {/* Day Sections */}
+      <div className="space-y-10">
+        {days.map((day, idx) => (
+          <DaySection
+            key={day.day}
+            day={day}
+            idx={idx}
+            dayRefs={dayRefs}
+            groupActivities={groupActivities}
+            destinationPhotos={destinationPhotos}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+};
 
-      {/* Activities */}
-      <div className="space-y-3">
-        {day.activities.map((act: any, i: number) => (
-          <div key={i} className="flex gap-3 group">
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                {activityIcon(act.type)}
-              </div>
-              {i < day.activities.length - 1 && <div className="w-px flex-1 bg-border mt-1" />}
+/* ============================================================
+   PREMIUM DAY SECTION
+   ============================================================ */
+interface DaySectionProps {
+  day: ItineraryDay;
+  idx: number;
+  dayRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
+  groupActivities: (activities: Activity[]) => Record<string, Activity[]>;
+  destinationPhotos: any[];
+}
+
+const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: DaySectionProps) => {
+  const grouped = groupActivities(day.activities);
+  const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
+
+  return (
+    <motion.div
+      ref={el => { dayRefs.current[day.day] = el; }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5, delay: 0.05 }}
+      className="scroll-mt-32"
+    >
+      {/* Day Hero */}
+      <div className="relative rounded-2xl overflow-hidden mb-6" style={{ height: "clamp(180px, 28vh, 280px)" }}>
+        {dayImage ? (
+          <img src={dayImage} alt={day.theme} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-secondary" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-white/60 text-xs font-medium uppercase tracking-wider mb-1">
+                {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
+              </p>
+              <h4 className="font-display text-2xl md:text-3xl font-bold text-white">
+                Day {day.day}: {day.theme}
+              </h4>
             </div>
-            <div className="flex-1 pb-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-semibold text-foreground text-sm">{act.title}</p>
-                  <p className="text-xs text-muted-foreground">{act.description}</p>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{act.time}</span>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-1.5">
-                <span className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{act.location}</span>
-                <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{act.duration}</span>
-                {act.cost > 0 && <span className="text-xs text-accent flex items-center gap-1"><DollarSign className="w-3 h-3" />${act.cost}</span>}
-              </div>
-              {act.tip && (
-                <div className="mt-2 text-xs text-primary bg-primary/5 rounded-md px-2 py-1 flex items-start gap-1">
-                  <Lightbulb className="w-3 h-3 mt-0.5 shrink-0" /> {act.tip}
-                </div>
+            <div className="flex gap-2 shrink-0">
+              {day.weather && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-medium">
+                  {weatherIcon(day.weather.condition)} {day.weather.temp}
+                </span>
+              )}
+              {day.dailyBudget != null && day.dailyBudget > 0 && (
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-medium">
+                  <DollarSign className="w-3 h-3" /> ${day.dailyBudget}
+                </span>
               )}
             </div>
           </div>
-        ))}
+        </div>
       </div>
+
+      {/* Weather advisory */}
+      {day.weather?.advisory && (
+        <div className="text-sm bg-primary/5 text-primary rounded-xl p-3 mb-4 flex items-start gap-2">
+          <Cloud className="w-4 h-4 mt-0.5 shrink-0" /> {day.weather.advisory}
+        </div>
+      )}
+
+      {/* Time-of-day groups */}
+      {(["morning", "afternoon", "evening"] as const).map(tod => {
+        const acts = grouped[tod];
+        if (!acts || acts.length === 0) return null;
+        return (
+          <div key={tod} className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              {timeOfDayIcon(tod)}
+              <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">{timeOfDayLabel(tod)}</h5>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {acts.map((act, i) => (
+                <ActivityCard key={i} activity={act} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Meals */}
       {day.meals && (
-        <div className="border-t border-border pt-4">
-          <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-            <Utensils className="w-4 h-4 text-accent" /> Dining
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {(["breakfast", "lunch", "dinner"] as const).map((meal) => {
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Utensils className="w-4 h-4 text-accent" />
+            <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">Dining</h5>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {(["breakfast", "lunch", "dinner"] as const).map(meal => {
               const m = day.meals?.[meal];
               if (!m) return null;
-              return (
-                <div key={meal} className="bg-secondary/50 rounded-lg p-2.5">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{meal}</p>
-                  <p className="text-sm font-medium text-foreground">{m.name}</p>
-                  <p className="text-xs text-muted-foreground">{m.cuisine} · {m.priceRange}</p>
-                </div>
-              );
+              return <MealCard key={meal} meal={m} mealType={meal} />;
             })}
           </div>
         </div>
       )}
 
+      {/* Daily Tip */}
       {day.travelTip && (
-        <div className="text-xs text-muted-foreground italic border-t border-border pt-3 flex items-start gap-1.5">
-          <Lightbulb className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" /> {day.travelTip}
+        <div className="text-sm text-muted-foreground bg-secondary/50 rounded-xl p-4 flex items-start gap-2">
+          <Lightbulb className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+          <span className="italic">{day.travelTip}</span>
         </div>
       )}
+    </motion.div>
+  );
+};
+
+/* ============================================================
+   VISUAL ACTIVITY CARD
+   ============================================================ */
+const ActivityCard = ({ activity }: { activity: Activity }) => {
+  const hasImage = !!activity.imageUrl;
+
+  return (
+    <motion.div
+      whileHover={{ y: -2 }}
+      className="group relative rounded-xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-md transition-all"
+    >
+      {/* Activity image */}
+      {hasImage && (
+        <div className="relative h-36 overflow-hidden">
+          <img
+            src={activity.imageUrl}
+            alt={activity.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          {/* Type badge */}
+          <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium uppercase tracking-wider">
+            {activityIcon(activity.type)} {activity.type}
+          </span>
+          {/* Time badge */}
+          <span className="absolute top-2 right-2 px-2 py-1 rounded-md bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium">
+            {activity.time}
+          </span>
+        </div>
+      )}
+
+      <div className={cn("p-3.5", !hasImage && "pt-4")}>
+        {!hasImage && (
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-primary">
+              {activityIcon(activity.type)} {activity.type}
+            </span>
+            <span className="text-xs text-muted-foreground">{activity.time}</span>
+          </div>
+        )}
+
+        <h6 className="font-semibold text-foreground text-sm mb-1 leading-snug">{activity.title}</h6>
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{activity.description}</p>
+
+        {/* Meta badges */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
+            <MapPin className="w-2.5 h-2.5" /> {activity.location}
+          </span>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
+            <Clock className="w-2.5 h-2.5" /> {activity.duration}
+          </span>
+          {activity.cost > 0 && (
+            <span className="text-[10px] text-accent flex items-center gap-0.5 bg-accent/10 px-1.5 py-0.5 rounded-md font-medium">
+              <DollarSign className="w-2.5 h-2.5" /> ${activity.cost}
+            </span>
+          )}
+        </div>
+
+        {/* Insider tip */}
+        {activity.tip && (
+          <div className="mt-2.5 text-[11px] text-primary bg-primary/5 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+            <Lightbulb className="w-3 h-3 mt-0.5 shrink-0" /> {activity.tip}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+/* ============================================================
+   MEAL CARD
+   ============================================================ */
+const MealCard = ({ meal, mealType }: { meal: MealInfo; mealType: string }) => {
+  const emoji = mealType === "breakfast" ? "🌅" : mealType === "lunch" ? "☀️" : "🌙";
+  const hasImage = !!meal.imageUrl;
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-border bg-card group hover:shadow-sm transition-shadow">
+      {hasImage && (
+        <div className="h-24 overflow-hidden">
+          <img src={meal.imageUrl} alt={meal.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+        </div>
+      )}
+      <div className="p-3">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">{emoji} {mealType}</p>
+        <p className="text-sm font-semibold text-foreground leading-snug">{meal.name}</p>
+        <p className="text-xs text-muted-foreground">{meal.cuisine} · {meal.priceRange}</p>
+        {meal.location && (
+          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-0.5">
+            <MapPin className="w-2.5 h-2.5" /> {meal.location}
+          </p>
+        )}
+      </div>
     </div>
-  </motion.div>
-);
+  );
+};
 
 export default AIItineraryResult;

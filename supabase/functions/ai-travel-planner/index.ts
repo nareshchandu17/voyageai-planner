@@ -150,6 +150,7 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
       "day": 1,
       "date": "YYYY-MM-DD",
       "theme": "Day theme",
+      "imageQuery": "specific landmark or scene for this day, e.g. 'Eiffel Tower Paris sunset'",
       "weather": { "condition": "Sunny/Rainy/etc", "temp": "25°C", "advisory": "optional weather note" },
       "activities": [
         {
@@ -160,13 +161,14 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
           "duration": "2 hours",
           "cost": 0,
           "type": "attraction|restaurant|transport|free|shopping|nightlife",
-          "tip": "Optional insider tip"
+          "tip": "Optional insider tip",
+          "imageQuery": "specific place name for image search, e.g. 'Louvre Museum Paris interior'"
         }
       ],
       "meals": {
-        "breakfast": { "name": "Real restaurant name", "cuisine": "Type", "priceRange": "$-$$$$", "location": "Neighborhood" },
-        "lunch": { "name": "...", "cuisine": "...", "priceRange": "...", "location": "..." },
-        "dinner": { "name": "...", "cuisine": "...", "priceRange": "...", "location": "..." }
+        "breakfast": { "name": "Real restaurant name", "cuisine": "Type", "priceRange": "$-$$$$", "location": "Neighborhood", "imageQuery": "restaurant name or cuisine type photo query" },
+        "lunch": { "name": "...", "cuisine": "...", "priceRange": "...", "location": "...", "imageQuery": "..." },
+        "dinner": { "name": "...", "cuisine": "...", "priceRange": "...", "location": "...", "imageQuery": "..." }
       },
       "dailyBudget": number,
       "travelTip": "Practical tip for the day"

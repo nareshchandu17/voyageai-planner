@@ -11,7 +11,7 @@ import {
   CloudSun, AlertCircle, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, fetchUnsplashBatch, fetchLocationCoordinatesBatch, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, fetchUnsplashBatch, fetchLocationCoordinatesBatch, fetchRouteEstimatesBatch, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
 import PlaceCard from "@/components/PlaceCard";
 import EventCard from "@/components/EventCard";
@@ -254,6 +254,29 @@ const PlanTrip = () => {
                 });
               }
             });
+          }
+
+          const routePairs = parsed.days?.flatMap((day: any) => {
+            const mappedActivities = (day.activities || []).filter((act: any) => act.coordinates?.lat && act.coordinates?.lng);
+            return mappedActivities.slice(0, -1).map((act: any, index: number) => ({
+              key: `${day.day}-${index}`,
+              origin: act.coordinates,
+              destination: mappedActivities[index + 1].coordinates,
+            }));
+          }) || [];
+
+          if (routePairs.length > 0) {
+            try {
+              const routeMap = await fetchRouteEstimatesBatch(routePairs);
+              parsed.days?.forEach((day: any) => {
+                const mappedActivities = (day.activities || []).filter((act: any) => act.coordinates?.lat && act.coordinates?.lng);
+                mappedActivities.slice(0, -1).forEach((act: any, index: number) => {
+                  act.nextLeg = routeMap[`${day.day}-${index}`] || null;
+                });
+              });
+            } catch (e) {
+              console.warn("Batch route estimates failed:", e);
+            }
           }
 
           setItineraryData(parsed);

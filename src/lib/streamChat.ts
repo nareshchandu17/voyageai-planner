@@ -10,6 +10,15 @@ export interface LocationPoint {
   address?: string;
 }
 
+export type TravelMode = "walking" | "transit" | "driving";
+
+export interface RouteEstimate {
+  recommendedMode: TravelMode;
+  durationText: string;
+  distanceText: string;
+  modes: Partial<Record<TravelMode, { durationText: string; distanceText: string; durationValue: number }>>;
+}
+
 export interface TripParams {
   destination: string;
   startDate: string;
@@ -126,6 +135,46 @@ export async function fetchLocationCoordinatesBatch(
   return results.reduce<Record<string, LocationPoint>>((acc, item) => {
     if (item.point) {
       acc[item.query] = item.point;
+    }
+    return acc;
+  }, {});
+}
+
+export async function fetchRouteEstimate(
+  origin: LocationPoint,
+  destination: LocationPoint,
+): Promise<RouteEstimate | null> {
+  try {
+    const resp = await fetch(GOOGLE_MAPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "route_estimates", origin, destination }),
+    });
+
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchRouteEstimatesBatch(
+  pairs: Array<{ key: string; origin: LocationPoint; destination: LocationPoint }>,
+): Promise<Record<string, RouteEstimate>> {
+  const results = await Promise.all(
+    pairs.map(async (pair) => ({
+      key: pair.key,
+      route: await fetchRouteEstimate(pair.origin, pair.destination),
+    })),
+  );
+
+  return results.reduce<Record<string, RouteEstimate>>((acc, item) => {
+    if (item.route) {
+      acc[item.key] = item.route;
     }
     return acc;
   }, {});

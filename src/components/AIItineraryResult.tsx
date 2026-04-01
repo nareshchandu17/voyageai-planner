@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from "react-leaflet";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
@@ -13,6 +14,13 @@ import BeforeTripSection from "./BeforeTripSection";
 import DuringTripSection from "./DuringTripSection";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
+import "leaflet/dist/leaflet.css";
+
+interface Coordinates {
+  lat: number;
+  lng: number;
+  address?: string;
+}
 
 interface Activity {
   time: string;
@@ -25,6 +33,7 @@ interface Activity {
   tip?: string;
   imageQuery?: string;
   imageUrl?: string;
+  coordinates?: Coordinates;
 }
 
 interface MealInfo {
@@ -34,6 +43,7 @@ interface MealInfo {
   location: string;
   imageQuery?: string;
   imageUrl?: string;
+  coordinates?: Coordinates;
 }
 
 interface ItineraryDay {
@@ -42,6 +52,7 @@ interface ItineraryDay {
   theme: string;
   imageQuery?: string;
   imageUrl?: string;
+   mapCenter?: Coordinates;
   weather?: { condition: string; temp: string; advisory?: string };
   activities: Activity[];
   meals?: {
@@ -104,6 +115,14 @@ const timeOfDayLabel = (tod: string) => {
   if (tod === "afternoon") return "Afternoon";
   return "Evening";
 };
+
+const mapStopStyles = [
+  "bg-primary text-primary-foreground",
+  "bg-accent text-accent-foreground",
+  "bg-secondary text-secondary-foreground",
+  "bg-primary/15 text-primary",
+  "bg-accent/15 text-accent",
+];
 
 interface Props {
   data: ItineraryData;
@@ -430,6 +449,7 @@ interface DaySectionProps {
 const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: DaySectionProps) => {
   const grouped = groupActivities(day.activities);
   const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
+  const mappedActivities = day.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng);
 
   return (
     <motion.div
@@ -481,6 +501,8 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: D
         </div>
       )}
 
+      <DayMapSection day={day} activities={mappedActivities} />
+
       {/* Time-of-day groups */}
       {(["morning", "afternoon", "evening"] as const).map(tod => {
         const acts = grouped[tod];
@@ -525,6 +547,165 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: D
         </div>
       )}
     </motion.div>
+  );
+};
+
+const getMapCenter = (day: ItineraryDay, activities: Activity[]) => {
+  if (day.mapCenter?.lat && day.mapCenter?.lng) {
+    return [day.mapCenter.lat, day.mapCenter.lng] as [number, number];
+  }
+
+  const firstActivity = activities[0]?.coordinates;
+  if (firstActivity?.lat && firstActivity?.lng) {
+    return [firstActivity.lat, firstActivity.lng] as [number, number];
+  }
+
+  return [20, 0] as [number, number];
+};
+
+const RouteBounds = ({ points }: { points: [number, number][] }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!points.length) return;
+    if (points.length === 1) {
+      map.setView(points[0], 13, { animate: true });
+      return;
+    }
+
+    map.fitBounds(points, {
+      padding: [36, 36],
+      animate: true,
+    });
+  }, [map, points]);
+
+  return null;
+};
+
+const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Activity[] }) => {
+  const routePoints = activities.map((activity) => [activity.coordinates!.lat, activity.coordinates!.lng] as [number, number]);
+  const center = getMapCenter(day, activities);
+
+  if (!activities.length) {
+    return (
+      <div className="glass-card p-5 mb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <MapPin className="w-4 h-4 text-primary" />
+          <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">Interactive Route Map</h5>
+        </div>
+        <p className="text-sm text-muted-foreground">Location pins will appear here as soon as this itinerary includes mapped places for the day.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-card p-4 md:p-5 mb-6 overflow-hidden">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <MapPin className="w-4 h-4 text-primary" />
+            <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">Interactive Route Map</h5>
+          </div>
+          <p className="text-sm text-muted-foreground">Follow the day in sequence with pinned stops and route lines between each location.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {activities.map((activity, index) => (
+            <span
+              key={`${activity.title}-${index}`}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium backdrop-blur-sm",
+                mapStopStyles[index % mapStopStyles.length],
+              )}
+            >
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-background/20 text-[10px] font-semibold">
+                {index + 1}
+              </span>
+              {activity.title}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.9fr)]">
+        <div className="h-[360px] overflow-hidden rounded-2xl border border-border/50 bg-secondary/30">
+          <MapContainer
+            center={center}
+            zoom={13}
+            scrollWheelZoom
+            className="h-full w-full"
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <RouteBounds points={routePoints} />
+            {routePoints.length > 1 && (
+              <Polyline positions={routePoints} pathOptions={{ color: "hsl(var(--primary))", weight: 4, opacity: 0.8 }} />
+            )}
+            {activities.map((activity, index) => {
+              const point = activity.coordinates;
+              if (!point) return null;
+
+              return (
+                <CircleMarker
+                  key={`${activity.title}-${activity.time}-${index}`}
+                  center={[point.lat, point.lng]}
+                  radius={10}
+                  pathOptions={{
+                    color: "hsl(var(--background))",
+                    weight: 2,
+                    fillColor: index === 0 ? "hsl(var(--accent))" : "hsl(var(--primary))",
+                    fillOpacity: 1,
+                  }}
+                >
+                  <Popup>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold">{index + 1}. {activity.title}</p>
+                      <p className="text-xs opacity-80">{activity.time} · {activity.location}</p>
+                      <p className="text-xs opacity-70">{activity.description}</p>
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
+          </MapContainer>
+        </div>
+
+        <div className="space-y-3">
+          {activities.map((activity, index) => (
+            <div key={`${activity.title}-route-${index}`} className="rounded-2xl border border-border/60 bg-card/80 p-4">
+              <div className="flex items-start gap-3">
+                <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", mapStopStyles[index % mapStopStyles.length])}>
+                  {index + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3 mb-1">
+                    <p className="text-sm font-semibold text-foreground">{activity.title}</p>
+                    <span className="text-xs text-muted-foreground">{activity.time}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">{activity.location}</p>
+                  <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                      <Clock className="w-3 h-3" /> {activity.duration}
+                    </span>
+                    {activity.cost > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-accent">
+                        <DollarSign className="w-3 h-3" /> ${activity.cost}
+                      </span>
+                    )}
+                  </div>
+                  {index < activities.length - 1 && (
+                    <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <ChevronRight className="w-3 h-3 text-primary" /> Route continues to the next stop
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

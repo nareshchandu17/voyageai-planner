@@ -4,6 +4,12 @@ const GOOGLE_MAPS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/googl
 const TICKETMASTER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ticketmaster`;
 const UNSPLASH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unsplash`;
 
+export interface LocationPoint {
+  lat: number;
+  lng: number;
+  address?: string;
+}
+
 export interface TripParams {
   destination: string;
   startDate: string;
@@ -76,6 +82,53 @@ export async function fetchEvents(destination: string, startDate: string, endDat
   } catch {
     return null;
   }
+}
+
+export async function fetchLocationCoordinates(query: string): Promise<LocationPoint | null> {
+  try {
+    const resp = await fetch(GOOGLE_MAPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "geocode", query }),
+    });
+
+    if (!resp.ok) return null;
+
+    const data = await resp.json();
+    const match = data.results?.[0];
+    const point = match?.geometry?.location;
+    if (!point?.lat || !point?.lng) return null;
+
+    return {
+      lat: point.lat,
+      lng: point.lng,
+      address: match.formatted_address,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchLocationCoordinatesBatch(
+  queries: string[],
+): Promise<Record<string, LocationPoint>> {
+  const uniqueQueries = [...new Set(queries.map((query) => query.trim()).filter(Boolean))];
+  const results = await Promise.all(
+    uniqueQueries.map(async (query) => ({
+      query,
+      point: await fetchLocationCoordinates(query),
+    })),
+  );
+
+  return results.reduce<Record<string, LocationPoint>>((acc, item) => {
+    if (item.point) {
+      acc[item.query] = item.point;
+    }
+    return acc;
+  }, {});
 }
 
 export async function streamItinerary({

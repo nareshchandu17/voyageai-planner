@@ -11,7 +11,7 @@ import {
   CloudSun, AlertCircle, Ticket, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, fetchUnsplashBatch, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
+import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, fetchUnsplashBatch, fetchLocationCoordinatesBatch, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
 import AIItineraryResult from "@/components/AIItineraryResult";
 import PlaceCard from "@/components/PlaceCard";
 import EventCard from "@/components/EventCard";
@@ -174,25 +174,38 @@ const PlanTrip = () => {
         if (parsed) {
           // Extract image queries from itinerary
           const imageQueries: string[] = [];
+          const locationQueries: string[] = [];
           parsed.days?.forEach((day: any) => {
             if (day.imageQuery) imageQueries.push(day.imageQuery);
             day.activities?.forEach((act: any) => {
               if (act.imageQuery) imageQueries.push(act.imageQuery);
+              if (act.location) locationQueries.push(`${act.location}, ${destination}`);
             });
+            if (day.theme && destination) locationQueries.push(`${day.theme}, ${destination}`);
             if (day.meals) {
               ["breakfast", "lunch", "dinner"].forEach(m => {
                 if (day.meals[m]?.imageQuery) imageQueries.push(day.meals[m].imageQuery);
+                if (day.meals[m]?.location) locationQueries.push(`${day.meals[m].location}, ${destination}`);
               });
             }
           });
 
           // Batch fetch images
           let imageMap: Record<string, any> | null = null;
+          let locationMap: Record<string, any> | null = null;
           if (imageQueries.length > 0) {
             try {
               imageMap = await fetchUnsplashBatch(imageQueries);
             } catch (e) {
               console.warn("Batch image fetch failed:", e);
+            }
+          }
+
+          if (locationQueries.length > 0) {
+            try {
+              locationMap = await fetchLocationCoordinatesBatch(locationQueries);
+            } catch (e) {
+              console.warn("Batch geocode failed:", e);
             }
           }
 
@@ -211,6 +224,32 @@ const PlanTrip = () => {
                 ["breakfast", "lunch", "dinner"].forEach(m => {
                   if (day.meals[m]?.imageQuery && imageMap![day.meals[m].imageQuery]) {
                     day.meals[m].imageUrl = imageMap![day.meals[m].imageQuery].small || imageMap![day.meals[m].imageQuery].url;
+                  }
+                });
+              }
+            });
+          }
+
+          if (locationMap) {
+            parsed.days?.forEach((day: any) => {
+              const dayLocationKey = `${day.theme}, ${destination}`;
+              if (locationMap?.[dayLocationKey]) {
+                day.mapCenter = locationMap[dayLocationKey];
+              }
+
+              day.activities?.forEach((act: any) => {
+                const locationKey = act.location ? `${act.location}, ${destination}` : "";
+                if (locationKey && locationMap?.[locationKey]) {
+                  act.coordinates = locationMap[locationKey];
+                }
+              });
+
+              if (day.meals) {
+                ["breakfast", "lunch", "dinner"].forEach(m => {
+                  const meal = day.meals[m];
+                  const mealLocationKey = meal?.location ? `${meal.location}, ${destination}` : "";
+                  if (mealLocationKey && locationMap?.[mealLocationKey]) {
+                    meal.coordinates = locationMap[mealLocationKey];
                   }
                 });
               }

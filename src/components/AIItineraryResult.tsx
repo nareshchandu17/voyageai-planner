@@ -5,9 +5,11 @@ import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
   Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download,
-  ChevronRight, Star, Sunrise, Sunset as SunsetIcon, Moon
+  ChevronRight, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import PlaceCard from "./PlaceCard";
 import EventCard from "./EventCard";
 import BeforeTripSection from "./BeforeTripSection";
@@ -22,6 +24,13 @@ interface Coordinates {
   address?: string;
 }
 
+interface RouteEstimate {
+  recommendedMode: "walking" | "transit" | "driving";
+  durationText: string;
+  distanceText: string;
+  modes?: Partial<Record<"walking" | "transit" | "driving", { durationText: string; distanceText: string; durationValue: number }>>;
+}
+
 interface Activity {
   time: string;
   title: string;
@@ -34,6 +43,7 @@ interface Activity {
   imageQuery?: string;
   imageUrl?: string;
   coordinates?: Coordinates;
+  nextLeg?: RouteEstimate | null;
 }
 
 interface MealInfo {
@@ -143,16 +153,33 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
 
   const [activePhase, setActivePhase] = useState<Phase>(autoPhase);
   const [activeDay, setActiveDay] = useState(1);
+  const [selectedStopKey, setSelectedStopKey] = useState<string | null>(null);
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [mapDay, setMapDay] = useState<number>(data.days[0]?.day || 1);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => { setActivePhase(autoPhase); }, [autoPhase]);
+  useEffect(() => { setMapDay(activeDay); }, [activeDay]);
 
   const hasBeforeTrip = !!data.beforeTrip;
   const hasDuringTrip = !!data.duringTrip;
 
+  const activeMapDayData = useMemo(
+    () => data.days.find((day) => day.day === mapDay) || data.days[0],
+    [data.days, mapDay],
+  );
+
   const scrollToDay = (dayNum: number) => {
     setActiveDay(dayNum);
     dayRefs.current[dayNum]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleSelectStop = (dayNum: number, stopKey: string) => {
+    setActiveDay(dayNum);
+    setMapDay(dayNum);
+    setSelectedStopKey(stopKey);
+    activityRefs.current[stopKey]?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   // Group activities by time of day
@@ -269,6 +296,9 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           <Button variant="outline" size="sm" onClick={() => exportBeforeTripPDF(data)} className="flex items-center gap-2">
             <Download className="w-4 h-4" /> Download PDF
           </Button>
+          <Button variant="glass" size="sm" onClick={() => setIsMapOpen(true)} className="flex items-center gap-2">
+            <Expand className="w-4 h-4" /> Full-Screen Map
+          </Button>
         </motion.div>
       )}
 
@@ -325,6 +355,10 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             scrollToDay={scrollToDay}
             groupActivities={groupActivities}
             destinationPhotos={destinationPhotos}
+            selectedStopKey={selectedStopKey}
+            setSelectedStopKey={setSelectedStopKey}
+            onSelectStop={handleSelectStop}
+            activityRefs={activityRefs}
           />
 
           {!hasBeforeTrip && data.budgetBreakdown && (
@@ -369,9 +403,27 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             scrollToDay={scrollToDay}
             groupActivities={groupActivities}
             destinationPhotos={destinationPhotos}
+            selectedStopKey={selectedStopKey}
+            setSelectedStopKey={setSelectedStopKey}
+            onSelectStop={handleSelectStop}
+            activityRefs={activityRefs}
           />
         </>
       )}
+
+      <FullScreenMapDialog
+        open={isMapOpen}
+        onOpenChange={setIsMapOpen}
+        days={data.days}
+        selectedDay={mapDay}
+        onSelectDay={(dayNum) => {
+          setMapDay(dayNum);
+          scrollToDay(dayNum);
+        }}
+        selectedStopKey={selectedStopKey}
+        onSelectStop={handleSelectStop}
+        day={activeMapDayData}
+      />
     </div>
   );
 };
@@ -386,9 +438,13 @@ interface DayByDaySectionProps {
   scrollToDay: (dayNum: number) => void;
   groupActivities: (activities: Activity[]) => Record<string, Activity[]>;
   destinationPhotos: any[];
+  selectedStopKey: string | null;
+  setSelectedStopKey: (key: string | null) => void;
+  onSelectStop: (dayNum: number, stopKey: string) => void;
+  activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
 }
 
-const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos }: DayByDaySectionProps) => {
+const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DayByDaySectionProps) => {
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -428,6 +484,10 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
             dayRefs={dayRefs}
             groupActivities={groupActivities}
             destinationPhotos={destinationPhotos}
+            selectedStopKey={selectedStopKey}
+            setSelectedStopKey={setSelectedStopKey}
+            onSelectStop={onSelectStop}
+            activityRefs={activityRefs}
           />
         ))}
       </div>
@@ -444,9 +504,13 @@ interface DaySectionProps {
   dayRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
   groupActivities: (activities: Activity[]) => Record<string, Activity[]>;
   destinationPhotos: any[];
+  selectedStopKey: string | null;
+  setSelectedStopKey: (key: string | null) => void;
+  onSelectStop: (dayNum: number, stopKey: string) => void;
+  activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
 }
 
-const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: DaySectionProps) => {
+const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DaySectionProps) => {
   const grouped = groupActivities(day.activities);
   const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
   const mappedActivities = day.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng);
@@ -501,7 +565,7 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: D
         </div>
       )}
 
-      <DayMapSection day={day} activities={mappedActivities} />
+      <DayMapSection day={day} activities={mappedActivities} selectedStopKey={selectedStopKey} onSelectStop={onSelectStop} />
 
       {/* Time-of-day groups */}
       {(["morning", "afternoon", "evening"] as const).map(tod => {
@@ -515,7 +579,18 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos }: D
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {acts.map((act, i) => (
-                <ActivityCard key={i} activity={act} />
+                <ActivityCard
+                  key={i}
+                  activity={act}
+                  stopKey={`day-${day.day}-${act.time}-${act.title}`}
+                  selected={selectedStopKey === `day-${day.day}-${act.time}-${act.title}`}
+                  onSelect={() => {
+                    const stopKey = `day-${day.day}-${act.time}-${act.title}`;
+                    setSelectedStopKey(stopKey);
+                    onSelectStop(day.day, stopKey);
+                  }}
+                  cardRef={(el) => { activityRefs.current[`day-${day.day}-${act.time}-${act.title}`] = el; }}
+                />
               ))}
             </div>
           </div>
@@ -582,7 +657,7 @@ const RouteBounds = ({ points }: { points: [number, number][] }) => {
   return null;
 };
 
-const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Activity[] }) => {
+const DayMapSection = ({ day, activities, selectedStopKey, onSelectStop }: { day: ItineraryDay; activities: Activity[]; selectedStopKey: string | null; onSelectStop: (dayNum: number, stopKey: string) => void; }) => {
   const routePoints = activities.map((activity) => [activity.coordinates!.lat, activity.coordinates!.lng] as [number, number]);
   const center = getMapCenter(day, activities);
 
@@ -609,12 +684,16 @@ const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Act
           <p className="text-sm text-muted-foreground">Follow the day in sequence with pinned stops and route lines between each location.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {activities.map((activity, index) => (
+          {activities.map((activity, index) => {
+            const stopKey = `day-${day.day}-${activity.time}-${activity.title}`;
+            return (
             <span
               key={`${activity.title}-${index}`}
+              onClick={() => onSelectStop(day.day, stopKey)}
               className={cn(
-                "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium backdrop-blur-sm",
+                "inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-transform hover:-translate-y-0.5",
                 mapStopStyles[index % mapStopStyles.length],
+                selectedStopKey === stopKey && "ring-2 ring-primary ring-offset-2 ring-offset-background",
               )}
             >
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-background/20 text-[10px] font-semibold">
@@ -622,7 +701,7 @@ const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Act
               </span>
               {activity.title}
             </span>
-          ))}
+          )})}
         </div>
       </div>
 
@@ -644,17 +723,19 @@ const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Act
             )}
             {activities.map((activity, index) => {
               const point = activity.coordinates;
+              const stopKey = `day-${day.day}-${activity.time}-${activity.title}`;
               if (!point) return null;
 
               return (
                 <CircleMarker
                   key={`${activity.title}-${activity.time}-${index}`}
                   center={[point.lat, point.lng]}
+                  eventHandlers={{ click: () => onSelectStop(day.day, stopKey) }}
                   radius={10}
                   pathOptions={{
-                    color: "hsl(var(--background))",
-                    weight: 2,
-                    fillColor: index === 0 ? "hsl(var(--accent))" : "hsl(var(--primary))",
+                    color: selectedStopKey === stopKey ? "hsl(var(--accent))" : "hsl(var(--background))",
+                    weight: selectedStopKey === stopKey ? 4 : 2,
+                    fillColor: selectedStopKey === stopKey ? "hsl(var(--accent))" : index === 0 ? "hsl(var(--accent))" : "hsl(var(--primary))",
                     fillOpacity: 1,
                   }}
                 >
@@ -672,8 +753,10 @@ const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Act
         </div>
 
         <div className="space-y-3">
-          {activities.map((activity, index) => (
-            <div key={`${activity.title}-route-${index}`} className="rounded-2xl border border-border/60 bg-card/80 p-4">
+          {activities.map((activity, index) => {
+            const stopKey = `day-${day.day}-${activity.time}-${activity.title}`;
+            return (
+            <div key={`${activity.title}-route-${index}`} className={cn("rounded-2xl border border-border/60 bg-card/80 p-4 transition-all", selectedStopKey === stopKey && "border-primary/60 shadow-lg shadow-primary/10") }>
               <div className="flex items-start gap-3">
                 <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", mapStopStyles[index % mapStopStyles.length])}>
                   {index + 1}
@@ -696,13 +779,14 @@ const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Act
                   </div>
                   {index < activities.length - 1 && (
                     <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <ChevronRight className="w-3 h-3 text-primary" /> Route continues to the next stop
+                      {activity.nextLeg?.recommendedMode ? transportModeIcon(activity.nextLeg.recommendedMode) : <ChevronRight className="w-3 h-3 text-primary" />}
+                      {activity.nextLeg ? `${activity.nextLeg.recommendedMode} · ${activity.nextLeg.durationText} · ${activity.nextLeg.distanceText}` : "Route continues to the next stop"}
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
     </div>
@@ -712,13 +796,21 @@ const DayMapSection = ({ day, activities }: { day: ItineraryDay; activities: Act
 /* ============================================================
    VISUAL ACTIVITY CARD
    ============================================================ */
-const ActivityCard = ({ activity }: { activity: Activity }) => {
+const transportModeIcon = (mode: RouteEstimate["recommendedMode"]) => {
+  if (mode === "walking") return <Footprints className="w-3 h-3 text-primary" />;
+  if (mode === "transit") return <TramFront className="w-3 h-3 text-primary" />;
+  return <Car className="w-3 h-3 text-primary" />;
+};
+
+const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; }) => {
   const hasImage = !!activity.imageUrl;
 
   return (
     <motion.div
+      ref={cardRef}
       whileHover={{ y: -2 }}
-      className="group relative rounded-xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-md transition-all"
+      onClick={onSelect}
+      className={cn("group relative cursor-pointer rounded-xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-md transition-all", selected && "border-primary/60 shadow-lg shadow-primary/10 ring-2 ring-primary/20")}
     >
       {/* Activity image */}
       {hasImage && (
@@ -775,8 +867,125 @@ const ActivityCard = ({ activity }: { activity: Activity }) => {
             <Lightbulb className="w-3 h-3 mt-0.5 shrink-0" /> {activity.tip}
           </div>
         )}
+
+        {activity.nextLeg && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+              {transportModeIcon(activity.nextLeg.recommendedMode)} {activity.nextLeg.recommendedMode}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+              <Navigation className="w-3 h-3 text-primary" /> {activity.nextLeg.durationText}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+              <LocateFixed className="w-3 h-3 text-primary" /> {activity.nextLeg.distanceText}
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
+  );
+};
+
+const FullScreenMapDialog = ({
+  open,
+  onOpenChange,
+  days,
+  selectedDay,
+  onSelectDay,
+  selectedStopKey,
+  onSelectStop,
+  day,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  days: ItineraryDay[];
+  selectedDay: number;
+  onSelectDay: (dayNum: number) => void;
+  selectedStopKey: string | null;
+  onSelectStop: (dayNum: number, stopKey: string) => void;
+  day: ItineraryDay;
+}) => {
+  const selectedIndex = Math.max(0, days.findIndex((item) => item.day === selectedDay));
+  const mappedActivities = day?.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng) || [];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[96vw] h-[92vh] p-0 overflow-hidden border-border/50 bg-background/95 backdrop-blur-xl">
+        <div className="flex h-full flex-col">
+          <div className="border-b border-border/60 px-5 py-4 md:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <DialogTitle className="font-display text-2xl text-foreground">Immersive Trip Navigator</DialogTitle>
+                <DialogDescription>Switch days, scrub the journey timeline, and tap pins to jump to the matching itinerary card.</DialogDescription>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {days.map((item) => (
+                  <Button
+                    key={item.day}
+                    variant={selectedDay === item.day ? "ocean" : "outline"}
+                    size="sm"
+                    onClick={() => onSelectDay(item.day)}
+                  >
+                    Day {item.day}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Timeline scrubber</p>
+                <Slider
+                  value={[selectedIndex]}
+                  min={0}
+                  max={Math.max(days.length - 1, 0)}
+                  step={1}
+                  onValueChange={(value) => onSelectDay(days[value[0]]?.day || days[0]?.day || 1)}
+                />
+              </div>
+              <div className="rounded-2xl border border-border/60 bg-card/70 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Current focus</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">Day {day?.day}: {day?.theme}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)]">
+            <div className="overflow-y-auto border-b border-border/60 p-5 lg:border-b-0 lg:border-r">
+              <div className="space-y-3">
+                {mappedActivities.map((activity) => {
+                  const stopKey = `day-${day.day}-${activity.time}-${activity.title}`;
+                  return (
+                    <button
+                      key={stopKey}
+                      onClick={() => onSelectStop(day.day, stopKey)}
+                      className={cn("w-full rounded-2xl border border-border/60 bg-card/80 p-4 text-left transition-all hover:border-primary/40", selectedStopKey === stopKey && "border-primary/60 shadow-lg shadow-primary/10")}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{activity.title}</p>
+                          <p className="text-xs text-muted-foreground">{activity.location}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{activity.time}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+                        <span className="rounded-full bg-secondary px-2.5 py-1">{activity.duration}</span>
+                        {activity.nextLeg && <span className="rounded-full bg-secondary px-2.5 py-1">{activity.nextLeg.durationText}</span>}
+                        {activity.nextLeg && <span className="rounded-full bg-secondary px-2.5 py-1">{activity.nextLeg.distanceText}</span>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="min-h-0 p-5">
+              <DayMapSection day={day} activities={mappedActivities} selectedStopKey={selectedStopKey} onSelectStop={onSelectStop} />
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

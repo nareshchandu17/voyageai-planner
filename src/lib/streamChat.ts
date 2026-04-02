@@ -12,6 +12,29 @@ export interface LocationPoint {
 
 export type TravelMode = "walking" | "transit" | "driving";
 
+export interface DirectionStep {
+  instruction: string;
+  distance: string;
+  duration: string;
+  travelMode: string;
+  transit?: {
+    line: string;
+    vehicle: string;
+    departureStop: string;
+    arrivalStop: string;
+    numStops: number;
+  };
+}
+
+export interface DirectionsDetail {
+  mode: TravelMode;
+  durationText: string;
+  distanceText: string;
+  startAddress: string;
+  endAddress: string;
+  steps: DirectionStep[];
+}
+
 export interface RouteEstimate {
   recommendedMode: TravelMode;
   durationText: string;

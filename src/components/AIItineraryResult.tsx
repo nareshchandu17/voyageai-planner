@@ -1,21 +1,24 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from "react-leaflet";
 import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
   Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download,
-  ChevronRight, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed
+  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import PlaceCard from "./PlaceCard";
 import EventCard from "./EventCard";
 import BeforeTripSection from "./BeforeTripSection";
 import DuringTripSection from "./DuringTripSection";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
+import { fetchDirectionsSteps, type DirectionsDetail, type DirectionStep, type TravelMode } from "@/lib/streamChat";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {

@@ -581,10 +581,15 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
               <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">{timeOfDayLabel(tod)}</h5>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {acts.map((act, i) => (
+              {acts.map((act, i) => {
+                const allActs = day.activities;
+                const globalIdx = allActs.indexOf(act);
+                const nextAct = globalIdx >= 0 && globalIdx < allActs.length - 1 ? allActs[globalIdx + 1] : undefined;
+                return (
                 <ActivityCard
                   key={i}
                   activity={act}
+                  nextActivity={nextAct}
                   stopKey={`day-${day.day}-${act.time}-${act.title}`}
                   selected={selectedStopKey === `day-${day.day}-${act.time}-${act.title}`}
                   onSelect={() => {
@@ -594,7 +599,7 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
                   }}
                   cardRef={(el) => { activityRefs.current[`day-${day.day}-${act.time}-${act.title}`] = el; }}
                 />
-              ))}
+              )})}
             </div>
           </div>
         );

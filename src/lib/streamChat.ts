@@ -182,6 +182,7 @@ export async function fetchRouteEstimate(
     return data ?? null;
   } catch {
     return null;
+  }
 }
 
 export async function fetchDirectionsSteps(
@@ -203,7 +204,6 @@ export async function fetchDirectionsSteps(
   } catch {
     return null;
   }
-}
 }
 
 export async function fetchRouteEstimatesBatch(

@@ -1035,17 +1035,7 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef }: { acti
         )}
 
         {activity.nextLeg && (
-          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
-              {transportModeIcon(activity.nextLeg.recommendedMode)} {activity.nextLeg.recommendedMode}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
-              <Navigation className="w-3 h-3 text-primary" /> {activity.nextLeg.durationText}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
-              <LocateFixed className="w-3 h-3 text-primary" /> {activity.nextLeg.distanceText}
-            </span>
-          </div>
+          <RouteLegDisplay activity={activity} nextActivity={nextActivity} />
         )}
       </div>
     </motion.div>

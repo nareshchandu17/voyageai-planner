@@ -17,6 +17,7 @@ const RequestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("details"), placeId: z.string().min(1) }),
   z.object({ action: z.literal("geocode"), query: z.string().min(1) }),
   z.object({ action: z.literal("route_estimates"), origin: LocationSchema, destination: LocationSchema }),
+  z.object({ action: z.literal("directions_steps"), origin: LocationSchema, destination: LocationSchema, mode: z.enum(["walking", "transit", "driving"]) }),
 ]);
 
 serve(async (req) => {

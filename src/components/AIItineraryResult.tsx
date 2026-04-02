@@ -1018,6 +1018,8 @@ const transportModeIcon = (mode: RouteEstimate["recommendedMode"]) => {
 const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextActivity?: Activity }) => {
   const [selectedMode, setSelectedMode] = useState<TravelMode>(activity.nextLeg?.recommendedMode || "walking");
   const modeData = activity.nextLeg?.modes?.[selectedMode];
+  const distText = modeData?.distanceText || activity.nextLeg?.distanceText;
+  const co2 = estimateCO2(selectedMode, distText);
 
   return (
     <div className="mt-2.5 space-y-1.5">
@@ -1034,8 +1036,13 @@ const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextA
           <Navigation className="w-3 h-3 text-primary" /> {modeData?.durationText || activity.nextLeg?.durationText}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
-          <LocateFixed className="w-3 h-3 text-primary" /> {modeData?.distanceText || activity.nextLeg?.distanceText}
+          <LocateFixed className="w-3 h-3 text-primary" /> {distText}
         </span>
+        {co2 && (
+          <span className={cn("inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1 font-medium", co2Color(selectedMode))}>
+            <Leaf className="w-3 h-3" /> {co2} CO₂
+          </span>
+        )}
       </div>
       {activity.coordinates && nextActivity?.coordinates && (
         <StepByStepDirections

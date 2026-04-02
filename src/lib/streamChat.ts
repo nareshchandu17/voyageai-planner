@@ -182,7 +182,28 @@ export async function fetchRouteEstimate(
     return data ?? null;
   } catch {
     return null;
+}
+
+export async function fetchDirectionsSteps(
+  origin: LocationPoint,
+  destination: LocationPoint,
+  mode: TravelMode,
+): Promise<DirectionsDetail | null> {
+  try {
+    const resp = await fetch(GOOGLE_MAPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "directions_steps", origin, destination, mode }),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  } catch {
+    return null;
   }
+}
 }
 
 export async function fetchRouteEstimatesBatch(

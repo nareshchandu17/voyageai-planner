@@ -17,6 +17,7 @@ const RequestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("details"), placeId: z.string().min(1) }),
   z.object({ action: z.literal("geocode"), query: z.string().min(1) }),
   z.object({ action: z.literal("route_estimates"), origin: LocationSchema, destination: LocationSchema }),
+  z.object({ action: z.literal("directions_steps"), origin: LocationSchema, destination: LocationSchema, mode: z.enum(["walking", "transit", "driving"]) }),
 ]);
 
 serve(async (req) => {
@@ -105,8 +106,48 @@ serve(async (req) => {
         };
         break;
       }
+      case "directions_steps": {
+        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${payload.origin.lat},${payload.origin.lng}&destination=${payload.destination.lat},${payload.destination.lng}&mode=${payload.mode}&key=${API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const leg = data.routes?.[0]?.legs?.[0];
+        if (!leg) {
+          return new Response(JSON.stringify({ error: "No route found" }), {
+            status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const steps = (leg.steps || []).map((step: any) => {
+          const base: any = {
+            instruction: step.html_instructions?.replace(/<[^>]*>/g, "") || "",
+            distance: step.distance?.text || "",
+            duration: step.duration?.text || "",
+            travelMode: step.travel_mode?.toLowerCase() || payload.mode,
+          };
+          if (step.transit_details) {
+            base.transit = {
+              line: step.transit_details.line?.short_name || step.transit_details.line?.name || "",
+              vehicle: step.transit_details.line?.vehicle?.type || "",
+              departureStop: step.transit_details.departure_stop?.name || "",
+              arrivalStop: step.transit_details.arrival_stop?.name || "",
+              numStops: step.transit_details.num_stops || 0,
+            };
+          }
+          return base;
+        });
+
+        result = {
+          mode: payload.mode,
+          durationText: leg.duration?.text || "",
+          distanceText: leg.distance?.text || "",
+          startAddress: leg.start_address || "",
+          endAddress: leg.end_address || "",
+          steps,
+        };
+        break;
+      }
       default:
-        return new Response(JSON.stringify({ error: "Invalid action. Use: search, nearby, details, geocode, route_estimates" }), {
+        return new Response(JSON.stringify({ error: "Invalid action" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
     }

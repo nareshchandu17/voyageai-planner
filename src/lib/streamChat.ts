@@ -12,6 +12,29 @@ export interface LocationPoint {
 
 export type TravelMode = "walking" | "transit" | "driving";
 
+export interface DirectionStep {
+  instruction: string;
+  distance: string;
+  duration: string;
+  travelMode: string;
+  transit?: {
+    line: string;
+    vehicle: string;
+    departureStop: string;
+    arrivalStop: string;
+    numStops: number;
+  };
+}
+
+export interface DirectionsDetail {
+  mode: TravelMode;
+  durationText: string;
+  distanceText: string;
+  startAddress: string;
+  endAddress: string;
+  steps: DirectionStep[];
+}
+
 export interface RouteEstimate {
   recommendedMode: TravelMode;
   durationText: string;
@@ -157,6 +180,27 @@ export async function fetchRouteEstimate(
     if (!resp.ok) return null;
     const data = await resp.json();
     return data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchDirectionsSteps(
+  origin: LocationPoint,
+  destination: LocationPoint,
+  mode: TravelMode,
+): Promise<DirectionsDetail | null> {
+  try {
+    const resp = await fetch(GOOGLE_MAPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "directions_steps", origin, destination, mode }),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
   } catch {
     return null;
   }

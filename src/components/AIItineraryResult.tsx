@@ -660,9 +660,143 @@ const RouteBounds = ({ points }: { points: [number, number][] }) => {
   return null;
 };
 
+/* ============================================================
+   TRANSPORT MODE SELECTOR + STEP-BY-STEP DIRECTIONS
+   ============================================================ */
+const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
+  currentMode: TravelMode;
+  modes?: Partial<Record<TravelMode, { durationText: string; distanceText: string; durationValue: number }>>;
+  onModeChange: (mode: TravelMode) => void;
+}) => {
+  const available = modes ? (Object.keys(modes) as TravelMode[]) : [];
+  if (available.length <= 1) return null;
+
+  return (
+    <div className="flex gap-1">
+      {(["walking", "transit", "driving"] as const).map(mode => {
+        const data = modes?.[mode];
+        if (!data) return null;
+        return (
+          <button
+            key={mode}
+            onClick={() => onModeChange(mode)}
+            className={cn(
+              "flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all",
+              currentMode === mode
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+            )}
+          >
+            {transportModeIcon(mode)}
+            <span>{data.durationText}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const StepByStepDirections = ({ origin, destination, mode }: {
+  origin: { lat: number; lng: number };
+  destination: { lat: number; lng: number };
+  mode: TravelMode;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const [directions, setDirections] = useState<DirectionsDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const fetchedRef = useRef<string>("");
+
+  const fetchKey = `${origin.lat},${origin.lng}-${destination.lat},${destination.lng}-${mode}`;
+
+  const loadSteps = useCallback(async () => {
+    if (fetchedRef.current === fetchKey) return;
+    setLoading(true);
+    fetchedRef.current = fetchKey;
+    const result = await fetchDirectionsSteps(origin, destination, mode);
+    setDirections(result);
+    setLoading(false);
+  }, [fetchKey, origin, destination, mode]);
+
+  const handleToggle = () => {
+    if (!expanded && !directions && fetchedRef.current !== fetchKey) {
+      loadSteps();
+    }
+    setExpanded(prev => !prev);
+  };
+
+  // Refetch when mode changes and already expanded
+  useEffect(() => {
+    if (expanded && fetchedRef.current !== fetchKey) {
+      loadSteps();
+    }
+  }, [expanded, fetchKey, loadSteps]);
+
+  return (
+    <div className="mt-1">
+      <button
+        onClick={handleToggle}
+        className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors font-medium"
+      >
+        <Route className="w-3 h-3" />
+        {expanded ? "Hide" : "Show"} step-by-step
+        <ChevronDown className={cn("w-3 h-3 transition-transform", expanded && "rotate-180")} />
+      </button>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin" /> Loading directions...
+              </div>
+            ) : directions?.steps?.length ? (
+              <div className="mt-2 space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                {directions.steps.map((step, i) => (
+                  <div key={i} className="flex gap-2 text-[11px]">
+                    <div className="mt-1 shrink-0">
+                      {step.travelMode === "transit" ? (
+                        <TramFront className="w-3 h-3 text-accent" />
+                      ) : step.travelMode === "walking" ? (
+                        <Footprints className="w-3 h-3 text-primary" />
+                      ) : (
+                        <Car className="w-3 h-3 text-primary" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-foreground/80">{step.instruction}</p>
+                      <div className="flex gap-2 mt-0.5 text-muted-foreground">
+                        <span>{step.distance}</span>
+                        <span>·</span>
+                        <span>{step.duration}</span>
+                      </div>
+                      {step.transit && (
+                        <div className="mt-1 rounded-md bg-accent/10 px-2 py-1 text-[10px] text-accent">
+                          🚉 {step.transit.line} ({step.transit.vehicle}) · {step.transit.departureStop} → {step.transit.arrivalStop} · {step.transit.numStops} stops
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="py-2 text-[11px] text-muted-foreground">No step-by-step directions available for this route.</p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const DayMapSection = ({ day, activities, selectedStopKey, onSelectStop }: { day: ItineraryDay; activities: Activity[]; selectedStopKey: string | null; onSelectStop: (dayNum: number, stopKey: string) => void; }) => {
   const routePoints = activities.map((activity) => [activity.coordinates!.lat, activity.coordinates!.lng] as [number, number]);
   const center = getMapCenter(day, activities);
+  const [preferredModes, setPreferredModes] = useState<Record<number, TravelMode>>({});
 
   if (!activities.length) {
     return (
@@ -758,6 +892,10 @@ const DayMapSection = ({ day, activities, selectedStopKey, onSelectStop }: { day
         <div className="space-y-3">
           {activities.map((activity, index) => {
             const stopKey = `day-${day.day}-${activity.time}-${activity.title}`;
+            const selectedMode = preferredModes[index] || activity.nextLeg?.recommendedMode || "walking";
+            const modeData = activity.nextLeg?.modes?.[selectedMode] || (activity.nextLeg ? { durationText: activity.nextLeg.durationText, distanceText: activity.nextLeg.distanceText } : null);
+            const nextActivity = activities[index + 1];
+
             return (
             <div key={`${activity.title}-route-${index}`} className={cn("rounded-2xl border border-border/60 bg-card/80 p-4 transition-all", selectedStopKey === stopKey && "border-primary/60 shadow-lg shadow-primary/10") }>
               <div className="flex items-start gap-3">
@@ -780,10 +918,35 @@ const DayMapSection = ({ day, activities, selectedStopKey, onSelectStop }: { day
                       </span>
                     )}
                   </div>
-                  {index < activities.length - 1 && (
+                  {index < activities.length - 1 && activity.nextLeg && (
+                    <div className="mt-3 space-y-2">
+                      {/* Transport mode selector */}
+                      <TransportModeSelector
+                        currentMode={selectedMode}
+                        modes={activity.nextLeg.modes}
+                        onModeChange={(mode) => setPreferredModes(prev => ({ ...prev, [index]: mode }))}
+                      />
+                      {/* Summary for selected mode */}
+                      {modeData && (
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                          {transportModeIcon(selectedMode)}
+                          <span>{selectedMode} · {modeData.durationText} · {modeData.distanceText}</span>
+                        </div>
+                      )}
+                      {/* Step-by-step directions */}
+                      {activity.coordinates && nextActivity?.coordinates && (
+                        <StepByStepDirections
+                          origin={activity.coordinates}
+                          destination={nextActivity.coordinates}
+                          mode={selectedMode}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {index < activities.length - 1 && !activity.nextLeg && (
                     <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-                      {activity.nextLeg?.recommendedMode ? transportModeIcon(activity.nextLeg.recommendedMode) : <ChevronRight className="w-3 h-3 text-primary" />}
-                      {activity.nextLeg ? `${activity.nextLeg.recommendedMode} · ${activity.nextLeg.durationText} · ${activity.nextLeg.distanceText}` : "Route continues to the next stop"}
+                      <ChevronRight className="w-3 h-3 text-primary" />
+                      Route continues to the next stop
                     </div>
                   )}
                 </div>

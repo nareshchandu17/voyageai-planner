@@ -5,7 +5,7 @@ import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
   Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download,
-  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route
+  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route, Leaf
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";

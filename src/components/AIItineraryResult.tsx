@@ -968,7 +968,40 @@ const transportModeIcon = (mode: RouteEstimate["recommendedMode"]) => {
   return <Car className="w-3 h-3 text-primary" />;
 };
 
-const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; }) => {
+const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextActivity?: Activity }) => {
+  const [selectedMode, setSelectedMode] = useState<TravelMode>(activity.nextLeg?.recommendedMode || "walking");
+  const modeData = activity.nextLeg?.modes?.[selectedMode];
+
+  return (
+    <div className="mt-2.5 space-y-1.5">
+      <TransportModeSelector
+        currentMode={selectedMode}
+        modes={activity.nextLeg?.modes}
+        onModeChange={setSelectedMode}
+      />
+      <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+          {transportModeIcon(selectedMode)} {selectedMode}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+          <Navigation className="w-3 h-3 text-primary" /> {modeData?.durationText || activity.nextLeg?.durationText}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+          <LocateFixed className="w-3 h-3 text-primary" /> {modeData?.distanceText || activity.nextLeg?.distanceText}
+        </span>
+      </div>
+      {activity.coordinates && nextActivity?.coordinates && (
+        <StepByStepDirections
+          origin={activity.coordinates}
+          destination={nextActivity.coordinates}
+          mode={selectedMode}
+        />
+      )}
+    </div>
+  );
+};
+
+const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity }) => {
   const hasImage = !!activity.imageUrl;
 
   return (

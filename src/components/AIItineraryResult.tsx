@@ -668,6 +668,34 @@ const RouteBounds = ({ points }: { points: [number, number][] }) => {
 /* ============================================================
    TRANSPORT MODE SELECTOR + STEP-BY-STEP DIRECTIONS
    ============================================================ */
+
+/** CO2 emission factors in g/km — average estimates */
+const CO2_FACTORS: Record<TravelMode, number> = { walking: 0, transit: 50, driving: 170 };
+
+/** Parse a distance string like "3.2 km" or "1.5 mi" into km */
+const parseDistanceKm = (text?: string): number | null => {
+  if (!text) return null;
+  const match = text.match(/([\d.]+)\s*(km|mi)/i);
+  if (!match) return null;
+  const val = parseFloat(match[1]);
+  return match[2].toLowerCase() === "mi" ? val * 1.60934 : val;
+};
+
+/** Returns formatted CO2 string, e.g. "0 g" or "540 g" or "1.2 kg" */
+const estimateCO2 = (mode: TravelMode, distanceText?: string): string | null => {
+  const km = parseDistanceKm(distanceText);
+  if (km === null) return null;
+  const grams = Math.round(km * CO2_FACTORS[mode]);
+  if (grams >= 1000) return `${(grams / 1000).toFixed(1)} kg`;
+  return `${grams} g`;
+};
+
+const co2Color = (mode: TravelMode) => {
+  if (mode === "walking") return "text-green-500";
+  if (mode === "transit") return "text-yellow-500";
+  return "text-orange-500";
+};
+
 const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
   currentMode: TravelMode;
   modes?: Partial<Record<TravelMode, { durationText: string; distanceText: string; durationValue: number }>>;
@@ -681,6 +709,7 @@ const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
       {(["walking", "transit", "driving"] as const).map(mode => {
         const data = modes?.[mode];
         if (!data) return null;
+        const co2 = estimateCO2(mode, data.distanceText);
         return (
           <button
             key={mode}
@@ -694,6 +723,11 @@ const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
           >
             {transportModeIcon(mode)}
             <span>{data.durationText}</span>
+            {co2 && (
+              <span className={cn("ml-0.5 flex items-center gap-0.5", currentMode === mode ? "text-primary-foreground/80" : co2Color(mode))}>
+                <Leaf className="w-2.5 h-2.5" />{co2}
+              </span>
+            )}
           </button>
         );
       })}

@@ -966,12 +966,20 @@ const DayMapSection = ({ day, activities, selectedStopKey, onSelectStop }: { day
                         onModeChange={(mode) => setPreferredModes(prev => ({ ...prev, [index]: mode }))}
                       />
                       {/* Summary for selected mode */}
-                      {modeData && (
-                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                          {transportModeIcon(selectedMode)}
-                          <span>{selectedMode} · {modeData.durationText} · {modeData.distanceText}</span>
-                        </div>
-                      )}
+                      {modeData && (() => {
+                        const co2 = estimateCO2(selectedMode, modeData.distanceText);
+                        return (
+                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                            {transportModeIcon(selectedMode)}
+                            <span>{selectedMode} · {modeData.durationText} · {modeData.distanceText}</span>
+                            {co2 && (
+                              <span className={cn("flex items-center gap-0.5 font-medium", co2Color(selectedMode))}>
+                                <Leaf className="w-3 h-3" /> {co2} CO₂
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {/* Step-by-step directions */}
                       {activity.coordinates && nextActivity?.coordinates && (
                         <StepByStepDirections

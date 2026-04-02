@@ -5,7 +5,7 @@ import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
   Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download,
-  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route
+  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route, Leaf
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -668,6 +668,34 @@ const RouteBounds = ({ points }: { points: [number, number][] }) => {
 /* ============================================================
    TRANSPORT MODE SELECTOR + STEP-BY-STEP DIRECTIONS
    ============================================================ */
+
+/** CO2 emission factors in g/km — average estimates */
+const CO2_FACTORS: Record<TravelMode, number> = { walking: 0, transit: 50, driving: 170 };
+
+/** Parse a distance string like "3.2 km" or "1.5 mi" into km */
+const parseDistanceKm = (text?: string): number | null => {
+  if (!text) return null;
+  const match = text.match(/([\d.]+)\s*(km|mi)/i);
+  if (!match) return null;
+  const val = parseFloat(match[1]);
+  return match[2].toLowerCase() === "mi" ? val * 1.60934 : val;
+};
+
+/** Returns formatted CO2 string, e.g. "0 g" or "540 g" or "1.2 kg" */
+const estimateCO2 = (mode: TravelMode, distanceText?: string): string | null => {
+  const km = parseDistanceKm(distanceText);
+  if (km === null) return null;
+  const grams = Math.round(km * CO2_FACTORS[mode]);
+  if (grams >= 1000) return `${(grams / 1000).toFixed(1)} kg`;
+  return `${grams} g`;
+};
+
+const co2Color = (mode: TravelMode) => {
+  if (mode === "walking") return "text-green-500";
+  if (mode === "transit") return "text-yellow-500";
+  return "text-orange-500";
+};
+
 const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
   currentMode: TravelMode;
   modes?: Partial<Record<TravelMode, { durationText: string; distanceText: string; durationValue: number }>>;
@@ -681,6 +709,7 @@ const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
       {(["walking", "transit", "driving"] as const).map(mode => {
         const data = modes?.[mode];
         if (!data) return null;
+        const co2 = estimateCO2(mode, data.distanceText);
         return (
           <button
             key={mode}
@@ -694,6 +723,11 @@ const TransportModeSelector = ({ currentMode, modes, onModeChange }: {
           >
             {transportModeIcon(mode)}
             <span>{data.durationText}</span>
+            {co2 && (
+              <span className={cn("ml-0.5 flex items-center gap-0.5", currentMode === mode ? "text-primary-foreground/80" : co2Color(mode))}>
+                <Leaf className="w-2.5 h-2.5" />{co2}
+              </span>
+            )}
           </button>
         );
       })}
@@ -932,12 +966,20 @@ const DayMapSection = ({ day, activities, selectedStopKey, onSelectStop }: { day
                         onModeChange={(mode) => setPreferredModes(prev => ({ ...prev, [index]: mode }))}
                       />
                       {/* Summary for selected mode */}
-                      {modeData && (
-                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                          {transportModeIcon(selectedMode)}
-                          <span>{selectedMode} · {modeData.durationText} · {modeData.distanceText}</span>
-                        </div>
-                      )}
+                      {modeData && (() => {
+                        const co2 = estimateCO2(selectedMode, modeData.distanceText);
+                        return (
+                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                            {transportModeIcon(selectedMode)}
+                            <span>{selectedMode} · {modeData.durationText} · {modeData.distanceText}</span>
+                            {co2 && (
+                              <span className={cn("flex items-center gap-0.5 font-medium", co2Color(selectedMode))}>
+                                <Leaf className="w-3 h-3" /> {co2} CO₂
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {/* Step-by-step directions */}
                       {activity.coordinates && nextActivity?.coordinates && (
                         <StepByStepDirections
@@ -976,6 +1018,8 @@ const transportModeIcon = (mode: RouteEstimate["recommendedMode"]) => {
 const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextActivity?: Activity }) => {
   const [selectedMode, setSelectedMode] = useState<TravelMode>(activity.nextLeg?.recommendedMode || "walking");
   const modeData = activity.nextLeg?.modes?.[selectedMode];
+  const distText = modeData?.distanceText || activity.nextLeg?.distanceText;
+  const co2 = estimateCO2(selectedMode, distText);
 
   return (
     <div className="mt-2.5 space-y-1.5">
@@ -992,8 +1036,13 @@ const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextA
           <Navigation className="w-3 h-3 text-primary" /> {modeData?.durationText || activity.nextLeg?.durationText}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
-          <LocateFixed className="w-3 h-3 text-primary" /> {modeData?.distanceText || activity.nextLeg?.distanceText}
+          <LocateFixed className="w-3 h-3 text-primary" /> {distText}
         </span>
+        {co2 && (
+          <span className={cn("inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-1 font-medium", co2Color(selectedMode))}>
+            <Leaf className="w-3 h-3" /> {co2} CO₂
+          </span>
+        )}
       </div>
       {activity.coordinates && nextActivity?.coordinates && (
         <StepByStepDirections

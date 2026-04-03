@@ -436,6 +436,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             setSelectedStopKey={setSelectedStopKey}
             onSelectStop={handleSelectStop}
             activityRefs={activityRefs}
+            narrativePhases={narrativePhases}
+            destination={destination}
           />
         </>
       )}

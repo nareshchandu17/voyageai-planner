@@ -1161,6 +1161,7 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
               <DollarSign className="w-2.5 h-2.5" /> ${activity.cost}
             </span>
           )}
+          <ActivityEnergyBadge activity={activity} />
         </div>
 
         {/* Insider tip */}

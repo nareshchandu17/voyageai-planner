@@ -19,6 +19,10 @@ import DuringTripSection from "./DuringTripSection";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
 import { fetchDirectionsSteps, type DirectionsDetail, type DirectionStep, type TravelMode } from "@/lib/streamChat";
+import { EnergyBar, ActivityEnergyBadge, RebalanceButton } from "./itinerary/EnergyProfiler";
+import { SerendipitySlot, getOpenSlots } from "./itinerary/SerendipityEngine";
+import { NarrativeArc, NarrativePhaseBadge, assignNarrativePhases } from "./itinerary/NarrativeArc";
+import { GroupOrchestrator, type GroupTraveler } from "./itinerary/GroupOrchestration";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {

@@ -95,6 +95,13 @@ const Dashboard = () => {
           ))}
         </motion.div>
 
+        {/* Traveler Profile Card */}
+        {travelerProfile && travelerProfile.trip_count > 0 && (
+          <motion.div className="mb-10" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}>
+            <TravelerProfileCard profile={travelerProfile} />
+          </motion.div>
+        )}
+
         {/* Tabs */}
         <motion.div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
           <div className="inline-flex bg-secondary/80 backdrop-blur-sm rounded-2xl p-1.5 gap-1">

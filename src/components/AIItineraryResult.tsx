@@ -643,6 +643,17 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
         );
       })}
 
+      {/* Serendipity Slots */}
+      {openSlots.map((slot, i) => (
+        <SerendipitySlot
+          key={`serendipity-${day.day}-${i}`}
+          dayNum={day.day}
+          time={slot.time}
+          destination={destination || ""}
+          coordinates={day.mapCenter}
+        />
+      ))}
+
       {/* Meals */}
       {day.meals && (
         <div className="mb-6">

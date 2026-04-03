@@ -579,7 +579,8 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
                 Day {day.day}: {day.theme}
               </h4>
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 shrink-0 flex-wrap items-center">
+              {narrativePhase && <NarrativePhaseBadge phase={narrativePhase} />}
               {day.weather && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-medium">
                   {weatherIcon(day.weather.condition)} {day.weather.temp}
@@ -594,6 +595,9 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
           </div>
         </div>
       </div>
+
+      {/* Energy Bar */}
+      <EnergyBar activities={day.activities} dayNum={day.day} />
 
       {/* Weather advisory */}
       {day.weather?.advisory && (

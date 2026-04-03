@@ -471,6 +471,8 @@ interface DayByDaySectionProps {
   setSelectedStopKey: (key: string | null) => void;
   onSelectStop: (dayNum: number, stopKey: string) => void;
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
+  narrativePhases?: import("./itinerary/NarrativeArc").NarrativePhase[];
+  destination?: string;
 }
 
 const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DayByDaySectionProps) => {

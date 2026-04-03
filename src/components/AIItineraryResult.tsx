@@ -317,6 +317,23 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         <>
           {hasBeforeTrip && <BeforeTripSection data={data.beforeTrip} />}
 
+          {/* === NARRATIVE ARC === */}
+          {data.days.length > 1 && (
+            <NarrativeArc
+              totalDays={data.days.length}
+              activeDay={activeDay}
+              onDayClick={scrollToDay}
+            />
+          )}
+
+          {/* === GROUP ORCHESTRATION === */}
+          <GroupOrchestrator travelers={groupTravelers} onTravelersChange={setGroupTravelers} />
+
+          {/* === ENERGY REBALANCE === */}
+          <div className="flex items-center gap-3">
+            <RebalanceButton days={data.days} onRebalance={() => {}} />
+          </div>
+
           {nearbyPlaces?.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-5">
               <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -369,6 +386,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             setSelectedStopKey={setSelectedStopKey}
             onSelectStop={handleSelectStop}
             activityRefs={activityRefs}
+            narrativePhases={narrativePhases}
+            destination={destination}
           />
 
           {!hasBeforeTrip && data.budgetBreakdown && (

@@ -542,12 +542,15 @@ interface DaySectionProps {
   setSelectedStopKey: (key: string | null) => void;
   onSelectStop: (dayNum: number, stopKey: string) => void;
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
+  narrativePhase?: import("./itinerary/NarrativeArc").NarrativePhase;
+  destination?: string;
 }
 
-const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DaySectionProps) => {
+const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhase, destination }: DaySectionProps) => {
   const grouped = groupActivities(day.activities);
   const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
   const mappedActivities = day.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng);
+  const openSlots = getOpenSlots(day.day, day.activities.length);
 
   return (
     <motion.div

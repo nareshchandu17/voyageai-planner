@@ -475,7 +475,7 @@ interface DayByDaySectionProps {
   destination?: string;
 }
 
-const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DayByDaySectionProps) => {
+const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination }: DayByDaySectionProps) => {
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -519,6 +519,14 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
             setSelectedStopKey={setSelectedStopKey}
             onSelectStop={onSelectStop}
             activityRefs={activityRefs}
+            narrativePhase={narrativePhases?.[idx]}
+            destination={destination}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+};
           />
         ))}
       </div>

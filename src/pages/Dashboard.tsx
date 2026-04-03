@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
+import { useTravelerProfile } from "@/hooks/useTravelerProfile";
 import WidgetDetailModal from "@/components/WidgetDetailModal";
 import CompletedTripDetail from "@/components/CompletedTripDetail";
+import TravelerProfileCard from "@/components/TravelerProfileCard";
 import heroTravel from "@/assets/hero-travel.jpg";
 import { toast } from "sonner";
 
@@ -41,6 +43,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TripTab>("planned");
   const { user } = useAuth();
   const { planned, active, completed, loading, updateStatus, updateTrip, fetchTrips } = useTrips();
+  const { profile: travelerProfile, learnFromTrip } = useTravelerProfile();
   const navigate = useNavigate();
 
   const counts = { planned: planned.length, active: active.length, completed: completed.length };
@@ -91,6 +94,13 @@ const Dashboard = () => {
             </div>
           ))}
         </motion.div>
+
+        {/* Traveler Profile Card */}
+        {travelerProfile && travelerProfile.trip_count > 0 && (
+          <motion.div className="mb-10" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}>
+            <TravelerProfileCard profile={travelerProfile} />
+          </motion.div>
+        )}
 
         {/* Tabs */}
         <motion.div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>

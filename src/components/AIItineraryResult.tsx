@@ -19,6 +19,10 @@ import DuringTripSection from "./DuringTripSection";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import { cn } from "@/lib/utils";
 import { fetchDirectionsSteps, type DirectionsDetail, type DirectionStep, type TravelMode } from "@/lib/streamChat";
+import { EnergyBar, ActivityEnergyBadge, RebalanceButton } from "./itinerary/EnergyProfiler";
+import { SerendipitySlot, getOpenSlots } from "./itinerary/SerendipityEngine";
+import { NarrativeArc, NarrativePhaseBadge, assignNarrativePhases } from "./itinerary/NarrativeArc";
+import { GroupOrchestrator, type GroupTraveler } from "./itinerary/GroupOrchestration";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {
@@ -144,11 +148,12 @@ interface Props {
   upcomingEvents?: any;
   destinationPhotos?: Array<{ id: string; url: string; small: string; thumb: string; alt: string; credit?: string; creditLink?: string }>;
   tripStartDate?: Date;
+  destination?: string;
 }
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";
@@ -159,8 +164,10 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const [selectedStopKey, setSelectedStopKey] = useState<string | null>(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapDay, setMapDay] = useState<number>(data.days[0]?.day || 1);
+  const [groupTravelers, setGroupTravelers] = useState<GroupTraveler[]>([]);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const narrativePhases = useMemo(() => assignNarrativePhases(data.days.length), [data.days.length]);
 
   useEffect(() => { setActivePhase(autoPhase); }, [autoPhase]);
   useEffect(() => { setMapDay(activeDay); }, [activeDay]);
@@ -310,6 +317,23 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         <>
           {hasBeforeTrip && <BeforeTripSection data={data.beforeTrip} />}
 
+          {/* === NARRATIVE ARC === */}
+          {data.days.length > 1 && (
+            <NarrativeArc
+              totalDays={data.days.length}
+              activeDay={activeDay}
+              onDayClick={scrollToDay}
+            />
+          )}
+
+          {/* === GROUP ORCHESTRATION === */}
+          <GroupOrchestrator travelers={groupTravelers} onTravelersChange={setGroupTravelers} />
+
+          {/* === ENERGY REBALANCE === */}
+          <div className="flex items-center gap-3">
+            <RebalanceButton days={data.days} onRebalance={() => {}} />
+          </div>
+
           {nearbyPlaces?.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-5">
               <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -362,6 +386,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             setSelectedStopKey={setSelectedStopKey}
             onSelectStop={handleSelectStop}
             activityRefs={activityRefs}
+            narrativePhases={narrativePhases}
+            destination={destination}
           />
 
           {!hasBeforeTrip && data.budgetBreakdown && (
@@ -410,6 +436,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             setSelectedStopKey={setSelectedStopKey}
             onSelectStop={handleSelectStop}
             activityRefs={activityRefs}
+            narrativePhases={narrativePhases}
+            destination={destination}
           />
         </>
       )}
@@ -445,9 +473,11 @@ interface DayByDaySectionProps {
   setSelectedStopKey: (key: string | null) => void;
   onSelectStop: (dayNum: number, stopKey: string) => void;
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
+  narrativePhases?: import("./itinerary/NarrativeArc").NarrativePhase[];
+  destination?: string;
 }
 
-const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DayByDaySectionProps) => {
+const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination }: DayByDaySectionProps) => {
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -491,12 +521,15 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
             setSelectedStopKey={setSelectedStopKey}
             onSelectStop={onSelectStop}
             activityRefs={activityRefs}
+            narrativePhase={narrativePhases?.[idx]}
+            destination={destination}
           />
         ))}
       </div>
     </motion.div>
   );
 };
+
 
 /* ============================================================
    PREMIUM DAY SECTION
@@ -511,12 +544,15 @@ interface DaySectionProps {
   setSelectedStopKey: (key: string | null) => void;
   onSelectStop: (dayNum: number, stopKey: string) => void;
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
+  narrativePhase?: import("./itinerary/NarrativeArc").NarrativePhase;
+  destination?: string;
 }
 
-const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs }: DaySectionProps) => {
+const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhase, destination }: DaySectionProps) => {
   const grouped = groupActivities(day.activities);
   const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
   const mappedActivities = day.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng);
+  const openSlots = getOpenSlots(day.day, day.activities.length);
 
   return (
     <motion.div
@@ -545,7 +581,8 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
                 Day {day.day}: {day.theme}
               </h4>
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 shrink-0 flex-wrap items-center">
+              {narrativePhase && <NarrativePhaseBadge phase={narrativePhase} />}
               {day.weather && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-medium">
                   {weatherIcon(day.weather.condition)} {day.weather.temp}
@@ -560,6 +597,9 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
           </div>
         </div>
       </div>
+
+      {/* Energy Bar */}
+      <EnergyBar activities={day.activities} dayNum={day.day} />
 
       {/* Weather advisory */}
       {day.weather?.advisory && (
@@ -604,6 +644,17 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
           </div>
         );
       })}
+
+      {/* Serendipity Slots */}
+      {openSlots.map((slot, i) => (
+        <SerendipitySlot
+          key={`serendipity-${day.day}-${i}`}
+          dayNum={day.day}
+          time={slot.time}
+          destination={destination || ""}
+          coordinates={day.mapCenter}
+        />
+      ))}
 
       {/* Meals */}
       {day.meals && (
@@ -1112,6 +1163,7 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
               <DollarSign className="w-2.5 h-2.5" /> ${activity.cost}
             </span>
           )}
+          <ActivityEnergyBadge activity={activity} />
         </div>
 
         {/* Insider tip */}

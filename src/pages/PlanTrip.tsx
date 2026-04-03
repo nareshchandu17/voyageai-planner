@@ -366,6 +366,7 @@ const PlanTrip = () => {
             upcomingEvents={upcomingEvents}
             destinationPhotos={destinationPhotos}
             tripStartDate={dateRange.from}
+            destination={destination}
           />
         </div>
       </motion.div>

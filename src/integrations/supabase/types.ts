@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      traveler_profiles: {
+        Row: {
+          average_rating: number | null
+          created_at: string
+          cuisine_preferences: string[] | null
+          energy_tolerance: number | null
+          id: string
+          pace_preference: string | null
+          past_patterns: Json | null
+          travel_style: string[] | null
+          trip_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_rating?: number | null
+          created_at?: string
+          cuisine_preferences?: string[] | null
+          energy_tolerance?: number | null
+          id?: string
+          pace_preference?: string | null
+          past_patterns?: Json | null
+          travel_style?: string[] | null
+          trip_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_rating?: number | null
+          created_at?: string
+          cuisine_preferences?: string[] | null
+          energy_tolerance?: number | null
+          id?: string
+          pace_preference?: string | null
+          past_patterns?: Json | null
+          travel_style?: string[] | null
+          trip_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trip_memories: {
         Row: {
           content: string | null
@@ -48,6 +90,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "trip_memories_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_travelers: {
+        Row: {
+          compatibility_score: number | null
+          created_at: string
+          id: string
+          name: string
+          preferences: Json | null
+          trip_id: string
+        }
+        Insert: {
+          compatibility_score?: number | null
+          created_at?: string
+          id?: string
+          name: string
+          preferences?: Json | null
+          trip_id: string
+        }
+        Update: {
+          compatibility_score?: number | null
+          created_at?: string
+          id?: string
+          name?: string
+          preferences?: Json | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_travelers_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"

@@ -527,12 +527,7 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
     </motion.div>
   );
 };
-          />
-        ))}
-      </div>
-    </motion.div>
-  );
-};
+
 
 /* ============================================================
    PREMIUM DAY SECTION

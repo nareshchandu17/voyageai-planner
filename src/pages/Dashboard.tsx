@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
+import { useTravelerProfile } from "@/hooks/useTravelerProfile";
 import WidgetDetailModal from "@/components/WidgetDetailModal";
 import CompletedTripDetail from "@/components/CompletedTripDetail";
+import TravelerProfileCard from "@/components/TravelerProfileCard";
 import heroTravel from "@/assets/hero-travel.jpg";
 import { toast } from "sonner";
 

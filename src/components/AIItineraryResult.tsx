@@ -164,8 +164,10 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const [selectedStopKey, setSelectedStopKey] = useState<string | null>(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapDay, setMapDay] = useState<number>(data.days[0]?.day || 1);
+  const [groupTravelers, setGroupTravelers] = useState<GroupTraveler[]>([]);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const narrativePhases = useMemo(() => assignNarrativePhases(data.days.length), [data.days.length]);
 
   useEffect(() => { setActivePhase(autoPhase); }, [autoPhase]);
   useEffect(() => { setMapDay(activeDay); }, [activeDay]);

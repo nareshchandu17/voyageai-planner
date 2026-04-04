@@ -32,6 +32,29 @@ serve(async (req) => {
         ).join("\n")}`
       : "";
 
+    const profileContext = travelerProfile
+      ? `\n\nTRAVELER PROFILE (personalize the itinerary based on this):
+- Pace preference: ${travelerProfile.pace_preference || "moderate"}
+- Energy tolerance: ${travelerProfile.energy_tolerance || 3}/5 (1=relaxed, 5=intense)
+- Cuisine preferences: ${travelerProfile.cuisine_preferences?.join(", ") || "no specific preference"}
+- Travel style: ${travelerProfile.travel_style?.join(", ") || "general"}
+- Past trips completed: ${travelerProfile.trip_count || 0}
+- Average trip rating: ${travelerProfile.average_rating || "N/A"}/5
+${travelerProfile.past_patterns?.avg_activities_per_day ? `- Preferred activities per day: ${travelerProfile.past_patterns.avg_activities_per_day}` : ""}
+${travelerProfile.past_patterns?.preferred_time_of_day ? `- Preferred time of day: ${travelerProfile.past_patterns.preferred_time_of_day}` : ""}
+${travelerProfile.past_patterns?.avg_daily_budget ? `- Average daily budget: $${travelerProfile.past_patterns.avg_daily_budget}` : ""}
+${travelerProfile.past_patterns?.favorite_activity_types?.length ? `- Favorite activity types: ${travelerProfile.past_patterns.favorite_activity_types.join(", ")}` : ""}
+${travelerProfile.past_patterns?.skipped_activity_types?.length ? `- Tends to skip: ${travelerProfile.past_patterns.skipped_activity_types.join(", ")} (avoid these)` : ""}
+${travelerProfile.past_patterns?.trip_ratings?.length ? `- Past destinations & ratings: ${travelerProfile.past_patterns.trip_ratings.map((r: any) => `${r.destination} (${r.rating}/5)`).join(", ")}` : ""}
+
+IMPORTANT: Use this profile to personalize the itinerary:
+- Match activity intensity to the energy tolerance level
+- Prioritize favorite activity types and cuisine preferences
+- Schedule ${travelerProfile.past_patterns?.avg_activities_per_day || 4} activities per day based on their history
+- If pace is "relaxed", add more free time; if "intense", pack more activities
+- Avoid activity types they tend to skip`
+      : "";
+
     const systemPrompt = `You are VoyageAI, an expert travel planner. You create comprehensive travel plans with TWO phases:
 1. BEFORE TRIP — preparation intelligence so the user is fully ready
 2. DURING TRIP — a live travel companion with practical info for while traveling

@@ -50,6 +50,7 @@ const PlanTrip = () => {
   const tripId = searchParams.get("tripId");
   const { user } = useAuth();
   const { saveTrip, updateTrip } = useTrips();
+  const { profile: travelerProfile } = useTravelerProfile();
 
   const [step, setStep] = useState(1);
   const [scrollY, setScrollY] = useState(0);

@@ -149,6 +149,15 @@ interface Props {
   destinationPhotos?: Array<{ id: string; url: string; small: string; thumb: string; alt: string; credit?: string; creditLink?: string }>;
   tripStartDate?: Date;
   destination?: string;
+  travelerProfile?: {
+    pace_preference?: string;
+    energy_tolerance?: number;
+    cuisine_preferences?: string[];
+    travel_style?: string[];
+    trip_count?: number;
+    average_rating?: number;
+    past_patterns?: any;
+  } | null;
 }
 
 type Phase = "before" | "during";

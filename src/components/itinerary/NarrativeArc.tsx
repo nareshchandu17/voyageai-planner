@@ -1,5 +1,6 @@
+import { useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag } from "lucide-react";
+import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -21,9 +22,8 @@ export const assignNarrativePhases = (totalDays: number): NarrativePhase[] => {
   if (totalDays === 4) return ["orientation", "build", "peak", "close"];
   if (totalDays === 5) return ["orientation", "build", "peak", "wind-down", "close"];
 
-  // For longer trips, distribute
   const phases: NarrativePhase[] = ["orientation"];
-  const remaining = totalDays - 3; // reserve orientation, peak, close
+  const remaining = totalDays - 3;
   const buildDays = Math.ceil(remaining * 0.4);
   const windDays = remaining - buildDays;
 
@@ -42,23 +42,93 @@ interface NarrativeArcProps {
   totalDays: number;
   activeDay: number;
   onDayClick?: (dayNum: number) => void;
+  onIntensityChange?: (dayIndex: number, newIntensity: number) => void;
 }
 
-export const NarrativeArc = ({ totalDays, activeDay, onDayClick }: NarrativeArcProps) => {
+export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChange }: NarrativeArcProps) => {
   const phases = assignNarrativePhases(totalDays);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [customIntensities, setCustomIntensities] = useState<Record<number, number>>({});
+
+  const getIntensity = (index: number, phase: NarrativePhase) =>
+    customIntensities[index] ?? phaseConfig[phase].intensity;
+
+  const handlePointerDown = (index: number, e: React.PointerEvent) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    setDragging(index);
+  };
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (dragging === null || !svgRef.current) return;
+    const svg = svgRef.current;
+    const rect = svg.getBoundingClientRect();
+    const svgY = e.clientY - rect.top;
+    const svgHeight = rect.height;
+    // Map y position to intensity (top=100, bottom=0)
+    const rawIntensity = ((svgHeight - svgY) / svgHeight) * 120;
+    const clamped = Math.max(10, Math.min(100, rawIntensity));
+
+    setCustomIntensities(prev => ({ ...prev, [dragging]: Math.round(clamped) }));
+  }, [dragging]);
+
+  const handlePointerUp = useCallback(() => {
+    if (dragging !== null && onIntensityChange && customIntensities[dragging] !== undefined) {
+      onIntensityChange(dragging, customIntensities[dragging]);
+    }
+    setDragging(null);
+  }, [dragging, customIntensities, onIntensityChange]);
+
+  const viewBoxWidth = totalDays * 100;
+  const viewBoxHeight = 80;
+
+  const points = phases.map((phase, i) => {
+    const intensity = getIntensity(i, phase);
+    const x = totalDays === 1 ? viewBoxWidth / 2 : (i / (totalDays - 1)) * viewBoxWidth;
+    const y = viewBoxHeight - 5 - (intensity / 100) * (viewBoxHeight - 15);
+    return { x, y, intensity };
+  });
+
+  const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const fillD = [
+    ...points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`),
+    `L ${points[points.length - 1].x} ${viewBoxHeight - 2}`,
+    `L ${points[0].x} ${viewBoxHeight - 2}`,
+    "Z"
+  ].join(" ");
+
+  const hasCustom = Object.keys(customIntensities).length > 0;
 
   return (
     <div className="glass-card p-5 mb-6">
       <div className="flex items-center gap-2 mb-4">
         <BookOpen className="w-4 h-4 text-primary" />
         <h5 className="text-sm font-semibold text-foreground">Trip Story Arc</h5>
-        <span className="text-[10px] text-muted-foreground ml-auto">Narrative pacing across your journey</span>
+        <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1">
+          <GripVertical className="w-3 h-3" /> Drag dots to reshape pacing
+        </span>
+        {hasCustom && (
+          <button
+            onClick={() => setCustomIntensities({})}
+            className="text-[10px] text-primary hover:underline ml-2"
+          >
+            Reset
+          </button>
+        )}
       </div>
 
       {/* Arc Visualization */}
       <div className="relative">
-        {/* Background curve */}
-        <svg viewBox={`0 0 ${totalDays * 100} 80`} className="w-full h-20" preserveAspectRatio="none">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+          className="w-full h-20 select-none touch-none"
+          preserveAspectRatio="none"
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        >
           <defs>
             <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
@@ -67,42 +137,36 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick }: NarrativeArcP
               <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
             </linearGradient>
           </defs>
-          <path
-            d={phases.map((phase, i) => {
-              const x = (i / (totalDays - 1 || 1)) * (totalDays * 100);
-              const y = 75 - (phaseConfig[phase].intensity / 100) * 65;
-              return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-            }).join(" ")}
-            fill="none"
-            stroke="url(#arcGradient)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Fill area under curve */}
-          <path
-            d={[
-              ...phases.map((phase, i) => {
-                const x = (i / (totalDays - 1 || 1)) * (totalDays * 100);
-                const y = 75 - (phaseConfig[phase].intensity / 100) * 65;
-                return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-              }),
-              `L ${(totalDays - 1) * 100} 78`,
-              `L 0 78`,
-              "Z"
-            ].join(" ")}
-            fill="url(#arcGradient)"
-            opacity="0.15"
-          />
+          {/* Fill under curve */}
+          <path d={fillD} fill="url(#arcGradient)" opacity="0.15" />
+          {/* Curve line */}
+          <path d={pathD} fill="none" stroke="url(#arcGradient)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Draggable dots */}
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={dragging === i ? 8 : 6}
+              fill={i + 1 === activeDay ? "hsl(var(--primary))" : customIntensities[i] !== undefined ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))"}
+              stroke="hsl(var(--background))"
+              strokeWidth="2"
+              className="cursor-grab active:cursor-grabbing transition-all"
+              style={{ filter: dragging === i ? "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))" : undefined }}
+              onPointerDown={(e) => handlePointerDown(i, e)}
+            />
+          ))}
         </svg>
 
-        {/* Day dots */}
+        {/* Day labels */}
         <div className="flex justify-between mt-2">
           <TooltipProvider>
             {phases.map((phase, i) => {
               const config = phaseConfig[phase];
               const Icon = config.icon;
               const isActive = i + 1 === activeDay;
+              const intensity = getIntensity(i, phase);
+              const isCustom = customIntensities[i] !== undefined;
 
               return (
                 <Tooltip key={i}>
@@ -121,7 +185,9 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick }: NarrativeArcP
                           "w-8 h-8 rounded-full flex items-center justify-center transition-all",
                           isActive
                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                            : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                            : isCustom
+                              ? "bg-accent/20 text-accent ring-1 ring-accent/30"
+                              : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
                         )}
                       >
                         <Icon className="w-3.5 h-3.5" />
@@ -129,11 +195,15 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick }: NarrativeArcP
                       <span className={cn("text-[9px] font-medium whitespace-nowrap", isActive ? "text-foreground" : "text-muted-foreground")}>
                         Day {i + 1}
                       </span>
+                      {isCustom && (
+                        <span className="text-[8px] text-accent font-medium">{intensity}%</span>
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
                     <p className="text-xs font-semibold">{config.label}</p>
                     <p className="text-[10px] text-muted-foreground max-w-[180px]">{config.description}</p>
+                    {isCustom && <p className="text-[10px] text-accent mt-1">Custom intensity: {intensity}%</p>}
                   </TooltipContent>
                 </Tooltip>
               );

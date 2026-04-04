@@ -208,7 +208,7 @@ Budget: $${budget} per person
 Group size: ${groupSize} travelers
 Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
-${weatherContext}${placesContext}${eventsContext}
+${weatherContext}${placesContext}${eventsContext}${profileContext}
 
 Create a comprehensive two-phase travel plan:
 1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview.

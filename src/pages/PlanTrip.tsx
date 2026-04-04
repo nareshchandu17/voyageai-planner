@@ -17,6 +17,7 @@ import PlaceCard from "@/components/PlaceCard";
 import EventCard from "@/components/EventCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips } from "@/hooks/useTrips";
+import { useTravelerProfile } from "@/hooks/useTravelerProfile";
 import { supabase } from "@/integrations/supabase/client";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
@@ -49,6 +50,7 @@ const PlanTrip = () => {
   const tripId = searchParams.get("tripId");
   const { user } = useAuth();
   const { saveTrip, updateTrip } = useTrips();
+  const { profile: travelerProfile } = useTravelerProfile();
 
   const [step, setStep] = useState(1);
   const [scrollY, setScrollY] = useState(0);
@@ -167,6 +169,15 @@ const PlanTrip = () => {
       weatherData,
       nearbyPlaces,
       upcomingEvents,
+      travelerProfile: travelerProfile ? {
+        pace_preference: travelerProfile.pace_preference,
+        energy_tolerance: travelerProfile.energy_tolerance,
+        cuisine_preferences: travelerProfile.cuisine_preferences,
+        travel_style: travelerProfile.travel_style,
+        past_patterns: travelerProfile.past_patterns,
+        trip_count: travelerProfile.trip_count,
+        average_rating: travelerProfile.average_rating,
+      } : undefined,
       onDelta: (chunk) => { fullText += chunk; setRawStream(fullText); },
       onDone: async () => {
         setGenerationPhase("done");

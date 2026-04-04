@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { destination, startDate, endDate, budget, styles, groupSize, interests, weatherForecast, nearbyPlaces, upcomingEvents } = await req.json();
+    const { destination, startDate, endDate, budget, styles, groupSize, interests, weatherForecast, nearbyPlaces, upcomingEvents, travelerProfile } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -30,6 +30,29 @@ serve(async (req) => {
       ? `\n\nLOCAL EVENTS during trip dates (from Ticketmaster - recommend relevant ones):\n${upcomingEvents.events.map((e: any) =>
           `- ${e.date}: ${e.name} at ${e.venue || "TBA"} (${e.category || "Event"}${e.priceRange ? ` - $${e.priceRange.min}-$${e.priceRange.max}` : ""})`
         ).join("\n")}`
+      : "";
+
+    const profileContext = travelerProfile
+      ? `\n\nTRAVELER PROFILE (personalize the itinerary based on this):
+- Pace preference: ${travelerProfile.pace_preference || "moderate"}
+- Energy tolerance: ${travelerProfile.energy_tolerance || 3}/5 (1=relaxed, 5=intense)
+- Cuisine preferences: ${travelerProfile.cuisine_preferences?.join(", ") || "no specific preference"}
+- Travel style: ${travelerProfile.travel_style?.join(", ") || "general"}
+- Past trips completed: ${travelerProfile.trip_count || 0}
+- Average trip rating: ${travelerProfile.average_rating || "N/A"}/5
+${travelerProfile.past_patterns?.avg_activities_per_day ? `- Preferred activities per day: ${travelerProfile.past_patterns.avg_activities_per_day}` : ""}
+${travelerProfile.past_patterns?.preferred_time_of_day ? `- Preferred time of day: ${travelerProfile.past_patterns.preferred_time_of_day}` : ""}
+${travelerProfile.past_patterns?.avg_daily_budget ? `- Average daily budget: $${travelerProfile.past_patterns.avg_daily_budget}` : ""}
+${travelerProfile.past_patterns?.favorite_activity_types?.length ? `- Favorite activity types: ${travelerProfile.past_patterns.favorite_activity_types.join(", ")}` : ""}
+${travelerProfile.past_patterns?.skipped_activity_types?.length ? `- Tends to skip: ${travelerProfile.past_patterns.skipped_activity_types.join(", ")} (avoid these)` : ""}
+${travelerProfile.past_patterns?.trip_ratings?.length ? `- Past destinations & ratings: ${travelerProfile.past_patterns.trip_ratings.map((r: any) => `${r.destination} (${r.rating}/5)`).join(", ")}` : ""}
+
+IMPORTANT: Use this profile to personalize the itinerary:
+- Match activity intensity to the energy tolerance level
+- Prioritize favorite activity types and cuisine preferences
+- Schedule ${travelerProfile.past_patterns?.avg_activities_per_day || 4} activities per day based on their history
+- If pace is "relaxed", add more free time; if "intense", pack more activities
+- Avoid activity types they tend to skip`
       : "";
 
     const systemPrompt = `You are VoyageAI, an expert travel planner. You create comprehensive travel plans with TWO phases:
@@ -185,7 +208,7 @@ Budget: $${budget} per person
 Group size: ${groupSize} travelers
 Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
-${weatherContext}${placesContext}${eventsContext}
+${weatherContext}${placesContext}${eventsContext}${profileContext}
 
 Create a comprehensive two-phase travel plan:
 1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview.

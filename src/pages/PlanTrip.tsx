@@ -378,6 +378,7 @@ const PlanTrip = () => {
             destinationPhotos={destinationPhotos}
             tripStartDate={dateRange.from}
             destination={destination}
+            travelerProfile={travelerProfile}
           />
         </div>
       </motion.div>

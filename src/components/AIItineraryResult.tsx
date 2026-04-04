@@ -5,7 +5,7 @@ import {
   MapPin, Clock, DollarSign, Sun, CloudRain, Cloud, Snowflake,
   Utensils, Camera, ShoppingBag, Bus, TreePine, PartyPopper,
   Lightbulb, AlertTriangle, Luggage, Ticket, Compass, Plane, Download,
-  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route, Leaf
+  ChevronRight, ChevronDown, Star, Sunrise, Sunset as SunsetIcon, Moon, Expand, Navigation, Car, TramFront, Footprints, LocateFixed, Loader2, Route, Leaf, Sparkles, User, Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -149,11 +149,20 @@ interface Props {
   destinationPhotos?: Array<{ id: string; url: string; small: string; thumb: string; alt: string; credit?: string; creditLink?: string }>;
   tripStartDate?: Date;
   destination?: string;
+  travelerProfile?: {
+    pace_preference?: string;
+    energy_tolerance?: number;
+    cuisine_preferences?: string[];
+    travel_style?: string[];
+    trip_count?: number;
+    average_rating?: number;
+    past_patterns?: any;
+  } | null;
 }
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, travelerProfile }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";
@@ -278,6 +287,39 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           </div>
         </motion.div>
       ) : null}
+
+      {/* Personalization Indicator */}
+      {travelerProfile && travelerProfile.trip_count && travelerProfile.trip_count > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 p-4"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shrink-0">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-primary" />
+                Personalized for You
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                This itinerary was tailored based on {travelerProfile.trip_count} past trip{travelerProfile.trip_count > 1 ? "s" : ""}
+                {travelerProfile.pace_preference && travelerProfile.pace_preference !== "moderate" ? ` · ${travelerProfile.pace_preference} pace` : ""}
+                {travelerProfile.cuisine_preferences?.length ? ` · ${travelerProfile.cuisine_preferences.slice(0, 2).join(", ")} cuisine` : ""}
+                {travelerProfile.travel_style?.length ? ` · ${travelerProfile.travel_style.slice(0, 2).join(", ")} style` : ""}
+                {travelerProfile.past_patterns?.favorite_activity_types?.length ? ` · loves ${travelerProfile.past_patterns.favorite_activity_types.slice(0, 2).join(", ")}` : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full shrink-0">
+              <Heart className="w-3 h-3" /> AI-Tuned
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Phase Toggle */}
       {(hasBeforeTrip || hasDuringTrip) && (

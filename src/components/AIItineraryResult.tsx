@@ -288,6 +288,39 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         </motion.div>
       ) : null}
 
+      {/* Personalization Indicator */}
+      {travelerProfile && travelerProfile.trip_count && travelerProfile.trip_count > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 p-4"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shrink-0">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-primary" />
+                Personalized for You
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                This itinerary was tailored based on {travelerProfile.trip_count} past trip{travelerProfile.trip_count > 1 ? "s" : ""}
+                {travelerProfile.pace_preference && travelerProfile.pace_preference !== "moderate" ? ` · ${travelerProfile.pace_preference} pace` : ""}
+                {travelerProfile.cuisine_preferences?.length ? ` · ${travelerProfile.cuisine_preferences.slice(0, 2).join(", ")} cuisine` : ""}
+                {travelerProfile.travel_style?.length ? ` · ${travelerProfile.travel_style.slice(0, 2).join(", ")} style` : ""}
+                {travelerProfile.past_patterns?.favorite_activity_types?.length ? ` · loves ${travelerProfile.past_patterns.favorite_activity_types.slice(0, 2).join(", ")}` : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full shrink-0">
+              <Heart className="w-3 h-3" /> AI-Tuned
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Phase Toggle */}
       {(hasBeforeTrip || hasDuringTrip) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}

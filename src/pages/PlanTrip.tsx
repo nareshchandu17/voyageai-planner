@@ -17,6 +17,7 @@ import PlaceCard from "@/components/PlaceCard";
 import EventCard from "@/components/EventCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips } from "@/hooks/useTrips";
+import { useTravelerProfile } from "@/hooks/useTravelerProfile";
 import { supabase } from "@/integrations/supabase/client";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";

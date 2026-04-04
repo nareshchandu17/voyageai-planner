@@ -169,6 +169,15 @@ const PlanTrip = () => {
       weatherData,
       nearbyPlaces,
       upcomingEvents,
+      travelerProfile: travelerProfile ? {
+        pace_preference: travelerProfile.pace_preference,
+        energy_tolerance: travelerProfile.energy_tolerance,
+        cuisine_preferences: travelerProfile.cuisine_preferences,
+        travel_style: travelerProfile.travel_style,
+        past_patterns: travelerProfile.past_patterns,
+        trip_count: travelerProfile.trip_count,
+        average_rating: travelerProfile.average_rating,
+      } : undefined,
       onDelta: (chunk) => { fullText += chunk; setRawStream(fullText); },
       onDone: async () => {
         setGenerationPhase("done");

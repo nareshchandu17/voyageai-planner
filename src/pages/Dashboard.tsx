@@ -43,7 +43,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TripTab>("planned");
   const { user } = useAuth();
   const { planned, active, completed, loading, updateStatus, updateTrip, fetchTrips } = useTrips();
-  const { profile: travelerProfile, learnFromTrip } = useTravelerProfile();
+  const { profile: travelerProfile, learnFromTrip, upsertProfile } = useTravelerProfile();
   const navigate = useNavigate();
 
   const counts = { planned: planned.length, active: active.length, completed: completed.length };
@@ -98,7 +98,7 @@ const Dashboard = () => {
         {/* Traveler Profile Card */}
         {travelerProfile && travelerProfile.trip_count > 0 && (
           <motion.div className="mb-10" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}>
-            <TravelerProfileCard profile={travelerProfile} />
+            <TravelerProfileCard profile={travelerProfile} onSave={upsertProfile} />
           </motion.div>
         )}
 

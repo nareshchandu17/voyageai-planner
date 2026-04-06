@@ -154,6 +154,12 @@ const PlanTrip = () => {
   const toggleStyle = (id: string) => setStyles((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
   const toggleInterest = (tag: string) => setInterests((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
 
+  const handleRegenerateWithArc = useCallback((intensities: Record<number, number>) => {
+    setNarrativeIntensities(intensities);
+    // Trigger regeneration after setting intensities
+    setTimeout(() => handleGenerate(), 50);
+  }, []);
+
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);

@@ -80,6 +80,7 @@ const PlanTrip = () => {
   const [error, setError] = useState<string | null>(null);
   const [enrichmentLoading, setEnrichmentLoading] = useState(false);
   const [enrichmentFetched, setEnrichmentFetched] = useState(false);
+  const [narrativeIntensities, setNarrativeIntensities] = useState<Record<number, number>>({});
 
   // Load existing trip if tripId is provided
   useEffect(() => {

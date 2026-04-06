@@ -390,6 +390,7 @@ const PlanTrip = () => {
             tripStartDate={dateRange.from}
             destination={destination}
             travelerProfile={travelerProfile}
+            onRegenerateWithArc={handleRegenerateWithArc}
           />
         </div>
       </motion.div>

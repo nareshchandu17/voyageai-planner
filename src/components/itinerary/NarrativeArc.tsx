@@ -1,8 +1,84 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical } from "lucide-react";
+import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical, Zap, TrendingUp, TrendingDown, Activity, Coffee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+interface ArcPreset {
+  id: string;
+  label: string;
+  icon: typeof Zap;
+  description: string;
+  /** Returns intensity (0-100) for each day index given totalDays */
+  generate: (totalDays: number) => Record<number, number>;
+}
+
+const arcPresets: ArcPreset[] = [
+  {
+    id: "slow-start",
+    label: "Slow Start",
+    icon: Coffee,
+    description: "Ease in gently, peak late, end strong",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) {
+        const t = i / Math.max(n - 1, 1);
+        m[i] = Math.round(20 + 70 * Math.pow(t, 1.8));
+      }
+      return m;
+    },
+  },
+  {
+    id: "peak-early",
+    label: "Peak Early",
+    icon: TrendingDown,
+    description: "Hit the highlights first, then unwind",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) {
+        const t = i / Math.max(n - 1, 1);
+        m[i] = Math.round(95 - 70 * Math.pow(t, 1.5));
+      }
+      return m;
+    },
+  },
+  {
+    id: "balanced",
+    label: "Balanced",
+    icon: Activity,
+    description: "Even energy throughout the trip",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) m[i] = 60;
+      return m;
+    },
+  },
+  {
+    id: "classic-arc",
+    label: "Classic Arc",
+    icon: TrendingUp,
+    description: "Build up, peak in the middle, wind down",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) {
+        const t = i / Math.max(n - 1, 1);
+        m[i] = Math.round(25 + 75 * Math.sin(t * Math.PI));
+      }
+      return m;
+    },
+  },
+  {
+    id: "max-intensity",
+    label: "Go All Out",
+    icon: Zap,
+    description: "Maximum activities every single day",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) m[i] = 95;
+      return m;
+    },
+  },
+];
 
 export type NarrativePhase = "orientation" | "build" | "peak" | "wind-down" | "close";
 

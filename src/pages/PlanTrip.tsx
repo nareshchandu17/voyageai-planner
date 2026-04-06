@@ -339,6 +339,8 @@ const PlanTrip = () => {
     });
   };
 
+  const handleGenerate = () => handleGenerateWithIntensities();
+
   const handleRefreshEnrichment = () => {
     setEnrichmentFetched(false);
     setWeatherData(null);

@@ -156,11 +156,12 @@ const PlanTrip = () => {
 
   const handleRegenerateWithArc = useCallback((intensities: Record<number, number>) => {
     setNarrativeIntensities(intensities);
-    // Trigger regeneration after setting intensities
-    setTimeout(() => handleGenerate(), 50);
+    // Use a ref-like approach: pass intensities directly to generate
+    handleGenerateWithIntensities(intensities);
   }, []);
 
-  const handleGenerate = async () => {
+  const handleGenerateWithIntensities = async (arcIntensities?: Record<number, number>) => {
+    const intensitiesToUse = arcIntensities ?? narrativeIntensities;
     setGenerating(true);
     setError(null);
     setRawStream("");
@@ -176,7 +177,7 @@ const PlanTrip = () => {
       weatherData,
       nearbyPlaces,
       upcomingEvents,
-      narrativeIntensities: Object.keys(narrativeIntensities).length > 0 ? narrativeIntensities : undefined,
+      narrativeIntensities: Object.keys(intensitiesToUse).length > 0 ? intensitiesToUse : undefined,
       travelerProfile: travelerProfile ? {
         pace_preference: travelerProfile.pace_preference,
         energy_tolerance: travelerProfile.energy_tolerance,

@@ -170,6 +170,7 @@ const PlanTrip = () => {
       weatherData,
       nearbyPlaces,
       upcomingEvents,
+      narrativeIntensities: Object.keys(narrativeIntensities).length > 0 ? narrativeIntensities : undefined,
       travelerProfile: travelerProfile ? {
         pace_preference: travelerProfile.pace_preference,
         energy_tolerance: travelerProfile.energy_tolerance,

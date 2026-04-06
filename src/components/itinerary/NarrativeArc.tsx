@@ -126,9 +126,20 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<number | null>(null);
   const [customIntensities, setCustomIntensities] = useState<Record<number, number>>({});
+  const [activePreset, setActivePreset] = useState<string | null>(null);
 
   const getIntensity = (index: number, phase: NarrativePhase) =>
     customIntensities[index] ?? phaseConfig[phase].intensity;
+
+  const applyPreset = useCallback((preset: ArcPreset) => {
+    const intensities = preset.generate(totalDays);
+    setCustomIntensities(intensities);
+    setActivePreset(preset.id);
+    // Notify parent of all changes
+    if (onIntensityChange) {
+      Object.entries(intensities).forEach(([idx, val]) => onIntensityChange(Number(idx), val));
+    }
+  }, [totalDays, onIntensityChange]);
 
   const handlePointerDown = (index: number, e: React.PointerEvent) => {
     e.preventDefault();

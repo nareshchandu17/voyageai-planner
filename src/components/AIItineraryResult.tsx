@@ -178,6 +178,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const narrativePhases = useMemo(() => assignNarrativePhases(data.days.length), [data.days.length]);
+  const [arcIntensities, setArcIntensities] = useState<Record<number, number>>({});
+  const hasArcChanges = Object.keys(arcIntensities).length > 0;
 
   useEffect(() => { setActivePhase(autoPhase); }, [autoPhase]);
   useEffect(() => { setMapDay(activeDay); }, [activeDay]);

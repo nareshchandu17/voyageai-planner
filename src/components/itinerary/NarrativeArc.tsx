@@ -1,8 +1,84 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical } from "lucide-react";
+import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical, Zap, TrendingUp, TrendingDown, Activity, Coffee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+interface ArcPreset {
+  id: string;
+  label: string;
+  icon: typeof Zap;
+  description: string;
+  /** Returns intensity (0-100) for each day index given totalDays */
+  generate: (totalDays: number) => Record<number, number>;
+}
+
+const arcPresets: ArcPreset[] = [
+  {
+    id: "slow-start",
+    label: "Slow Start",
+    icon: Coffee,
+    description: "Ease in gently, peak late, end strong",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) {
+        const t = i / Math.max(n - 1, 1);
+        m[i] = Math.round(20 + 70 * Math.pow(t, 1.8));
+      }
+      return m;
+    },
+  },
+  {
+    id: "peak-early",
+    label: "Peak Early",
+    icon: TrendingDown,
+    description: "Hit the highlights first, then unwind",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) {
+        const t = i / Math.max(n - 1, 1);
+        m[i] = Math.round(95 - 70 * Math.pow(t, 1.5));
+      }
+      return m;
+    },
+  },
+  {
+    id: "balanced",
+    label: "Balanced",
+    icon: Activity,
+    description: "Even energy throughout the trip",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) m[i] = 60;
+      return m;
+    },
+  },
+  {
+    id: "classic-arc",
+    label: "Classic Arc",
+    icon: TrendingUp,
+    description: "Build up, peak in the middle, wind down",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) {
+        const t = i / Math.max(n - 1, 1);
+        m[i] = Math.round(25 + 75 * Math.sin(t * Math.PI));
+      }
+      return m;
+    },
+  },
+  {
+    id: "max-intensity",
+    label: "Go All Out",
+    icon: Zap,
+    description: "Maximum activities every single day",
+    generate: (n) => {
+      const m: Record<number, number> = {};
+      for (let i = 0; i < n; i++) m[i] = 95;
+      return m;
+    },
+  },
+];
 
 export type NarrativePhase = "orientation" | "build" | "peak" | "wind-down" | "close";
 
@@ -50,9 +126,20 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<number | null>(null);
   const [customIntensities, setCustomIntensities] = useState<Record<number, number>>({});
+  const [activePreset, setActivePreset] = useState<string | null>(null);
 
   const getIntensity = (index: number, phase: NarrativePhase) =>
     customIntensities[index] ?? phaseConfig[phase].intensity;
+
+  const applyPreset = useCallback((preset: ArcPreset) => {
+    const intensities = preset.generate(totalDays);
+    setCustomIntensities(intensities);
+    setActivePreset(preset.id);
+    // Notify parent of all changes
+    if (onIntensityChange) {
+      Object.entries(intensities).forEach(([idx, val]) => onIntensityChange(Number(idx), val));
+    }
+  }, [totalDays, onIntensityChange]);
 
   const handlePointerDown = (index: number, e: React.PointerEvent) => {
     e.preventDefault();
@@ -71,6 +158,7 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
     const clamped = Math.max(10, Math.min(100, rawIntensity));
 
     setCustomIntensities(prev => ({ ...prev, [dragging]: Math.round(clamped) }));
+    setActivePreset(null); // manual drag clears preset selection
   }, [dragging]);
 
   const handlePointerUp = useCallback(() => {
@@ -110,7 +198,7 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
         </span>
         {hasCustom && (
           <button
-            onClick={() => setCustomIntensities({})}
+            onClick={() => { setCustomIntensities({}); setActivePreset(null); }}
             className="text-[10px] text-primary hover:underline ml-2"
           >
             Reset
@@ -118,7 +206,36 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
         )}
       </div>
 
-      {/* Arc Visualization */}
+      {/* Preset Templates */}
+      {totalDays > 1 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {arcPresets.map((preset) => {
+            const Icon = preset.icon;
+            const isActive = activePreset === preset.id;
+            return (
+              <Tooltip key={preset.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => applyPreset(preset)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                        : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {preset.label}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">{preset.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+      )}
       <div className="relative">
         <svg
           ref={svgRef}

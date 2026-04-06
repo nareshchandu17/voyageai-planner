@@ -55,6 +55,24 @@ IMPORTANT: Use this profile to personalize the itinerary:
 - Avoid activity types they tend to skip`
       : "";
 
+    // Build narrative intensity context from user-shaped arc
+    const narrativeContext = narrativeIntensities && Object.keys(narrativeIntensities).length > 0
+      ? `\n\nNARRATIVE ARC PACING (user has manually shaped the trip intensity arc — FOLLOW THIS CLOSELY):
+${Object.entries(narrativeIntensities).map(([dayIdx, intensity]) => {
+  const dayNum = parseInt(dayIdx) + 1;
+  let activityCount: string;
+  const pct = intensity as number;
+  if (pct <= 25) activityCount = "2 activities (very relaxed, mostly free time)";
+  else if (pct <= 40) activityCount = "3 activities (light and easy)";
+  else if (pct <= 60) activityCount = "4 activities (moderate pace)";
+  else if (pct <= 80) activityCount = "5-6 activities (active and packed)";
+  else activityCount = "6-7 activities (maximum intensity, dawn to late night)";
+  return `- Day ${dayNum}: intensity ${pct}% → ${activityCount}`;
+}).join("\n")}
+
+IMPORTANT: The user has customized the emotional pacing of their trip. Days with higher intensity should have MORE activities, MORE ambitious plans, and LONGER days. Days with lower intensity should have FEWER activities, more free time, leisurely meals, and relaxation. This overrides default pacing.`
+      : "";
+
     const systemPrompt = `You are VoyageAI, an expert travel planner. You create comprehensive travel plans with TWO phases:
 1. BEFORE TRIP — preparation intelligence so the user is fully ready
 2. DURING TRIP — a live travel companion with practical info for while traveling

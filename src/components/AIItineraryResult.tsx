@@ -158,11 +158,12 @@ interface Props {
     average_rating?: number;
     past_patterns?: any;
   } | null;
+  onRegenerateWithArc?: (intensities: Record<number, number>) => void;
 }
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, travelerProfile }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, travelerProfile, onRegenerateWithArc }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";
@@ -177,6 +178,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const narrativePhases = useMemo(() => assignNarrativePhases(data.days.length), [data.days.length]);
+  const [arcIntensities, setArcIntensities] = useState<Record<number, number>>({});
+  const hasArcChanges = Object.keys(arcIntensities).length > 0;
 
   useEffect(() => { setActivePhase(autoPhase); }, [autoPhase]);
   useEffect(() => { setMapDay(activeDay); }, [activeDay]);
@@ -361,11 +364,37 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
 
           {/* === NARRATIVE ARC === */}
           {data.days.length > 1 && (
-            <NarrativeArc
-              totalDays={data.days.length}
-              activeDay={activeDay}
-              onDayClick={scrollToDay}
-            />
+            <div>
+              <NarrativeArc
+                totalDays={data.days.length}
+                activeDay={activeDay}
+                onDayClick={scrollToDay}
+                onIntensityChange={(dayIndex, newIntensity) => {
+                  setArcIntensities(prev => ({ ...prev, [dayIndex]: newIntensity }));
+                }}
+              />
+              {hasArcChanges && onRegenerateWithArc && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center justify-center gap-3 -mt-3 mb-4"
+                >
+                  <button
+                    onClick={() => onRegenerateWithArc(arcIntensities)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-105"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Regenerate with Custom Pacing
+                  </button>
+                  <button
+                    onClick={() => setArcIntensities({})}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset Arc
+                  </button>
+                </motion.div>
+              )}
+            </div>
           )}
 
           {/* === GROUP ORCHESTRATION === */}

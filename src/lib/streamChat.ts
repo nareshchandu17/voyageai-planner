@@ -230,6 +230,7 @@ export async function streamItinerary({
   nearbyPlaces,
   upcomingEvents,
   travelerProfile,
+  narrativeIntensities,
   onDelta,
   onDone,
   onError,
@@ -239,6 +240,7 @@ export async function streamItinerary({
   nearbyPlaces?: any;
   upcomingEvents?: any;
   travelerProfile?: any;
+  narrativeIntensities?: Record<number, number>;
   onDelta: (chunk: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
@@ -250,7 +252,7 @@ export async function streamItinerary({
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ ...params, weatherForecast: weatherData, nearbyPlaces, upcomingEvents, travelerProfile }),
+      body: JSON.stringify({ ...params, weatherForecast: weatherData, nearbyPlaces, upcomingEvents, travelerProfile, narrativeIntensities }),
     });
 
     if (!resp.ok) {

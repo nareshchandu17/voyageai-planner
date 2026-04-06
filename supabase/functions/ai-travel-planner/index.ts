@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { destination, startDate, endDate, budget, styles, groupSize, interests, weatherForecast, nearbyPlaces, upcomingEvents, travelerProfile } = await req.json();
+    const { destination, startDate, endDate, budget, styles, groupSize, interests, weatherForecast, nearbyPlaces, upcomingEvents, travelerProfile, narrativeIntensities } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -53,6 +53,24 @@ IMPORTANT: Use this profile to personalize the itinerary:
 - Schedule ${travelerProfile.past_patterns?.avg_activities_per_day || 4} activities per day based on their history
 - If pace is "relaxed", add more free time; if "intense", pack more activities
 - Avoid activity types they tend to skip`
+      : "";
+
+    // Build narrative intensity context from user-shaped arc
+    const narrativeContext = narrativeIntensities && Object.keys(narrativeIntensities).length > 0
+      ? `\n\nNARRATIVE ARC PACING (user has manually shaped the trip intensity arc — FOLLOW THIS CLOSELY):
+${Object.entries(narrativeIntensities).map(([dayIdx, intensity]) => {
+  const dayNum = parseInt(dayIdx) + 1;
+  let activityCount: string;
+  const pct = intensity as number;
+  if (pct <= 25) activityCount = "2 activities (very relaxed, mostly free time)";
+  else if (pct <= 40) activityCount = "3 activities (light and easy)";
+  else if (pct <= 60) activityCount = "4 activities (moderate pace)";
+  else if (pct <= 80) activityCount = "5-6 activities (active and packed)";
+  else activityCount = "6-7 activities (maximum intensity, dawn to late night)";
+  return `- Day ${dayNum}: intensity ${pct}% → ${activityCount}`;
+}).join("\n")}
+
+IMPORTANT: The user has customized the emotional pacing of their trip. Days with higher intensity should have MORE activities, MORE ambitious plans, and LONGER days. Days with lower intensity should have FEWER activities, more free time, leisurely meals, and relaxation. This overrides default pacing.`
       : "";
 
     const systemPrompt = `You are VoyageAI, an expert travel planner. You create comprehensive travel plans with TWO phases:
@@ -208,7 +226,7 @@ Budget: $${budget} per person
 Group size: ${groupSize} travelers
 Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
-${weatherContext}${placesContext}${eventsContext}${profileContext}
+${weatherContext}${placesContext}${eventsContext}${profileContext}${narrativeContext}
 
 Create a comprehensive two-phase travel plan:
 1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview.

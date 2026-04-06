@@ -80,6 +80,7 @@ const PlanTrip = () => {
   const [error, setError] = useState<string | null>(null);
   const [enrichmentLoading, setEnrichmentLoading] = useState(false);
   const [enrichmentFetched, setEnrichmentFetched] = useState(false);
+  const [narrativeIntensities, setNarrativeIntensities] = useState<Record<number, number>>({});
 
   // Load existing trip if tripId is provided
   useEffect(() => {
@@ -153,7 +154,14 @@ const PlanTrip = () => {
   const toggleStyle = (id: string) => setStyles((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
   const toggleInterest = (tag: string) => setInterests((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
 
-  const handleGenerate = async () => {
+  const handleRegenerateWithArc = useCallback((intensities: Record<number, number>) => {
+    setNarrativeIntensities(intensities);
+    // Use a ref-like approach: pass intensities directly to generate
+    handleGenerateWithIntensities(intensities);
+  }, []);
+
+  const handleGenerateWithIntensities = async (arcIntensities?: Record<number, number>) => {
+    const intensitiesToUse = arcIntensities ?? narrativeIntensities;
     setGenerating(true);
     setError(null);
     setRawStream("");
@@ -169,6 +177,7 @@ const PlanTrip = () => {
       weatherData,
       nearbyPlaces,
       upcomingEvents,
+      narrativeIntensities: Object.keys(intensitiesToUse).length > 0 ? intensitiesToUse : undefined,
       travelerProfile: travelerProfile ? {
         pace_preference: travelerProfile.pace_preference,
         energy_tolerance: travelerProfile.energy_tolerance,
@@ -330,6 +339,8 @@ const PlanTrip = () => {
     });
   };
 
+  const handleGenerate = () => handleGenerateWithIntensities();
+
   const handleRefreshEnrichment = () => {
     setEnrichmentFetched(false);
     setWeatherData(null);
@@ -379,6 +390,7 @@ const PlanTrip = () => {
             tripStartDate={dateRange.from}
             destination={destination}
             travelerProfile={travelerProfile}
+            onRegenerateWithArc={handleRegenerateWithArc}
           />
         </div>
       </motion.div>

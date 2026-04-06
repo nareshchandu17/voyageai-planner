@@ -158,11 +158,12 @@ interface Props {
     average_rating?: number;
     past_patterns?: any;
   } | null;
+  onRegenerateWithArc?: (intensities: Record<number, number>) => void;
 }
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, travelerProfile }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, travelerProfile, onRegenerateWithArc }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";

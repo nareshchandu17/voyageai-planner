@@ -197,7 +197,7 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
         </span>
         {hasCustom && (
           <button
-            onClick={() => setCustomIntensities({})}
+            onClick={() => { setCustomIntensities({}); setActivePreset(null); }}
             className="text-[10px] text-primary hover:underline ml-2"
           >
             Reset
@@ -205,7 +205,36 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
         )}
       </div>
 
-      {/* Arc Visualization */}
+      {/* Preset Templates */}
+      {totalDays > 1 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {arcPresets.map((preset) => {
+            const Icon = preset.icon;
+            const isActive = activePreset === preset.id;
+            return (
+              <Tooltip key={preset.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => applyPreset(preset)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                        : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {preset.label}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">{preset.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+      )}
       <div className="relative">
         <svg
           ref={svgRef}

@@ -158,6 +158,7 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
     const clamped = Math.max(10, Math.min(100, rawIntensity));
 
     setCustomIntensities(prev => ({ ...prev, [dragging]: Math.round(clamped) }));
+    setActivePreset(null); // manual drag clears preset selection
   }, [dragging]);
 
   const handlePointerUp = useCallback(() => {

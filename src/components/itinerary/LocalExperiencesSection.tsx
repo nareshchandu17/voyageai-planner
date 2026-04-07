@@ -308,6 +308,7 @@ const LocalExperiencesSection = ({ destination, interests, styles, days }: Props
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  </div>
                 </motion.div>
               );
             })}

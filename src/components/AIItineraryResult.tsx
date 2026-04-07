@@ -23,6 +23,7 @@ import { EnergyBar, ActivityEnergyBadge, RebalanceButton } from "./itinerary/Ene
 import { SerendipitySlot, getOpenSlots } from "./itinerary/SerendipityEngine";
 import { NarrativeArc, NarrativePhaseBadge, assignNarrativePhases } from "./itinerary/NarrativeArc";
 import { GroupOrchestrator, type GroupTraveler } from "./itinerary/GroupOrchestration";
+import LocalExperiencesSection from "./itinerary/LocalExperiencesSection";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {
@@ -444,6 +445,15 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
               </div>
             </motion.div>
           ) : null}
+
+          {/* === LOCAL EXPERIENCES RECOMMENDER === */}
+          {destination && (
+            <LocalExperiencesSection
+              destination={destination}
+              interests={data.days?.[0]?.activities?.map(a => a.type).filter(Boolean)}
+              days={data.days.length}
+            />
+          )}
 
           {/* Day-by-Day Itinerary */}
           <DayByDaySection

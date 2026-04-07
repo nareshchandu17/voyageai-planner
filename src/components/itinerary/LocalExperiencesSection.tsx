@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchUnsplashBatch } from "@/lib/streamChat";
 import {
   Sparkles, Utensils, Coffee, ShoppingBag, Eye, Palette, TreePine, Music, Heart, Gem,
   MapPin, Clock, DollarSign, ChevronRight, Loader2, RefreshCw, Star, Compass
@@ -17,6 +18,7 @@ interface Experience {
   neighborhood: string;
   tags: string[];
   confidence: number;
+  imageUrl?: string;
 }
 
 interface Category {
@@ -77,6 +79,28 @@ const LocalExperiencesSection = ({ destination, interests, styles, days }: Props
       });
       if (fnError) throw new Error(fnError.message);
       if (fnData?.error) throw new Error(fnData.error);
+
+      // Fetch Unsplash images for all experiences in one batch
+      const allExps: { catIdx: number; expIdx: number; query: string }[] = [];
+      (fnData.categories || []).forEach((cat: Category, ci: number) => {
+        cat.experiences?.forEach((exp: Experience, ei: number) => {
+          allExps.push({ catIdx: ci, expIdx: ei, query: `${exp.name} ${destination}` });
+        });
+      });
+
+      if (allExps.length > 0) {
+        const queries = allExps.map(e => e.query);
+        const photos = await fetchUnsplashBatch(queries);
+        if (photos) {
+          allExps.forEach(({ catIdx, expIdx, query }) => {
+            const photo = photos[query];
+            if (photo?.urls?.small) {
+              fnData.categories[catIdx].experiences[expIdx].imageUrl = photo.urls.small;
+            }
+          });
+        }
+      }
+
       setData(fnData);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
@@ -210,18 +234,35 @@ const LocalExperiencesSection = ({ destination, interests, styles, days }: Props
                   transition={{ delay: i * 0.08 }}
                   onClick={() => setExpandedExp(isExpanded ? null : `${activeCategory}-${i}`)}
                   className={cn(
-                    "rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/30",
+                    "rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-primary/30",
                     isExpanded && "border-primary/40 shadow-lg shadow-primary/5"
                   )}
                 >
+                  {exp.imageUrl && (
+                    <div className="h-32 overflow-hidden relative">
+                      <img src={exp.imageUrl} alt={exp.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
+                      <div className="absolute bottom-2 left-3 right-3">
+                        <h4 className="text-sm font-semibold text-foreground drop-shadow-sm">{exp.name}</h4>
+                      </div>
+                    </div>
+                  )}
+                  <div className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h4 className="text-sm font-semibold text-foreground">{exp.name}</h4>
-                        <span className={cn("text-[10px] font-medium flex items-center gap-0.5", conf.color)}>
+                      {!exp.imageUrl && (
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h4 className="text-sm font-semibold text-foreground">{exp.name}</h4>
+                          <span className={cn("text-[10px] font-medium flex items-center gap-0.5", conf.color)}>
+                            <Star className="w-2.5 h-2.5" /> {conf.text}
+                          </span>
+                        </div>
+                      )}
+                      {exp.imageUrl && (
+                        <span className={cn("text-[10px] font-medium flex items-center gap-0.5 mb-1", conf.color)}>
                           <Star className="w-2.5 h-2.5" /> {conf.text}
                         </span>
-                      </div>
+                      )}
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{exp.description}</p>
                     </div>
                     <ChevronRight className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0 mt-1", isExpanded && "rotate-90")} />
@@ -267,6 +308,7 @@ const LocalExperiencesSection = ({ destination, interests, styles, days }: Props
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  </div>
                 </motion.div>
               );
             })}

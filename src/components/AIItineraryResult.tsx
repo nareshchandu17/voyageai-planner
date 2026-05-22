@@ -693,6 +693,22 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
         </div>
       </div>
 
+      {/* Companion Memory insight */}
+      {(day as any).companionInsight && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-4 flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 via-accent/5 to-transparent border border-primary/20"
+        >
+          <Heart className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-0.5">Tuned for You</p>
+            <p className="text-xs text-foreground/80 leading-relaxed">{(day as any).companionInsight}</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Energy Bar */}
       <EnergyBar activities={day.activities} dayNum={day.day} />
 

@@ -212,7 +212,8 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
         "dinner": { "name": "...", "cuisine": "...", "priceRange": "...", "location": "...", "imageQuery": "..." }
       },
       "dailyBudget": number,
-      "travelTip": "Practical tip for the day"
+      "travelTip": "Practical tip for the day",
+      "companionInsight": "A 1-2 sentence personalized note explaining HOW this day was tailored to the traveler's profile or narrative arc — e.g. 'We've softened Day 2 mornings since you prefer slower starts' or 'Packed Day 3 with culture stops because museums are your top interest.' Reference SPECIFIC profile fields or arc intensity."
     }
   ],
   "warnings": ["any important travel warnings"]

@@ -97,6 +97,33 @@ export type Database = {
           },
         ]
       }
+      trip_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          sender_name: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          sender_name: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          sender_name?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trip_travelers: {
         Row: {
           compatibility_score: number | null

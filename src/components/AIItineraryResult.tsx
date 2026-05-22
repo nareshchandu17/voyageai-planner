@@ -150,6 +150,7 @@ interface Props {
   destinationPhotos?: Array<{ id: string; url: string; small: string; thumb: string; alt: string; credit?: string; creditLink?: string }>;
   tripStartDate?: Date;
   destination?: string;
+  tripId?: string | null;
   travelerProfile?: {
     pace_preference?: string;
     energy_tolerance?: number;
@@ -160,11 +161,13 @@ interface Props {
     past_patterns?: any;
   } | null;
   onRegenerateWithArc?: (intensities: Record<number, number>) => void;
+  onSmartRebalance?: () => void;
+  smartRebalancing?: boolean;
 }
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, travelerProfile, onRegenerateWithArc }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, tripId, travelerProfile, onRegenerateWithArc, onSmartRebalance, smartRebalancing }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";
@@ -399,11 +402,22 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           )}
 
           {/* === GROUP ORCHESTRATION === */}
-          <GroupOrchestrator travelers={groupTravelers} onTravelersChange={setGroupTravelers} />
+          <GroupOrchestrator
+            travelers={groupTravelers}
+            onTravelersChange={setGroupTravelers}
+            tripId={tripId}
+            destination={destination}
+            days={data.days}
+          />
 
           {/* === ENERGY REBALANCE === */}
           <div className="flex items-center gap-3">
-            <RebalanceButton days={data.days} onRebalance={() => {}} />
+            <RebalanceButton
+              days={data.days}
+              onRebalance={() => {}}
+              onRegenerateBalanced={onSmartRebalance}
+              regenerating={smartRebalancing}
+            />
           </div>
 
           {nearbyPlaces?.length > 0 && (
@@ -678,6 +692,22 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
           </div>
         </div>
       </div>
+
+      {/* Companion Memory insight */}
+      {(day as any).companionInsight && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-4 flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 via-accent/5 to-transparent border border-primary/20"
+        >
+          <Heart className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-0.5">Tuned for You</p>
+            <p className="text-xs text-foreground/80 leading-relaxed">{(day as any).companionInsight}</p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Energy Bar */}
       <EnergyBar activities={day.activities} dayNum={day.day} />

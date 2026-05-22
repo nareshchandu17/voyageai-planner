@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
-import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical, Zap, TrendingUp, TrendingDown, Activity, Coffee } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, Compass, Mountain, Sunrise, Heart, Flag, GripVertical, Zap, TrendingUp, TrendingDown, Activity, Coffee, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -188,6 +188,33 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
 
   const hasCustom = Object.keys(customIntensities).length > 0;
 
+  // Flatness analysis — surface AI warning when arc lacks emotional variation
+  const flatnessWarning = useMemo(() => {
+    if (totalDays < 3) return null;
+    const intensities = phases.map((p, i) => getIntensity(i, p));
+    const min = Math.min(...intensities);
+    const max = Math.max(...intensities);
+    const range = max - min;
+    const avg = intensities.reduce((s, v) => s + v, 0) / intensities.length;
+    if (range < 15) {
+      return {
+        kind: "flat" as const,
+        message: avg > 80
+          ? "Your trip stays at peak intensity every day — without recovery time, you risk travel burnout. Soften 1-2 days to make peaks feel bigger."
+          : avg < 35
+            ? "Every day is low-energy — the trip may feel monotonous. Add a peak day or two so the highlights actually stand out."
+            : "The arc is very flat — emotional pacing relies on contrast. Try raising one day to ~90% and lowering another to ~30% so the trip has a real climax.",
+      };
+    }
+    if (intensities[intensities.length - 1] > intensities[0] + 30) {
+      return {
+        kind: "back-loaded" as const,
+        message: "Trip ends at peak intensity with no wind-down — travelers usually want a calmer last day to absorb the experience before flying home.",
+      };
+    }
+    return null;
+  }, [phases, customIntensities, totalDays]);
+
   return (
     <div className="glass-card p-5 mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -205,6 +232,25 @@ export const NarrativeArc = ({ totalDays, activeDay, onDayClick, onIntensityChan
           </button>
         )}
       </div>
+
+      <AnimatePresence>
+        {flatnessWarning && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-start gap-2 p-3 mb-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+              <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[11px] font-semibold text-yellow-600 dark:text-yellow-400">AI Pacing Warning</p>
+                <p className="text-[11px] text-foreground/80 leading-relaxed mt-0.5">{flatnessWarning.message}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Preset Templates */}
       {totalDays > 1 && (

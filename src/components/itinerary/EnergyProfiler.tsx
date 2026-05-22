@@ -134,23 +134,30 @@ export const ActivityEnergyBadge = ({ activity }: { activity: { type: string; du
   );
 };
 
-/** Auto-rebalance suggestion */
-export const RebalanceButton = ({ days, onRebalance }: { days: any[]; onRebalance: (rebalanced: any[]) => void }) => {
+/** Auto-rebalance suggestion — supports both local rebalance and AI regenerate */
+export const RebalanceButton = ({
+  days,
+  onRebalance,
+  onRegenerateBalanced,
+  regenerating,
+}: {
+  days: any[];
+  onRebalance: (rebalanced: any[]) => void;
+  onRegenerateBalanced?: () => void;
+  regenerating?: boolean;
+}) => {
   const overloadedDays = days.filter(d => getDayEnergy(d.activities || []) > MAX_COMFORTABLE_ENERGY);
 
   if (overloadedDays.length === 0) return null;
 
   const handleRebalance = () => {
-    // Simple rebalancing: move high-energy activities from overloaded days to underloaded ones
-    const rebalanced = [...days.map(d => ({ ...d, activities: [...(d.activities || [])] }))];
-    
+    // Move highest-energy activity from each overloaded day to an underloaded one
+    const rebalanced = days.map(d => ({ ...d, activities: [...(d.activities || [])] }));
+
     for (const day of rebalanced) {
       const energy = getDayEnergy(day.activities);
       if (energy > MAX_COMFORTABLE_ENERGY) {
-        // Sort activities by energy cost descending
         day.activities.sort((a: any, b: any) => getActivityEnergy(b) - getActivityEnergy(a));
-        
-        // Find an underloaded day to move the highest-energy activity
         const underloaded = rebalanced.find(d => d.day !== day.day && getDayEnergy(d.activities) < MAX_COMFORTABLE_ENERGY - 3);
         if (underloaded && day.activities.length > 2) {
           const moved = day.activities.splice(0, 1)[0];
@@ -163,9 +170,17 @@ export const RebalanceButton = ({ days, onRebalance }: { days: any[]; onRebalanc
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={handleRebalance} className="gap-2 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/10">
-      <RefreshCw className="w-3.5 h-3.5" />
-      Auto-Rebalance ({overloadedDays.length} overloaded {overloadedDays.length === 1 ? "day" : "days"})
-    </Button>
+    <div className="flex flex-wrap items-center gap-2">
+      <Button variant="outline" size="sm" onClick={handleRebalance} className="gap-2 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/10">
+        <RefreshCw className="w-3.5 h-3.5" />
+        Quick Rebalance ({overloadedDays.length} overloaded {overloadedDays.length === 1 ? "day" : "days"})
+      </Button>
+      {onRegenerateBalanced && (
+        <Button variant="default" size="sm" onClick={onRegenerateBalanced} disabled={regenerating} className="gap-2">
+          <Zap className="w-3.5 h-3.5" />
+          {regenerating ? "AI Replanning…" : "AI Smart Rebalance"}
+        </Button>
+      )}
+    </div>
   );
 };

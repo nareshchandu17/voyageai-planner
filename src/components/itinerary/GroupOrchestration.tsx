@@ -180,7 +180,7 @@ export const GroupOrchestrator = ({ travelers, onTravelersChange, tripId, destin
     const content = draft.trim().slice(0, 1000);
     setDraft("");
     setSending(true);
-    const senderName = (user.user_metadata?.full_name as string | undefined) || (user.email?.split("@")[0]) || "You";
+    const senderName = user.name || user.email?.split("@")[0] || "You";
     const { error } = await supabase.from("trip_messages").insert([{
       trip_id: tripId, user_id: user.id, sender_name: senderName, content,
     }] as any);

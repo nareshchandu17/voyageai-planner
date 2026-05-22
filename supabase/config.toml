@@ -23,3 +23,9 @@ verify_jwt = false
 
 [functions.unsplash-batch]
 verify_jwt = false
+
+[functions.ai-group-suggestions]
+verify_jwt = false
+
+[functions.ai-local-experiences]
+verify_jwt = false

@@ -389,8 +389,26 @@ const PlanTrip = () => {
             destinationPhotos={destinationPhotos}
             tripStartDate={dateRange.from}
             destination={destination}
+            tripId={existingTripId}
             travelerProfile={travelerProfile}
             onRegenerateWithArc={handleRegenerateWithArc}
+            onSmartRebalance={() => {
+              // Compute reduced intensities for overloaded days, then regenerate
+              const reduced: Record<number, number> = { ...narrativeIntensities };
+              (itineraryData?.days || []).forEach((d: any, idx: number) => {
+                const acts = d.activities || [];
+                const energy = acts.reduce((s: number, a: any) => {
+                  const base = ({ attraction: 3, restaurant: 1, transport: 2, free: 2, shopping: 2, nightlife: 3, hiking: 5, adventure: 5, museum: 2, temple: 2 } as Record<string, number>)[a.type] || 2;
+                  const hours = parseFloat(a.duration) || 1;
+                  return s + Math.min(5, Math.max(1, Math.round(base * (hours / 2))));
+                }, 0);
+                if (energy > 15) reduced[idx] = Math.max(30, (reduced[idx] ?? 60) - 25);
+                else if (energy < 8 && reduced[idx] === undefined) reduced[idx] = 75; // pack the underloaded
+              });
+              toast.info("AI replanning a balanced trip…");
+              handleGenerateWithIntensities(reduced);
+            }}
+            smartRebalancing={generating}
           />
         </div>
       </motion.div>

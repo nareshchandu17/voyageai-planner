@@ -106,6 +106,15 @@ const CompletedTripDetail = ({ trip, allCompleted = [], onStoryGenerated }: Prop
     setSharing(false);
   };
 
+  const handleRevoke = async () => {
+    setSharing(true);
+    const { error } = await supabase.from("trips").update({ share_token: null } as any).eq("id", trip.id);
+    setSharing(false);
+    if (error) { toast.error("Failed to revoke link"); return; }
+    setShareUrl(null);
+    toast.success("Share link revoked");
+  };
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files?.length) return;
@@ -132,11 +141,18 @@ const CompletedTripDetail = ({ trip, allCompleted = [], onStoryGenerated }: Prop
 
   return (
     <div className="space-y-4">
-      {/* Share button */}
-      <Button variant="ghost" size="sm" className="w-full text-xs" onClick={handleShare} disabled={sharing}>
-        {sharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-        {copied ? "Link Copied!" : shareUrl ? "Copy Share Link" : "Share Trip Story"}
-      </Button>
+      {/* Share controls */}
+      <div className="flex gap-2">
+        <Button variant="ghost" size="sm" className="flex-1 text-xs" onClick={handleShare} disabled={sharing}>
+          {sharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+          {copied ? "Link Copied!" : shareUrl ? "Copy Share Link" : "Share Trip Story"}
+        </Button>
+        {shareUrl && (
+          <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={handleRevoke} disabled={sharing} title="Revoke share link">
+            <X className="w-3.5 h-3.5" /> Revoke
+          </Button>
+        )}
+      </div>
 
       {/* Section tabs */}
       <div className="flex gap-1 bg-secondary/50 rounded-xl p-1">

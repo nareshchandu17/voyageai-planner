@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          preferred_date: string
+          status: string
+          tour_duration: string | null
+          tour_price: string | null
+          tour_title: string
+          travelers: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          preferred_date: string
+          status?: string
+          tour_duration?: string | null
+          tour_price?: string | null
+          tour_title: string
+          travelers?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          preferred_date?: string
+          status?: string
+          tour_duration?: string | null
+          tour_price?: string | null
+          tour_title?: string
+          travelers?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       traveler_profiles: {
         Row: {
           average_rating: number | null

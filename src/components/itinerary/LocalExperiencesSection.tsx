@@ -94,19 +94,23 @@ const LocalExperiencesSection = ({ destination, interests, styles, days, tripId,
         return { ...d, activities: [...(d.activities || []), newActivity] };
       });
 
+      const { data: tripRow, error: fetchErr } = await supabase
+        .from("trips")
+        .select("itinerary_data")
+        .eq("id", tripId)
+        .single();
+      if (fetchErr) throw fetchErr;
+      const currentData = (tripRow?.itinerary_data as any) || {};
+      const merged = { ...currentData, days: updated };
       const { error } = await supabase
         .from("trips")
-        .update({ itinerary_data: { ...((itineraryDays as any).meta || {}), days: updated } } as any)
+        .update({ itinerary_data: merged } as any)
         .eq("id", tripId);
-
-      // Fetch current itinerary_data and merge to avoid clobbering
-      const { data: tripRow } = await supabase.from("trips").select("itinerary_data").eq("id", tripId).single();
-      const merged = { ...(tripRow?.itinerary_data || {}), days: updated };
-      await supabase.from("trips").update({ itinerary_data: merged } as any).eq("id", tripId);
-
       if (error) throw error;
+
       onItineraryUpdate?.(updated);
       toast.success(`Added "${exp.name}" to Day ${dayIndex + 1}`);
+
     } catch (e: any) {
       toast.error(e.message || "Couldn't add to itinerary");
     }

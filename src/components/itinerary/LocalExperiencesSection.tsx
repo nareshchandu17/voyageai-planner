@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchUnsplashBatch } from "@/lib/streamChat";
+import { toast } from "sonner";
 import {
   Sparkles, Utensils, Coffee, ShoppingBag, Eye, Palette, TreePine, Music, Heart, Gem,
-  MapPin, Clock, DollarSign, ChevronRight, Loader2, RefreshCw, Star, Compass
+  MapPin, Clock, DollarSign, ChevronRight, Loader2, RefreshCw, Star, Compass, Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -61,14 +62,61 @@ interface Props {
   interests?: string[];
   styles?: string[];
   days?: number;
+  tripId?: string | null;
+  itineraryDays?: any[];
+  onItineraryUpdate?: (days: any[]) => void;
 }
 
-const LocalExperiencesSection = ({ destination, interests, styles, days }: Props) => {
+const LocalExperiencesSection = ({ destination, interests, styles, days, tripId, itineraryDays, onItineraryUpdate }: Props) => {
   const [data, setData] = useState<LocalExperiencesData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState(0);
   const [expandedExp, setExpandedExp] = useState<string | null>(null);
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+
+  const addToDay = async (exp: Experience, dayIndex: number) => {
+    if (!tripId || !itineraryDays) return;
+    const key = `${exp.name}-${dayIndex}`;
+    setAddingKey(key);
+    try {
+      const updated = itineraryDays.map((d, i) => {
+        if (i !== dayIndex) return d;
+        const newActivity = {
+          time: exp.bestTime || "Flexible",
+          title: exp.name,
+          location: exp.neighborhood,
+          description: exp.description,
+          type: "local-gem",
+          tip: exp.localTip,
+          priceLevel: exp.priceLevel,
+        };
+        return { ...d, activities: [...(d.activities || []), newActivity] };
+      });
+
+      const { data: tripRow, error: fetchErr } = await supabase
+        .from("trips")
+        .select("itinerary_data")
+        .eq("id", tripId)
+        .single();
+      if (fetchErr) throw fetchErr;
+      const currentData = (tripRow?.itinerary_data as any) || {};
+      const merged = { ...currentData, days: updated };
+      const { error } = await supabase
+        .from("trips")
+        .update({ itinerary_data: merged } as any)
+        .eq("id", tripId);
+      if (error) throw error;
+
+      onItineraryUpdate?.(updated);
+      toast.success(`Added "${exp.name}" to Day ${dayIndex + 1}`);
+
+    } catch (e: any) {
+      toast.error(e.message || "Couldn't add to itinerary");
+    }
+    setAddingKey(null);
+  };
+
 
   const fetchExperiences = async () => {
     setLoading(true);
@@ -302,6 +350,30 @@ const LocalExperiencesSection = ({ destination, interests, styles, days }: Props
                               {exp.tags.map(tag => (
                                 <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">#{tag}</span>
                               ))}
+                            </div>
+                          )}
+                          {tripId && itineraryDays && itineraryDays.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-border/40">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1">
+                                <Plus className="w-3 h-3" /> Add to your itinerary
+                              </p>
+                              <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                {itineraryDays.map((_, di) => {
+                                  const k = `${exp.name}-${di}`;
+                                  const isAdding = addingKey === k;
+                                  return (
+                                    <button
+                                      key={di}
+                                      disabled={!!addingKey}
+                                      onClick={(e) => { e.stopPropagation(); addToDay(exp, di); }}
+                                      className="text-[10px] font-medium px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 flex items-center gap-1"
+                                    >
+                                      {isAdding ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Plus className="w-2.5 h-2.5" />}
+                                      Day {di + 1}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
                           )}
                         </div>

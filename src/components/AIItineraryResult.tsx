@@ -466,6 +466,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
               destination={destination}
               interests={data.days?.[0]?.activities?.map(a => a.type).filter(Boolean)}
               days={data.days.length}
+              tripId={tripId}
+              itineraryDays={data.days}
             />
           )}
 

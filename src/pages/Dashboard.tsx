@@ -121,9 +121,9 @@ const Dashboard = () => {
         ) : (
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-              {activeTab === "planned" && <TripGrid trips={planned} tab="planned" updateStatus={updateStatus} navigate={navigate} />}
-              {activeTab === "active" && <TripGrid trips={active} tab="active" updateStatus={updateStatus} navigate={navigate} />}
-              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} onStoryGenerated={async () => { await fetchTrips(); }} />}
+              {activeTab === "planned" && <TripGrid trips={planned} tab="planned" updateStatus={updateStatus} navigate={navigate} learnFromTrip={learnFromTrip} />}
+              {activeTab === "active" && <TripGrid trips={active} tab="active" updateStatus={updateStatus} navigate={navigate} learnFromTrip={learnFromTrip} />}
+              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} learnFromTrip={learnFromTrip} onStoryGenerated={async () => { await fetchTrips(); }} />}
             </motion.div>
           </AnimatePresence>
         )}
@@ -150,11 +150,12 @@ const Dashboard = () => {
 // ═══════════════════════════════════════
 // TRIP GRID — handles all three tabs
 // ═══════════════════════════════════════
-const TripGrid = ({ trips, tab, updateStatus, navigate, onStoryGenerated }: {
+const TripGrid = ({ trips, tab, updateStatus, navigate, learnFromTrip, onStoryGenerated }: {
   trips: Trip[];
   tab: TripTab;
   updateStatus: (id: string, status: "planned" | "active" | "completed") => Promise<boolean>;
   navigate: (path: string) => void;
+  learnFromTrip?: (trip: Trip) => Promise<void>;
   onStoryGenerated?: (tripId: string, story: string) => void;
 }) => {
   const [widgetModal, setWidgetModal] = useState<{ open: boolean; title: string; icon: any; items: any[] }>({ open: false, title: "", icon: "restaurants", items: [] });
@@ -164,7 +165,13 @@ const TripGrid = ({ trips, tab, updateStatus, navigate, onStoryGenerated }: {
   const handleStatusChange = async (trip: Trip) => {
     const next = nextStatus[trip.status];
     const ok = await updateStatus(trip.id, next);
-    if (ok) toast.success(`Trip moved to ${next}`);
+    if (ok) {
+      toast.success(`Trip moved to ${next}`);
+      if (next === "completed" && learnFromTrip) {
+        await learnFromTrip(trip);
+        toast.success("Traveler profile updated from this trip ✨");
+      }
+    }
   };
 
   const openWidget = (title: string, icon: any, trip: Trip) => {

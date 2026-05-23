@@ -352,6 +352,30 @@ const LocalExperiencesSection = ({ destination, interests, styles, days, tripId,
                               ))}
                             </div>
                           )}
+                          {tripId && itineraryDays && itineraryDays.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-border/40">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1">
+                                <Plus className="w-3 h-3" /> Add to your itinerary
+                              </p>
+                              <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                {itineraryDays.map((_, di) => {
+                                  const k = `${exp.name}-${di}`;
+                                  const isAdding = addingKey === k;
+                                  return (
+                                    <button
+                                      key={di}
+                                      disabled={!!addingKey}
+                                      onClick={(e) => { e.stopPropagation(); addToDay(exp, di); }}
+                                      className="text-[10px] font-medium px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 flex items-center gap-1"
+                                    >
+                                      {isAdding ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Plus className="w-2.5 h-2.5" />}
+                                      Day {di + 1}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}

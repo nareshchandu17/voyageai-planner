@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowUpRight, CalendarDays, Users, Mail, User } from "lucide-react";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const bookingSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -22,11 +24,12 @@ interface BookingModalProps {
 
 const BookingModal = ({ isOpen, onClose, tourTitle, tourPrice, tourDuration }: BookingModalProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", travelers: 1, date: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
@@ -42,15 +45,34 @@ const BookingModal = ({ isOpen, onClose, tourTitle, tourPrice, tourDuration }: B
     }
 
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    const { error } = await supabase.from("bookings").insert([{
+      user_id: user?.id ?? null,
+      tour_title: tourTitle,
+      tour_price: tourPrice,
+      tour_duration: tourDuration,
+      name: form.name,
+      email: form.email,
+      travelers: form.travelers,
+      preferred_date: form.date,
+      message: form.message || null,
+    }] as any);
+    setSubmitting(false);
+
+    if (error) {
       toast({
-        title: "Booking Request Sent! 🎉",
-        description: `Your trip to ${tourTitle} has been submitted. We'll reach out to ${form.email} shortly.`,
+        title: "Booking failed",
+        description: error.message,
+        variant: "destructive",
       });
-      onClose();
-      setForm({ name: "", email: "", travelers: 1, date: "", message: "" });
-    }, 1200);
+      return;
+    }
+
+    toast({
+      title: "Booking Request Sent! 🎉",
+      description: `Your trip to ${tourTitle} has been submitted. We'll reach out to ${form.email} shortly.`,
+    });
+    onClose();
+    setForm({ name: "", email: "", travelers: 1, date: "", message: "" });
   };
 
   return (

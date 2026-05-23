@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchUnsplashBatch } from "@/lib/streamChat";
+import { toast } from "sonner";
 import {
   Sparkles, Utensils, Coffee, ShoppingBag, Eye, Palette, TreePine, Music, Heart, Gem,
-  MapPin, Clock, DollarSign, ChevronRight, Loader2, RefreshCw, Star, Compass
+  MapPin, Clock, DollarSign, ChevronRight, Loader2, RefreshCw, Star, Compass, Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -61,14 +62,57 @@ interface Props {
   interests?: string[];
   styles?: string[];
   days?: number;
+  tripId?: string | null;
+  itineraryDays?: any[];
+  onItineraryUpdate?: (days: any[]) => void;
 }
 
-const LocalExperiencesSection = ({ destination, interests, styles, days }: Props) => {
+const LocalExperiencesSection = ({ destination, interests, styles, days, tripId, itineraryDays, onItineraryUpdate }: Props) => {
   const [data, setData] = useState<LocalExperiencesData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState(0);
   const [expandedExp, setExpandedExp] = useState<string | null>(null);
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+
+  const addToDay = async (exp: Experience, dayIndex: number) => {
+    if (!tripId || !itineraryDays) return;
+    const key = `${exp.name}-${dayIndex}`;
+    setAddingKey(key);
+    try {
+      const updated = itineraryDays.map((d, i) => {
+        if (i !== dayIndex) return d;
+        const newActivity = {
+          time: exp.bestTime || "Flexible",
+          title: exp.name,
+          location: exp.neighborhood,
+          description: exp.description,
+          type: "local-gem",
+          tip: exp.localTip,
+          priceLevel: exp.priceLevel,
+        };
+        return { ...d, activities: [...(d.activities || []), newActivity] };
+      });
+
+      const { error } = await supabase
+        .from("trips")
+        .update({ itinerary_data: { ...((itineraryDays as any).meta || {}), days: updated } } as any)
+        .eq("id", tripId);
+
+      // Fetch current itinerary_data and merge to avoid clobbering
+      const { data: tripRow } = await supabase.from("trips").select("itinerary_data").eq("id", tripId).single();
+      const merged = { ...(tripRow?.itinerary_data || {}), days: updated };
+      await supabase.from("trips").update({ itinerary_data: merged } as any).eq("id", tripId);
+
+      if (error) throw error;
+      onItineraryUpdate?.(updated);
+      toast.success(`Added "${exp.name}" to Day ${dayIndex + 1}`);
+    } catch (e: any) {
+      toast.error(e.message || "Couldn't add to itinerary");
+    }
+    setAddingKey(null);
+  };
+
 
   const fetchExperiences = async () => {
     setLoading(true);

@@ -170,7 +170,7 @@ interface Props {
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, tripId, travelerProfile, onRegenerateWithArc, onSmartRebalance, smartRebalancing }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, tripId, travelerProfile, onRegenerateWithArc, onSmartRebalance, smartRebalancing, onPersistDays }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";

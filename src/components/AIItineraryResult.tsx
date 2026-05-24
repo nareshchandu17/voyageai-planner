@@ -26,6 +26,7 @@ import { GroupOrchestrator, type GroupTraveler } from "./itinerary/GroupOrchestr
 import LocalExperiencesSection from "./itinerary/LocalExperiencesSection";
 import { PlaceVoting } from "./itinerary/PlaceVoting";
 import { ItineraryQualityWarning } from "./itinerary/ItineraryQualityWarning";
+import { toast } from "sonner";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {

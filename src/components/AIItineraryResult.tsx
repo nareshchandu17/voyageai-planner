@@ -640,6 +640,8 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
             activityRefs={activityRefs}
             narrativePhase={narrativePhases?.[idx]}
             destination={destination}
+            tripId={tripId}
+            hasCollaborators={hasCollaborators}
           />
         ))}
       </div>

@@ -590,6 +590,8 @@ interface DayByDaySectionProps {
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   narrativePhases?: import("./itinerary/NarrativeArc").NarrativePhase[];
   destination?: string;
+  tripId?: string | null;
+  hasCollaborators?: boolean;
 }
 
 const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination }: DayByDaySectionProps) => {

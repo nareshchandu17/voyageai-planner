@@ -503,6 +503,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             activityRefs={activityRefs}
             narrativePhases={narrativePhases}
             destination={destination}
+            tripId={tripId}
+            hasCollaborators={groupTravelers.length > 1}
           />
 
           {!hasBeforeTrip && data.budgetBreakdown && (

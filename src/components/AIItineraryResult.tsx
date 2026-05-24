@@ -180,13 +180,13 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const [activeDay, setActiveDay] = useState(1);
   const [selectedStopKey, setSelectedStopKey] = useState<string | null>(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
-  const [mapDay, setMapDay] = useState<number>(localDays[0]?.day || 1);
+  const [mapDay, setMapDay] = useState<number>(data.days[0]?.day || 1);
   const [groupTravelers, setGroupTravelers] = useState<GroupTraveler[]>([]);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // Local mirror of days so quick rebalances persist in this view immediately
-  const [localDays, setLocalDays] = useState(localDays);
-  useEffect(() => { setLocalDays(localDays); }, [localDays]);
+  const [localDays, setLocalDays] = useState(data.days);
+  useEffect(() => { setLocalDays(data.days); }, [data.days]);
   const narrativePhases = useMemo(() => assignNarrativePhases(localDays.length), [localDays.length]);
   const [arcIntensities, setArcIntensities] = useState<Record<number, number>>({});
   const hasArcChanges = Object.keys(arcIntensities).length > 0;

@@ -594,7 +594,7 @@ interface DayByDaySectionProps {
   hasCollaborators?: boolean;
 }
 
-const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination }: DayByDaySectionProps) => {
+const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination, tripId, hasCollaborators }: DayByDaySectionProps) => {
   const navRef = useRef<HTMLDivElement>(null);
 
   return (

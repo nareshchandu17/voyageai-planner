@@ -1261,7 +1261,7 @@ const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextA
   );
 };
 
-const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity }) => {
+const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity, tripId, dayNum, hasCollaborators }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity; tripId?: string | null; dayNum?: number; hasCollaborators?: boolean }) => {
   const hasImage = !!activity.imageUrl;
 
   return (

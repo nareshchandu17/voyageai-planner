@@ -751,30 +751,48 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
       {(["morning", "afternoon", "evening"] as const).map(tod => {
         const acts = grouped[tod];
         if (!acts || acts.length === 0) return null;
+        const todInsight = (day as any).companionInsights?.[tod] as string | undefined;
         return (
           <div key={tod} className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               {timeOfDayIcon(tod)}
               <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">{timeOfDayLabel(tod)}</h5>
             </div>
+            {todInsight && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mb-3 flex items-start gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                <p className="text-[11px] text-foreground/80 leading-relaxed">
+                  <span className="font-semibold text-primary">Companion memory: </span>
+                  {todInsight}
+                </p>
+              </motion.div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {acts.map((act, i) => {
                 const allActs = day.activities;
                 const globalIdx = allActs.indexOf(act);
                 const nextAct = globalIdx >= 0 && globalIdx < allActs.length - 1 ? allActs[globalIdx + 1] : undefined;
+                const stopKey = `day-${day.day}-${act.time}-${act.title}`;
                 return (
                 <ActivityCard
                   key={i}
                   activity={act}
                   nextActivity={nextAct}
-                  stopKey={`day-${day.day}-${act.time}-${act.title}`}
-                  selected={selectedStopKey === `day-${day.day}-${act.time}-${act.title}`}
+                  stopKey={stopKey}
+                  selected={selectedStopKey === stopKey}
                   onSelect={() => {
-                    const stopKey = `day-${day.day}-${act.time}-${act.title}`;
                     setSelectedStopKey(stopKey);
                     onSelectStop(day.day, stopKey);
                   }}
-                  cardRef={(el) => { activityRefs.current[`day-${day.day}-${act.time}-${act.title}`] = el; }}
+                  cardRef={(el) => { activityRefs.current[stopKey] = el; }}
+                  tripId={tripId}
+                  dayNum={day.day}
+                  hasCollaborators={hasCollaborators}
                 />
               )})}
             </div>

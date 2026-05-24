@@ -180,13 +180,13 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const [activeDay, setActiveDay] = useState(1);
   const [selectedStopKey, setSelectedStopKey] = useState<string | null>(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
-  const [mapDay, setMapDay] = useState<number>(data.days[0]?.day || 1);
+  const [mapDay, setMapDay] = useState<number>(localDays[0]?.day || 1);
   const [groupTravelers, setGroupTravelers] = useState<GroupTraveler[]>([]);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // Local mirror of days so quick rebalances persist in this view immediately
-  const [localDays, setLocalDays] = useState(data.days);
-  useEffect(() => { setLocalDays(data.days); }, [data.days]);
+  const [localDays, setLocalDays] = useState(localDays);
+  useEffect(() => { setLocalDays(localDays); }, [localDays]);
   const narrativePhases = useMemo(() => assignNarrativePhases(localDays.length), [localDays.length]);
   const [arcIntensities, setArcIntensities] = useState<Record<number, number>>({});
   const hasArcChanges = Object.keys(arcIntensities).length > 0;
@@ -198,8 +198,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const hasDuringTrip = !!data.duringTrip;
 
   const activeMapDayData = useMemo(
-    () => data.days.find((day) => day.day === mapDay) || data.days[0],
-    [data.days, mapDay],
+    () => localDays.find((day) => day.day === mapDay) || localDays[0],
+    [localDays, mapDay],
   );
 
   const scrollToDay = (dayNum: number) => {
@@ -225,8 +225,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   };
 
   const heroPhoto = destinationPhotos[0];
-  const totalDays = data.days.length;
-  const totalBudget = data.totalBudgetEstimate || data.days.reduce((sum, d) => sum + (d.dailyBudget || 0), 0);
+  const totalDays = localDays.length;
+  const totalBudget = data.totalBudgetEstimate || localDays.reduce((sum, d) => sum + (d.dailyBudget || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -275,9 +275,9 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
                 <DollarSign className="w-3.5 h-3.5" /> ${totalBudget.toLocaleString()} {data.currency || "USD"}
               </span>
             )}
-            {data.days[0]?.weather && (
+            {localDays[0]?.weather && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
-                {weatherIcon(data.days[0].weather.condition)} {data.days[0].weather.temp}
+                {weatherIcon(localDays[0].weather.condition)} {localDays[0].weather.temp}
               </span>
             )}
           </motion.div>
@@ -373,10 +373,10 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           {hasBeforeTrip && <BeforeTripSection data={data.beforeTrip} />}
 
           {/* === NARRATIVE ARC === */}
-          {data.days.length > 1 && (
+          {localDays.length > 1 && (
             <div>
               <NarrativeArc
-                totalDays={data.days.length}
+                totalDays={localDays.length}
                 activeDay={activeDay}
                 onDayClick={scrollToDay}
                 onIntensityChange={(dayIndex, newIntensity) => {
@@ -413,13 +413,13 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             onTravelersChange={setGroupTravelers}
             tripId={tripId}
             destination={destination}
-            days={data.days}
+            days={localDays}
           />
 
           {/* === ENERGY REBALANCE === */}
           <div className="flex items-center gap-3">
             <RebalanceButton
-              days={data.days}
+              days={localDays}
               onRebalance={() => {}}
               onRegenerateBalanced={onSmartRebalance}
               regenerating={smartRebalancing}
@@ -470,16 +470,16 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           {destination && (
             <LocalExperiencesSection
               destination={destination}
-              interests={data.days?.[0]?.activities?.map(a => a.type).filter(Boolean)}
-              days={data.days.length}
+              interests={localDays?.[0]?.activities?.map(a => a.type).filter(Boolean)}
+              days={localDays.length}
               tripId={tripId}
-              itineraryDays={data.days}
+              itineraryDays={localDays}
             />
           )}
 
           {/* Day-by-Day Itinerary */}
           <DayByDaySection
-            days={data.days}
+            days={localDays}
             activeDay={activeDay}
             dayRefs={dayRefs}
             scrollToDay={scrollToDay}
@@ -529,7 +529,7 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         <>
           {hasDuringTrip && <DuringTripSection data={data.duringTrip} />}
           <DayByDaySection
-            days={data.days}
+            days={localDays}
             activeDay={activeDay}
             dayRefs={dayRefs}
             scrollToDay={scrollToDay}
@@ -548,7 +548,7 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
       <FullScreenMapDialog
         open={isMapOpen}
         onOpenChange={setIsMapOpen}
-        days={data.days}
+        days={localDays}
         selectedDay={mapDay}
         onSelectDay={(dayNum) => {
           setMapDay(dayNum);

@@ -665,9 +665,11 @@ interface DaySectionProps {
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   narrativePhase?: import("./itinerary/NarrativeArc").NarrativePhase;
   destination?: string;
+  tripId?: string | null;
+  hasCollaborators?: boolean;
 }
 
-const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhase, destination }: DaySectionProps) => {
+const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhase, destination, tripId, hasCollaborators }: DaySectionProps) => {
   const grouped = groupActivities(day.activities);
   const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
   const mappedActivities = day.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng);

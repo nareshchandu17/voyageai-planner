@@ -24,6 +24,8 @@ import { SerendipitySlot, getOpenSlots } from "./itinerary/SerendipityEngine";
 import { NarrativeArc, NarrativePhaseBadge, assignNarrativePhases } from "./itinerary/NarrativeArc";
 import { GroupOrchestrator, type GroupTraveler } from "./itinerary/GroupOrchestration";
 import LocalExperiencesSection from "./itinerary/LocalExperiencesSection";
+import { PlaceVoting } from "./itinerary/PlaceVoting";
+import { ItineraryQualityWarning } from "./itinerary/ItineraryQualityWarning";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {

@@ -1331,6 +1331,12 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
         {activity.nextLeg && (
           <RouteLegDisplay activity={activity} nextActivity={nextActivity} />
         )}
+
+        {hasCollaborators && tripId && dayNum != null && (
+          <div className="mt-2.5 pt-2.5 border-t border-border/40">
+            <PlaceVoting tripId={tripId} dayNum={dayNum} placeKey={stopKey} placeName={activity.title} />
+          </div>
+        )}
       </div>
     </motion.div>
   );

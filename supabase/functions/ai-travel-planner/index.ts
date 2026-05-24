@@ -213,7 +213,12 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
       },
       "dailyBudget": number,
       "travelTip": "Practical tip for the day",
-      "companionInsight": "A 1-2 sentence personalized note explaining HOW this day was tailored to the traveler's profile or narrative arc — e.g. 'We've softened Day 2 mornings since you prefer slower starts' or 'Packed Day 3 with culture stops because museums are your top interest.' Reference SPECIFIC profile fields or arc intensity."
+      "companionInsight": "A 1-2 sentence personalized note explaining HOW this day was tailored to the traveler's profile or narrative arc — e.g. 'We've softened Day 2 mornings since you prefer slower starts' or 'Packed Day 3 with culture stops because museums are your top interest.' Reference SPECIFIC profile fields or arc intensity.",
+      "companionInsights": {
+        "morning": "1 sentence companion-memory insight for the MORNING block referencing the traveler's pace, energy tolerance, or past patterns — e.g. 'Gentle 10am start since you skipped early activities on past trips.'",
+        "afternoon": "1 sentence companion-memory insight for the AFTERNOON block referencing cuisine prefs or favorite activity types.",
+        "evening": "1 sentence companion-memory insight for the EVENING block referencing energy tolerance / nightlife appetite from past trips."
+      }
     }
   ],
   "warnings": ["any important travel warnings"]

@@ -24,6 +24,9 @@ import { SerendipitySlot, getOpenSlots } from "./itinerary/SerendipityEngine";
 import { NarrativeArc, NarrativePhaseBadge, assignNarrativePhases } from "./itinerary/NarrativeArc";
 import { GroupOrchestrator, type GroupTraveler } from "./itinerary/GroupOrchestration";
 import LocalExperiencesSection from "./itinerary/LocalExperiencesSection";
+import { PlaceVoting } from "./itinerary/PlaceVoting";
+import { ItineraryQualityWarning } from "./itinerary/ItineraryQualityWarning";
+import { toast } from "sonner";
 import "leaflet/dist/leaflet.css";
 
 interface Coordinates {
@@ -163,11 +166,12 @@ interface Props {
   onRegenerateWithArc?: (intensities: Record<number, number>) => void;
   onSmartRebalance?: () => void;
   smartRebalancing?: boolean;
+  onPersistDays?: (days: any[]) => void | Promise<void>;
 }
 
 type Phase = "before" | "during";
 
-const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, tripId, travelerProfile, onRegenerateWithArc, onSmartRebalance, smartRebalancing }: Props) => {
+const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, destinationPhotos = [], tripStartDate, destination, tripId, travelerProfile, onRegenerateWithArc, onSmartRebalance, smartRebalancing, onPersistDays }: Props) => {
   const autoPhase = useMemo<Phase>(() => {
     if (!tripStartDate) return "before";
     return new Date() >= tripStartDate ? "during" : "before";
@@ -181,7 +185,10 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const [groupTravelers, setGroupTravelers] = useState<GroupTraveler[]>([]);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const narrativePhases = useMemo(() => assignNarrativePhases(data.days.length), [data.days.length]);
+  // Local mirror of days so quick rebalances persist in this view immediately
+  const [localDays, setLocalDays] = useState(data.days);
+  useEffect(() => { setLocalDays(data.days); }, [data.days]);
+  const narrativePhases = useMemo(() => assignNarrativePhases(localDays.length), [localDays.length]);
   const [arcIntensities, setArcIntensities] = useState<Record<number, number>>({});
   const hasArcChanges = Object.keys(arcIntensities).length > 0;
 
@@ -192,8 +199,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const hasDuringTrip = !!data.duringTrip;
 
   const activeMapDayData = useMemo(
-    () => data.days.find((day) => day.day === mapDay) || data.days[0],
-    [data.days, mapDay],
+    () => localDays.find((day) => day.day === mapDay) || localDays[0],
+    [localDays, mapDay],
   );
 
   const scrollToDay = (dayNum: number) => {
@@ -219,8 +226,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   };
 
   const heroPhoto = destinationPhotos[0];
-  const totalDays = data.days.length;
-  const totalBudget = data.totalBudgetEstimate || data.days.reduce((sum, d) => sum + (d.dailyBudget || 0), 0);
+  const totalDays = localDays.length;
+  const totalBudget = data.totalBudgetEstimate || localDays.reduce((sum, d) => sum + (d.dailyBudget || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -269,9 +276,9 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
                 <DollarSign className="w-3.5 h-3.5" /> ${totalBudget.toLocaleString()} {data.currency || "USD"}
               </span>
             )}
-            {data.days[0]?.weather && (
+            {localDays[0]?.weather && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
-                {weatherIcon(data.days[0].weather.condition)} {data.days[0].weather.temp}
+                {weatherIcon(localDays[0].weather.condition)} {localDays[0].weather.temp}
               </span>
             )}
           </motion.div>
@@ -367,10 +374,10 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           {hasBeforeTrip && <BeforeTripSection data={data.beforeTrip} />}
 
           {/* === NARRATIVE ARC === */}
-          {data.days.length > 1 && (
+          {localDays.length > 1 && (
             <div>
               <NarrativeArc
-                totalDays={data.days.length}
+                totalDays={localDays.length}
                 activeDay={activeDay}
                 onDayClick={scrollToDay}
                 onIntensityChange={(dayIndex, newIntensity) => {
@@ -407,14 +414,25 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             onTravelersChange={setGroupTravelers}
             tripId={tripId}
             destination={destination}
-            days={data.days}
+            days={localDays}
+          />
+
+          {/* === ITINERARY QUALITY WARNING === */}
+          <ItineraryQualityWarning
+            days={localDays}
+            onRegenerate={onSmartRebalance}
+            regenerating={smartRebalancing}
           />
 
           {/* === ENERGY REBALANCE === */}
           <div className="flex items-center gap-3">
             <RebalanceButton
-              days={data.days}
-              onRebalance={() => {}}
+              days={localDays}
+              onRebalance={(rebalanced) => {
+                setLocalDays(rebalanced);
+                onPersistDays?.(rebalanced);
+                toast.success("Rebalanced — saved to your trip");
+              }}
               onRegenerateBalanced={onSmartRebalance}
               regenerating={smartRebalancing}
             />
@@ -464,16 +482,16 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
           {destination && (
             <LocalExperiencesSection
               destination={destination}
-              interests={data.days?.[0]?.activities?.map(a => a.type).filter(Boolean)}
-              days={data.days.length}
+              interests={localDays?.[0]?.activities?.map(a => a.type).filter(Boolean)}
+              days={localDays.length}
               tripId={tripId}
-              itineraryDays={data.days}
+              itineraryDays={localDays}
             />
           )}
 
           {/* Day-by-Day Itinerary */}
           <DayByDaySection
-            days={data.days}
+            days={localDays}
             activeDay={activeDay}
             dayRefs={dayRefs}
             scrollToDay={scrollToDay}
@@ -485,6 +503,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             activityRefs={activityRefs}
             narrativePhases={narrativePhases}
             destination={destination}
+            tripId={tripId}
+            hasCollaborators={groupTravelers.length > 1}
           />
 
           {!hasBeforeTrip && data.budgetBreakdown && (
@@ -523,7 +543,7 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         <>
           {hasDuringTrip && <DuringTripSection data={data.duringTrip} />}
           <DayByDaySection
-            days={data.days}
+            days={localDays}
             activeDay={activeDay}
             dayRefs={dayRefs}
             scrollToDay={scrollToDay}
@@ -535,6 +555,8 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             activityRefs={activityRefs}
             narrativePhases={narrativePhases}
             destination={destination}
+            tripId={tripId}
+            hasCollaborators={groupTravelers.length > 1}
           />
         </>
       )}
@@ -542,7 +564,7 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
       <FullScreenMapDialog
         open={isMapOpen}
         onOpenChange={setIsMapOpen}
-        days={data.days}
+        days={localDays}
         selectedDay={mapDay}
         onSelectDay={(dayNum) => {
           setMapDay(dayNum);
@@ -572,9 +594,11 @@ interface DayByDaySectionProps {
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   narrativePhases?: import("./itinerary/NarrativeArc").NarrativePhase[];
   destination?: string;
+  tripId?: string | null;
+  hasCollaborators?: boolean;
 }
 
-const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination }: DayByDaySectionProps) => {
+const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhases, destination, tripId, hasCollaborators }: DayByDaySectionProps) => {
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -620,6 +644,8 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
             activityRefs={activityRefs}
             narrativePhase={narrativePhases?.[idx]}
             destination={destination}
+            tripId={tripId}
+            hasCollaborators={hasCollaborators}
           />
         ))}
       </div>
@@ -643,9 +669,11 @@ interface DaySectionProps {
   activityRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   narrativePhase?: import("./itinerary/NarrativeArc").NarrativePhase;
   destination?: string;
+  tripId?: string | null;
+  hasCollaborators?: boolean;
 }
 
-const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhase, destination }: DaySectionProps) => {
+const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, selectedStopKey, setSelectedStopKey, onSelectStop, activityRefs, narrativePhase, destination, tripId, hasCollaborators }: DaySectionProps) => {
   const grouped = groupActivities(day.activities);
   const dayImage = day.imageUrl || destinationPhotos[idx + 1]?.url || destinationPhotos[idx + 1]?.small;
   const mappedActivities = day.activities.filter((activity) => activity.coordinates?.lat && activity.coordinates?.lng);
@@ -727,30 +755,48 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
       {(["morning", "afternoon", "evening"] as const).map(tod => {
         const acts = grouped[tod];
         if (!acts || acts.length === 0) return null;
+        const todInsight = (day as any).companionInsights?.[tod] as string | undefined;
         return (
           <div key={tod} className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               {timeOfDayIcon(tod)}
               <h5 className="text-sm font-semibold text-foreground uppercase tracking-wider">{timeOfDayLabel(tod)}</h5>
             </div>
+            {todInsight && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mb-3 flex items-start gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                <p className="text-[11px] text-foreground/80 leading-relaxed">
+                  <span className="font-semibold text-primary">Companion memory: </span>
+                  {todInsight}
+                </p>
+              </motion.div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {acts.map((act, i) => {
                 const allActs = day.activities;
                 const globalIdx = allActs.indexOf(act);
                 const nextAct = globalIdx >= 0 && globalIdx < allActs.length - 1 ? allActs[globalIdx + 1] : undefined;
+                const stopKey = `day-${day.day}-${act.time}-${act.title}`;
                 return (
                 <ActivityCard
                   key={i}
                   activity={act}
                   nextActivity={nextAct}
-                  stopKey={`day-${day.day}-${act.time}-${act.title}`}
-                  selected={selectedStopKey === `day-${day.day}-${act.time}-${act.title}`}
+                  stopKey={stopKey}
+                  selected={selectedStopKey === stopKey}
                   onSelect={() => {
-                    const stopKey = `day-${day.day}-${act.time}-${act.title}`;
                     setSelectedStopKey(stopKey);
                     onSelectStop(day.day, stopKey);
                   }}
-                  cardRef={(el) => { activityRefs.current[`day-${day.day}-${act.time}-${act.title}`] = el; }}
+                  cardRef={(el) => { activityRefs.current[stopKey] = el; }}
+                  tripId={tripId}
+                  dayNum={day.day}
+                  hasCollaborators={hasCollaborators}
                 />
               )})}
             </div>
@@ -1219,7 +1265,7 @@ const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextA
   );
 };
 
-const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity }) => {
+const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity, tripId, dayNum, hasCollaborators }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity; tripId?: string | null; dayNum?: number; hasCollaborators?: boolean }) => {
   const hasImage = !!activity.imageUrl;
 
   return (
@@ -1288,6 +1334,12 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
 
         {activity.nextLeg && (
           <RouteLegDisplay activity={activity} nextActivity={nextActivity} />
+        )}
+
+        {hasCollaborators && tripId && dayNum != null && (
+          <div className="mt-2.5 pt-2.5 border-t border-border/40">
+            <PlaceVoting tripId={tripId} dayNum={dayNum} placeKey={stopKey} placeName={activity.title} />
+          </div>
         )}
       </div>
     </motion.div>

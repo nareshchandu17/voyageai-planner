@@ -165,6 +165,7 @@ interface Props {
   onRegenerateWithArc?: (intensities: Record<number, number>) => void;
   onSmartRebalance?: () => void;
   smartRebalancing?: boolean;
+  onPersistDays?: (days: any[]) => void | Promise<void>;
 }
 
 type Phase = "before" | "during";

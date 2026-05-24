@@ -416,11 +416,22 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             days={localDays}
           />
 
+          {/* === ITINERARY QUALITY WARNING === */}
+          <ItineraryQualityWarning
+            days={localDays}
+            onRegenerate={onSmartRebalance}
+            regenerating={smartRebalancing}
+          />
+
           {/* === ENERGY REBALANCE === */}
           <div className="flex items-center gap-3">
             <RebalanceButton
               days={localDays}
-              onRebalance={() => {}}
+              onRebalance={(rebalanced) => {
+                setLocalDays(rebalanced);
+                onPersistDays?.(rebalanced);
+                toast.success("Rebalanced — saved to your trip");
+              }}
               onRegenerateBalanced={onSmartRebalance}
               regenerating={smartRebalancing}
             />

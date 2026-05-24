@@ -172,6 +172,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_place_votes: {
+        Row: {
+          created_at: string
+          day_num: number | null
+          id: string
+          place_key: string
+          place_name: string
+          trip_id: string
+          updated_at: string
+          vote: number
+          voter_id: string
+          voter_name: string
+        }
+        Insert: {
+          created_at?: string
+          day_num?: number | null
+          id?: string
+          place_key: string
+          place_name: string
+          trip_id: string
+          updated_at?: string
+          vote: number
+          voter_id: string
+          voter_name: string
+        }
+        Update: {
+          created_at?: string
+          day_num?: number | null
+          id?: string
+          place_key?: string
+          place_name?: string
+          trip_id?: string
+          updated_at?: string
+          vote?: number
+          voter_id?: string
+          voter_name?: string
+        }
+        Relationships: []
+      }
       trip_travelers: {
         Row: {
           compatibility_score: number | null

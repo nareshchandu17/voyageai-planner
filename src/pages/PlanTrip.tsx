@@ -557,15 +557,34 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><MapPin className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Where do you want to go?</h2><p className="text-sm text-muted-foreground">Search for a destination or pick a popular one</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">Where do you want to go?</h2><p className="text-sm text-muted-foreground">Search for any destination or pick a popular one below</p></div>
                         </div>
                         <div className="relative mb-6">
                           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Search destinations..." className="w-full h-14 pl-12 pr-4 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean font-body text-base" />
+                          <input
+                            type="text"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            placeholder="e.g. Tokyo, Bali, Paris..."
+                            className="w-full h-14 pl-12 pr-4 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean font-body text-base"
+                          />
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">Popular destinations</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[280px] overflow-y-auto pr-1">
                           {popularDestinations.map((d) => (
-                            <button key={d} onClick={() => setDestination(d)} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all border", destination === d ? "bg-ocean text-primary-foreground border-ocean" : "bg-secondary border-border text-foreground hover:border-ocean/50")}>{d}</button>
+                            <button
+                              key={d.name}
+                              onClick={() => setDestination(d.name)}
+                              className={cn(
+                                "flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border text-left",
+                                destination === d.name
+                                  ? "bg-ocean text-primary-foreground border-ocean shadow-soft"
+                                  : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                              )}
+                            >
+                              <span className="text-lg leading-none">{d.flag}</span>
+                              <span className="truncate">{d.name}</span>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -576,13 +595,19 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><CalendarIcon className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">When are you traveling?</h2><p className="text-sm text-muted-foreground">Select your trip dates</p></div>
+                          <div>
+                            <h2 className="font-display text-2xl font-bold text-foreground">Select trip dates</h2>
+                            <p className="text-sm text-muted-foreground">Pick a start and end date (between in range)</p>
+                          </div>
                         </div>
                         <div className="flex justify-center">
                           <Calendar mode="range" selected={dateRange as any} onSelect={(range: any) => setDateRange(range || {})} numberOfMonths={1} className="pointer-events-auto rounded-xl border border-border" disabled={(date) => date < new Date()} />
                         </div>
                         {dateRange.from && dateRange.to && (
-                          <p className="text-center text-sm text-muted-foreground mt-4">{format(dateRange.from, "MMM d")} — {format(dateRange.to, "MMM d, yyyy")}</p>
+                          <div className="mt-4 glass-card p-3 text-center">
+                            <p className="text-sm font-medium text-foreground">{format(dateRange.from, "MMM d")} — {format(dateRange.to, "MMM d, yyyy")}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{differenceInDays(dateRange.to, dateRange.from) + 1} days trip</p>
+                          </div>
                         )}
                       </div>
                     )}
@@ -592,14 +617,29 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><DollarSign className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">What's your budget?</h2><p className="text-sm text-muted-foreground">Set a total trip budget per person</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">What's your budget?</h2><p className="text-sm text-muted-foreground">Per person, total trip — drag the slider or pick a preset</p></div>
                         </div>
-                        <div className="text-center mb-8">
-                          <span className="text-5xl font-display font-bold text-gradient-ocean">${budget.toLocaleString()}</span>
-                          <p className="text-sm text-muted-foreground mt-1">per person</p>
+                        <div className="text-center mb-6">
+                          <span className="text-6xl font-display font-bold text-gradient-ocean tracking-tight">${budget.toLocaleString()}</span>
+                          <p className="text-sm text-muted-foreground mt-1">per person · {groupSize > 1 ? `~$${(budget * groupSize).toLocaleString()} total` : "solo trip"}</p>
                         </div>
                         <input type="range" min={200} max={10000} step={100} value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-ocean" />
-                        <div className="flex justify-between text-xs text-muted-foreground mt-2"><span>$200</span><span>$10,000</span></div>
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2 mb-6"><span>$200</span><span>$10,000</span></div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {budgetPresets.map((p) => (
+                            <button
+                              key={p.value}
+                              onClick={() => setBudget(p.value)}
+                              className={cn(
+                                "px-3 py-3 rounded-xl border text-sm font-medium transition-all",
+                                budget === p.value ? "bg-ocean text-primary-foreground border-ocean shadow-soft" : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                              )}
+                            >
+                              <div className="font-semibold">{p.label}</div>
+                              <div className="text-xs opacity-80 mt-0.5">${p.value.toLocaleString()}</div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -608,15 +648,32 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><Sparkles className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Your travel style</h2><p className="text-sm text-muted-foreground">Select one or more styles</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">Your travel style</h2><p className="text-sm text-muted-foreground">Pick any that fit — mix & match freely</p></div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {travelStyles.map((s) => (
-                            <button key={s.id} onClick={() => toggleStyle(s.id)} className={cn("flex flex-col items-center gap-2 p-5 rounded-2xl border transition-all", styles.includes(s.id) ? "bg-ocean text-primary-foreground border-ocean shadow-soft" : "bg-secondary border-border text-foreground hover:border-ocean/50")}>
-                              <s.icon className="w-7 h-7" /><span className="text-sm font-medium">{s.label}</span>
-                            </button>
-                          ))}
+                          {travelStyles.map((s) => {
+                            const active = styles.includes(s.id);
+                            return (
+                              <button
+                                key={s.id}
+                                onClick={() => toggleStyle(s.id)}
+                                className={cn(
+                                  "group flex flex-col items-start gap-2 p-4 rounded-2xl border transition-all text-left",
+                                  active ? "bg-ocean text-primary-foreground border-ocean shadow-soft scale-[1.02]" : "bg-secondary border-border text-foreground hover:border-ocean/50 hover:-translate-y-0.5"
+                                )}
+                              >
+                                <s.icon className="w-7 h-7" />
+                                <div>
+                                  <div className="text-sm font-semibold">{s.label}</div>
+                                  <div className={cn("text-xs mt-0.5", active ? "text-primary-foreground/80" : "text-muted-foreground")}>{s.desc}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
+                        {styles.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-4 text-center">{styles.length} style{styles.length > 1 ? "s" : ""} selected · <button onClick={() => setStyles([])} className="underline hover:text-foreground">clear</button></p>
+                        )}
                       </div>
                     )}
 
@@ -627,10 +684,27 @@ const PlanTrip = () => {
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><Users className="w-5 h-5 text-primary-foreground" /></div>
                           <div><h2 className="font-display text-2xl font-bold text-foreground">How many travelers?</h2><p className="text-sm text-muted-foreground">Including yourself</p></div>
                         </div>
-                        <div className="flex items-center justify-center gap-6">
+                        <div className="flex items-center justify-center gap-6 mb-8">
                           <button onClick={() => setGroupSize(Math.max(1, groupSize - 1))} className="w-14 h-14 rounded-2xl bg-secondary border border-border text-foreground text-2xl font-medium hover:bg-muted transition-colors">−</button>
-                          <span className="text-6xl font-display font-bold text-gradient-ocean w-20 text-center">{groupSize}</span>
+                          <div className="text-center w-28">
+                            <span className="text-7xl font-display font-bold text-gradient-ocean leading-none">{groupSize}</span>
+                            <p className="text-xs text-muted-foreground mt-2">{groupSize === 1 ? "solo traveler" : `${groupSize} travelers`}</p>
+                          </div>
                           <button onClick={() => setGroupSize(Math.min(20, groupSize + 1))} className="w-14 h-14 rounded-2xl bg-secondary border border-border text-foreground text-2xl font-medium hover:bg-muted transition-colors">+</button>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {[1, 2, 4, 6].map((n) => (
+                            <button
+                              key={n}
+                              onClick={() => setGroupSize(n)}
+                              className={cn(
+                                "px-3 py-2 rounded-xl border text-sm font-medium transition-all",
+                                groupSize === n ? "bg-ocean text-primary-foreground border-ocean" : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                              )}
+                            >
+                              {n === 1 ? "Solo" : n === 2 ? "Couple" : `Group of ${n}`}
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -640,15 +714,36 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><Tag className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Your interests</h2><p className="text-sm text-muted-foreground">Help us personalize your trip</p></div>
+                          <div>
+                            <h2 className="font-display text-2xl font-bold text-foreground">Your interests</h2>
+                            <p className="text-sm text-muted-foreground">Tap anything that excites you — the more, the better</p>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 max-h-[280px] overflow-y-auto pr-1">
                           {interestTags.map((tag) => (
-                            <button key={tag} onClick={() => toggleInterest(tag)} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all border", interests.includes(tag) ? "bg-sunset text-accent-foreground border-sunset" : "bg-secondary border-border text-foreground hover:border-sunset/50")}>{tag}</button>
+                            <button
+                              key={tag}
+                              onClick={() => toggleInterest(tag)}
+                              className={cn(
+                                "px-4 py-2 rounded-full text-sm font-medium transition-all border",
+                                interests.includes(tag)
+                                  ? "bg-sunset text-accent-foreground border-sunset shadow-soft"
+                                  : "bg-secondary border-border text-foreground hover:border-sunset/50 hover:-translate-y-0.5"
+                              )}
+                            >
+                              {interests.includes(tag) ? "✓ " : "+ "}{tag}
+                            </button>
                           ))}
+                        </div>
+                        <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
+                          <span>{interests.length} selected</span>
+                          {interests.length > 0 && (
+                            <button onClick={() => setInterests([])} className="underline hover:text-foreground">Clear all</button>
+                          )}
                         </div>
                       </div>
                     )}
+
 
                     {/* Step 7: Generate */}
                     {step === 7 && (

@@ -231,6 +231,7 @@ export async function streamItinerary({
   upcomingEvents,
   travelerProfile,
   narrativeIntensities,
+  planningMode,
   onDelta,
   onDone,
   onError,
@@ -241,6 +242,7 @@ export async function streamItinerary({
   upcomingEvents?: any;
   travelerProfile?: any;
   narrativeIntensities?: Record<number, number>;
+  planningMode?: string;
   onDelta: (chunk: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
@@ -252,8 +254,9 @@ export async function streamItinerary({
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ ...params, weatherForecast: weatherData, nearbyPlaces, upcomingEvents, travelerProfile, narrativeIntensities }),
+      body: JSON.stringify({ ...params, weatherForecast: weatherData, nearbyPlaces, upcomingEvents, travelerProfile, narrativeIntensities, planningMode }),
     });
+
 
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({ error: "AI planner failed" }));

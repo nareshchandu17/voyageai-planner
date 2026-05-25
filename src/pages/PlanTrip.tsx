@@ -24,25 +24,99 @@ import planTripBanner from "@/assets/plan-trip-banner.jpg";
 import { motion, AnimatePresence } from "framer-motion";
 
 const travelStyles = [
-  { id: "adventure", label: "Adventure", icon: Mountain },
-  { id: "culture", label: "Culture", icon: Palette },
-  { id: "food", label: "Food", icon: UtensilsCrossed },
-  { id: "nature", label: "Nature", icon: TreePine },
-  { id: "luxury", label: "Luxury", icon: Crown },
-  { id: "budget", label: "Budget", icon: Wallet },
+  { id: "adventure", label: "Adventure", icon: Mountain, desc: "Hikes, treks, adrenaline" },
+  { id: "culture", label: "Culture", icon: Palette, desc: "Museums, history, art" },
+  { id: "food", label: "Food", icon: UtensilsCrossed, desc: "Markets, tastings, local eats" },
+  { id: "nature", label: "Nature", icon: TreePine, desc: "Parks, beaches, scenery" },
+  { id: "luxury", label: "Luxury", icon: Crown, desc: "Premium stays & dining" },
+  { id: "budget", label: "Budget", icon: Wallet, desc: "Smart spending, value picks" },
 ];
 
 const interestTags = [
   "Photography", "Hiking", "Museums", "Street Food", "Beaches", "Nightlife",
   "History", "Shopping", "Wellness", "Architecture", "Wildlife", "Festivals",
+  "Coffee Culture", "Live Music", "Hidden Gems", "Local Markets", "Cycling", "Diving",
+  "Yoga & Spa", "Sunset Spots", "Rooftop Bars", "Vegan Food",
 ];
 
 const popularDestinations = [
-  "Tokyo, Japan", "Bali, Indonesia", "Paris, France", "New York, USA",
-  "Barcelona, Spain", "Cape Town, South Africa", "Iceland", "Machu Picchu, Peru",
+  { name: "Tokyo, Japan", flag: "🇯🇵" },
+  { name: "Kyoto, Japan", flag: "🇯🇵" },
+  { name: "Bali, Indonesia", flag: "🇮🇩" },
+  { name: "Paris, France", flag: "🇫🇷" },
+  { name: "New York, USA", flag: "🇺🇸" },
+  { name: "Barcelona, Spain", flag: "🇪🇸" },
+  { name: "Rome, Italy", flag: "🇮🇹" },
+  { name: "Lisbon, Portugal", flag: "🇵🇹" },
+  { name: "Istanbul, Türkiye", flag: "🇹🇷" },
+  { name: "Marrakech, Morocco", flag: "🇲🇦" },
+  { name: "Cape Town, South Africa", flag: "🇿🇦" },
+  { name: "Iceland", flag: "🇮🇸" },
+  { name: "Machu Picchu, Peru", flag: "🇵🇪" },
+  { name: "Switzerland", flag: "🇨🇭" },
+  { name: "Bangkok, Thailand", flag: "🇹🇭" },
+  { name: "Dubai, UAE", flag: "🇦🇪" },
+  { name: "Sydney, Australia", flag: "🇦🇺" },
+  { name: "Santorini, Greece", flag: "🇬🇷" },
+];
+
+const budgetPresets = [
+  { label: "Backpacker", value: 800 },
+  { label: "Comfort", value: 2000 },
+  { label: "Premium", value: 4500 },
+  { label: "Luxury", value: 8000 },
+];
+
+const planningModes = [
+  {
+    id: "smart_balanced",
+    emoji: "1️⃣",
+    title: "Smart Balanced",
+    badge: "Recommended",
+    tagline: "Best for most travelers",
+    points: ["Balances exploration + rest", "Avoids overload", "Mixes famous + hidden places", "Optimized pacing"],
+    accent: "from-sky-500/15 to-cyan-500/10 border-sky-500/30",
+  },
+  {
+    id: "deep_exploration",
+    emoji: "2️⃣",
+    title: "Deep Exploration",
+    badge: "Best for 7–15 days",
+    tagline: "Goes beyond the top-10 list",
+    points: ["Explores districts deeply", "Reduces rushed movement", "Creates thematic days", "Avoids repetitive attractions"],
+    accent: "from-emerald-500/15 to-teal-500/10 border-emerald-500/30",
+  },
+  {
+    id: "fast_highlights",
+    emoji: "3️⃣",
+    title: "Fast Highlights",
+    badge: "Short trips",
+    tagline: "Pack in the major must-sees",
+    points: ["Prioritizes major attractions", "Compressed schedule", "Minimizes downtime", "Maximum coverage"],
+    accent: "from-orange-500/15 to-red-500/10 border-orange-500/30",
+  },
+  {
+    id: "adaptive_flow",
+    emoji: "4️⃣",
+    title: "Adaptive Flow",
+    badge: "Premium feel",
+    tagline: "Feels like a human strategist made it",
+    points: ["Flexible days with alternatives", "Adapts pacing dynamically", "Buffer windows built in", "Confident, considered, never rigid"],
+    accent: "from-violet-500/15 to-fuchsia-500/10 border-violet-500/30",
+  },
+  {
+    id: "local_immersion",
+    emoji: "5️⃣",
+    title: "Local Immersion",
+    badge: "Premium · Stands out",
+    tagline: "Live like a local, not a tourist",
+    points: ["Prioritizes local culture", "Cafés, neighborhoods, slow time", "Avoids tourist-heavy repetition", "Family-run eateries & markets"],
+    accent: "from-amber-500/15 to-rose-500/10 border-amber-500/30",
+  },
 ];
 
 const TOTAL_STEPS = 7;
+
 
 const PlanTrip = () => {
   const navigate = useNavigate();

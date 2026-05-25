@@ -783,6 +783,51 @@ const PlanTrip = () => {
                               <p><span className="text-muted-foreground">Style:</span> <span className="font-medium text-foreground">{styles.join(", ") || "Any"}</span></p>
                             </div>
 
+                            {/* AI Planning Mode selector */}
+                            <div className="text-left">
+                              <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> Choose your AI planning mode</h3>
+                                <span className="text-xs text-muted-foreground">tap to switch</span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                {planningModes.map((m) => {
+                                  const active = planningMode === m.id;
+                                  return (
+                                    <button
+                                      key={m.id}
+                                      type="button"
+                                      onClick={() => setPlanningMode(m.id)}
+                                      className={cn(
+                                        "relative text-left rounded-2xl p-4 border bg-gradient-to-br transition-all",
+                                        m.accent,
+                                        active
+                                          ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-soft scale-[1.01]"
+                                          : "hover:-translate-y-0.5 hover:shadow-soft opacity-90 hover:opacity-100"
+                                      )}
+                                    >
+                                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-lg">{m.emoji}</span>
+                                          <span className="font-display font-bold text-foreground text-base leading-tight">{m.title}</span>
+                                        </div>
+                                        {active && <span className="text-[10px] uppercase tracking-wider font-bold text-primary">Selected</span>}
+                                      </div>
+                                      <span className="inline-block text-[10px] uppercase tracking-wider font-semibold bg-background/60 text-foreground px-2 py-0.5 rounded-full mb-2">{m.badge}</span>
+                                      <p className="text-xs text-foreground/80 italic mb-2">{m.tagline}</p>
+                                      <ul className="space-y-0.5">
+                                        {m.points.map((p) => (
+                                          <li key={p} className="text-[11px] text-muted-foreground flex gap-1.5">
+                                            <span className="text-primary">•</span><span>{p}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+
                             {enrichmentLoading && (
                               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-4">
                                 <Loader2 className="w-4 h-4 animate-spin text-primary" /><span>Loading real-world data for {destination}…</span>

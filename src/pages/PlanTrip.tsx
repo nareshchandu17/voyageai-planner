@@ -24,25 +24,99 @@ import planTripBanner from "@/assets/plan-trip-banner.jpg";
 import { motion, AnimatePresence } from "framer-motion";
 
 const travelStyles = [
-  { id: "adventure", label: "Adventure", icon: Mountain },
-  { id: "culture", label: "Culture", icon: Palette },
-  { id: "food", label: "Food", icon: UtensilsCrossed },
-  { id: "nature", label: "Nature", icon: TreePine },
-  { id: "luxury", label: "Luxury", icon: Crown },
-  { id: "budget", label: "Budget", icon: Wallet },
+  { id: "adventure", label: "Adventure", icon: Mountain, desc: "Hikes, treks, adrenaline" },
+  { id: "culture", label: "Culture", icon: Palette, desc: "Museums, history, art" },
+  { id: "food", label: "Food", icon: UtensilsCrossed, desc: "Markets, tastings, local eats" },
+  { id: "nature", label: "Nature", icon: TreePine, desc: "Parks, beaches, scenery" },
+  { id: "luxury", label: "Luxury", icon: Crown, desc: "Premium stays & dining" },
+  { id: "budget", label: "Budget", icon: Wallet, desc: "Smart spending, value picks" },
 ];
 
 const interestTags = [
   "Photography", "Hiking", "Museums", "Street Food", "Beaches", "Nightlife",
   "History", "Shopping", "Wellness", "Architecture", "Wildlife", "Festivals",
+  "Coffee Culture", "Live Music", "Hidden Gems", "Local Markets", "Cycling", "Diving",
+  "Yoga & Spa", "Sunset Spots", "Rooftop Bars", "Vegan Food",
 ];
 
 const popularDestinations = [
-  "Tokyo, Japan", "Bali, Indonesia", "Paris, France", "New York, USA",
-  "Barcelona, Spain", "Cape Town, South Africa", "Iceland", "Machu Picchu, Peru",
+  { name: "Tokyo, Japan", flag: "🇯🇵" },
+  { name: "Kyoto, Japan", flag: "🇯🇵" },
+  { name: "Bali, Indonesia", flag: "🇮🇩" },
+  { name: "Paris, France", flag: "🇫🇷" },
+  { name: "New York, USA", flag: "🇺🇸" },
+  { name: "Barcelona, Spain", flag: "🇪🇸" },
+  { name: "Rome, Italy", flag: "🇮🇹" },
+  { name: "Lisbon, Portugal", flag: "🇵🇹" },
+  { name: "Istanbul, Türkiye", flag: "🇹🇷" },
+  { name: "Marrakech, Morocco", flag: "🇲🇦" },
+  { name: "Cape Town, South Africa", flag: "🇿🇦" },
+  { name: "Iceland", flag: "🇮🇸" },
+  { name: "Machu Picchu, Peru", flag: "🇵🇪" },
+  { name: "Switzerland", flag: "🇨🇭" },
+  { name: "Bangkok, Thailand", flag: "🇹🇭" },
+  { name: "Dubai, UAE", flag: "🇦🇪" },
+  { name: "Sydney, Australia", flag: "🇦🇺" },
+  { name: "Santorini, Greece", flag: "🇬🇷" },
+];
+
+const budgetPresets = [
+  { label: "Backpacker", value: 800 },
+  { label: "Comfort", value: 2000 },
+  { label: "Premium", value: 4500 },
+  { label: "Luxury", value: 8000 },
+];
+
+const planningModes = [
+  {
+    id: "smart_balanced",
+    emoji: "1️⃣",
+    title: "Smart Balanced",
+    badge: "Recommended",
+    tagline: "Best for most travelers",
+    points: ["Balances exploration + rest", "Avoids overload", "Mixes famous + hidden places", "Optimized pacing"],
+    accent: "from-sky-500/15 to-cyan-500/10 border-sky-500/30",
+  },
+  {
+    id: "deep_exploration",
+    emoji: "2️⃣",
+    title: "Deep Exploration",
+    badge: "Best for 7–15 days",
+    tagline: "Goes beyond the top-10 list",
+    points: ["Explores districts deeply", "Reduces rushed movement", "Creates thematic days", "Avoids repetitive attractions"],
+    accent: "from-emerald-500/15 to-teal-500/10 border-emerald-500/30",
+  },
+  {
+    id: "fast_highlights",
+    emoji: "3️⃣",
+    title: "Fast Highlights",
+    badge: "Short trips",
+    tagline: "Pack in the major must-sees",
+    points: ["Prioritizes major attractions", "Compressed schedule", "Minimizes downtime", "Maximum coverage"],
+    accent: "from-orange-500/15 to-red-500/10 border-orange-500/30",
+  },
+  {
+    id: "adaptive_flow",
+    emoji: "4️⃣",
+    title: "Adaptive Flow",
+    badge: "Premium feel",
+    tagline: "Feels like a human strategist made it",
+    points: ["Flexible days with alternatives", "Adapts pacing dynamically", "Buffer windows built in", "Confident, considered, never rigid"],
+    accent: "from-violet-500/15 to-fuchsia-500/10 border-violet-500/30",
+  },
+  {
+    id: "local_immersion",
+    emoji: "5️⃣",
+    title: "Local Immersion",
+    badge: "Premium · Stands out",
+    tagline: "Live like a local, not a tourist",
+    points: ["Prioritizes local culture", "Cafés, neighborhoods, slow time", "Avoids tourist-heavy repetition", "Family-run eateries & markets"],
+    accent: "from-amber-500/15 to-rose-500/10 border-amber-500/30",
+  },
 ];
 
 const TOTAL_STEPS = 7;
+
 
 const PlanTrip = () => {
   const navigate = useNavigate();
@@ -81,6 +155,8 @@ const PlanTrip = () => {
   const [enrichmentLoading, setEnrichmentLoading] = useState(false);
   const [enrichmentFetched, setEnrichmentFetched] = useState(false);
   const [narrativeIntensities, setNarrativeIntensities] = useState<Record<number, number>>({});
+  const [planningMode, setPlanningMode] = useState<string>("smart_balanced");
+
 
   // Load existing trip if tripId is provided
   useEffect(() => {
@@ -178,6 +254,8 @@ const PlanTrip = () => {
       nearbyPlaces,
       upcomingEvents,
       narrativeIntensities: Object.keys(intensitiesToUse).length > 0 ? intensitiesToUse : undefined,
+      planningMode,
+
       travelerProfile: travelerProfile ? {
         pace_preference: travelerProfile.pace_preference,
         energy_tolerance: travelerProfile.energy_tolerance,
@@ -479,15 +557,34 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><MapPin className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Where do you want to go?</h2><p className="text-sm text-muted-foreground">Search for a destination or pick a popular one</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">Where do you want to go?</h2><p className="text-sm text-muted-foreground">Search for any destination or pick a popular one below</p></div>
                         </div>
                         <div className="relative mb-6">
                           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Search destinations..." className="w-full h-14 pl-12 pr-4 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean font-body text-base" />
+                          <input
+                            type="text"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            placeholder="e.g. Tokyo, Bali, Paris..."
+                            className="w-full h-14 pl-12 pr-4 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean font-body text-base"
+                          />
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">Popular destinations</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[280px] overflow-y-auto pr-1">
                           {popularDestinations.map((d) => (
-                            <button key={d} onClick={() => setDestination(d)} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all border", destination === d ? "bg-ocean text-primary-foreground border-ocean" : "bg-secondary border-border text-foreground hover:border-ocean/50")}>{d}</button>
+                            <button
+                              key={d.name}
+                              onClick={() => setDestination(d.name)}
+                              className={cn(
+                                "flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border text-left",
+                                destination === d.name
+                                  ? "bg-ocean text-primary-foreground border-ocean shadow-soft"
+                                  : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                              )}
+                            >
+                              <span className="text-lg leading-none">{d.flag}</span>
+                              <span className="truncate">{d.name}</span>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -498,13 +595,19 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><CalendarIcon className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">When are you traveling?</h2><p className="text-sm text-muted-foreground">Select your trip dates</p></div>
+                          <div>
+                            <h2 className="font-display text-2xl font-bold text-foreground">Select trip dates</h2>
+                            <p className="text-sm text-muted-foreground">Pick a start and end date (between in range)</p>
+                          </div>
                         </div>
                         <div className="flex justify-center">
                           <Calendar mode="range" selected={dateRange as any} onSelect={(range: any) => setDateRange(range || {})} numberOfMonths={1} className="pointer-events-auto rounded-xl border border-border" disabled={(date) => date < new Date()} />
                         </div>
                         {dateRange.from && dateRange.to && (
-                          <p className="text-center text-sm text-muted-foreground mt-4">{format(dateRange.from, "MMM d")} — {format(dateRange.to, "MMM d, yyyy")}</p>
+                          <div className="mt-4 glass-card p-3 text-center">
+                            <p className="text-sm font-medium text-foreground">{format(dateRange.from, "MMM d")} — {format(dateRange.to, "MMM d, yyyy")}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{differenceInDays(dateRange.to, dateRange.from) + 1} days trip</p>
+                          </div>
                         )}
                       </div>
                     )}
@@ -514,14 +617,29 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><DollarSign className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">What's your budget?</h2><p className="text-sm text-muted-foreground">Set a total trip budget per person</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">What's your budget?</h2><p className="text-sm text-muted-foreground">Per person, total trip — drag the slider or pick a preset</p></div>
                         </div>
-                        <div className="text-center mb-8">
-                          <span className="text-5xl font-display font-bold text-gradient-ocean">${budget.toLocaleString()}</span>
-                          <p className="text-sm text-muted-foreground mt-1">per person</p>
+                        <div className="text-center mb-6">
+                          <span className="text-6xl font-display font-bold text-gradient-ocean tracking-tight">${budget.toLocaleString()}</span>
+                          <p className="text-sm text-muted-foreground mt-1">per person · {groupSize > 1 ? `~$${(budget * groupSize).toLocaleString()} total` : "solo trip"}</p>
                         </div>
                         <input type="range" min={200} max={10000} step={100} value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-ocean" />
-                        <div className="flex justify-between text-xs text-muted-foreground mt-2"><span>$200</span><span>$10,000</span></div>
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2 mb-6"><span>$200</span><span>$10,000</span></div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {budgetPresets.map((p) => (
+                            <button
+                              key={p.value}
+                              onClick={() => setBudget(p.value)}
+                              className={cn(
+                                "px-3 py-3 rounded-xl border text-sm font-medium transition-all",
+                                budget === p.value ? "bg-ocean text-primary-foreground border-ocean shadow-soft" : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                              )}
+                            >
+                              <div className="font-semibold">{p.label}</div>
+                              <div className="text-xs opacity-80 mt-0.5">${p.value.toLocaleString()}</div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -530,15 +648,32 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><Sparkles className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Your travel style</h2><p className="text-sm text-muted-foreground">Select one or more styles</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">Your travel style</h2><p className="text-sm text-muted-foreground">Pick any that fit — mix & match freely</p></div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {travelStyles.map((s) => (
-                            <button key={s.id} onClick={() => toggleStyle(s.id)} className={cn("flex flex-col items-center gap-2 p-5 rounded-2xl border transition-all", styles.includes(s.id) ? "bg-ocean text-primary-foreground border-ocean shadow-soft" : "bg-secondary border-border text-foreground hover:border-ocean/50")}>
-                              <s.icon className="w-7 h-7" /><span className="text-sm font-medium">{s.label}</span>
-                            </button>
-                          ))}
+                          {travelStyles.map((s) => {
+                            const active = styles.includes(s.id);
+                            return (
+                              <button
+                                key={s.id}
+                                onClick={() => toggleStyle(s.id)}
+                                className={cn(
+                                  "group flex flex-col items-start gap-2 p-4 rounded-2xl border transition-all text-left",
+                                  active ? "bg-ocean text-primary-foreground border-ocean shadow-soft scale-[1.02]" : "bg-secondary border-border text-foreground hover:border-ocean/50 hover:-translate-y-0.5"
+                                )}
+                              >
+                                <s.icon className="w-7 h-7" />
+                                <div>
+                                  <div className="text-sm font-semibold">{s.label}</div>
+                                  <div className={cn("text-xs mt-0.5", active ? "text-primary-foreground/80" : "text-muted-foreground")}>{s.desc}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
+                        {styles.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-4 text-center">{styles.length} style{styles.length > 1 ? "s" : ""} selected · <button onClick={() => setStyles([])} className="underline hover:text-foreground">clear</button></p>
+                        )}
                       </div>
                     )}
 
@@ -549,10 +684,27 @@ const PlanTrip = () => {
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><Users className="w-5 h-5 text-primary-foreground" /></div>
                           <div><h2 className="font-display text-2xl font-bold text-foreground">How many travelers?</h2><p className="text-sm text-muted-foreground">Including yourself</p></div>
                         </div>
-                        <div className="flex items-center justify-center gap-6">
+                        <div className="flex items-center justify-center gap-6 mb-8">
                           <button onClick={() => setGroupSize(Math.max(1, groupSize - 1))} className="w-14 h-14 rounded-2xl bg-secondary border border-border text-foreground text-2xl font-medium hover:bg-muted transition-colors">−</button>
-                          <span className="text-6xl font-display font-bold text-gradient-ocean w-20 text-center">{groupSize}</span>
+                          <div className="text-center w-28">
+                            <span className="text-7xl font-display font-bold text-gradient-ocean leading-none">{groupSize}</span>
+                            <p className="text-xs text-muted-foreground mt-2">{groupSize === 1 ? "solo traveler" : `${groupSize} travelers`}</p>
+                          </div>
                           <button onClick={() => setGroupSize(Math.min(20, groupSize + 1))} className="w-14 h-14 rounded-2xl bg-secondary border border-border text-foreground text-2xl font-medium hover:bg-muted transition-colors">+</button>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {[1, 2, 4, 6].map((n) => (
+                            <button
+                              key={n}
+                              onClick={() => setGroupSize(n)}
+                              className={cn(
+                                "px-3 py-2 rounded-xl border text-sm font-medium transition-all",
+                                groupSize === n ? "bg-ocean text-primary-foreground border-ocean" : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                              )}
+                            >
+                              {n === 1 ? "Solo" : n === 2 ? "Couple" : `Group of ${n}`}
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -562,15 +714,36 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><Tag className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Your interests</h2><p className="text-sm text-muted-foreground">Help us personalize your trip</p></div>
+                          <div>
+                            <h2 className="font-display text-2xl font-bold text-foreground">Your interests</h2>
+                            <p className="text-sm text-muted-foreground">Tap anything that excites you — the more, the better</p>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 max-h-[280px] overflow-y-auto pr-1">
                           {interestTags.map((tag) => (
-                            <button key={tag} onClick={() => toggleInterest(tag)} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all border", interests.includes(tag) ? "bg-sunset text-accent-foreground border-sunset" : "bg-secondary border-border text-foreground hover:border-sunset/50")}>{tag}</button>
+                            <button
+                              key={tag}
+                              onClick={() => toggleInterest(tag)}
+                              className={cn(
+                                "px-4 py-2 rounded-full text-sm font-medium transition-all border",
+                                interests.includes(tag)
+                                  ? "bg-sunset text-accent-foreground border-sunset shadow-soft"
+                                  : "bg-secondary border-border text-foreground hover:border-sunset/50 hover:-translate-y-0.5"
+                              )}
+                            >
+                              {interests.includes(tag) ? "✓ " : "+ "}{tag}
+                            </button>
                           ))}
+                        </div>
+                        <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
+                          <span>{interests.length} selected</span>
+                          {interests.length > 0 && (
+                            <button onClick={() => setInterests([])} className="underline hover:text-foreground">Clear all</button>
+                          )}
                         </div>
                       </div>
                     )}
+
 
                     {/* Step 7: Generate */}
                     {step === 7 && (
@@ -609,6 +782,51 @@ const PlanTrip = () => {
                               <p><span className="text-muted-foreground">Budget:</span> <span className="font-medium text-foreground">${budget.toLocaleString()}/person · {groupSize} travelers</span></p>
                               <p><span className="text-muted-foreground">Style:</span> <span className="font-medium text-foreground">{styles.join(", ") || "Any"}</span></p>
                             </div>
+
+                            {/* AI Planning Mode selector */}
+                            <div className="text-left">
+                              <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> Choose your AI planning mode</h3>
+                                <span className="text-xs text-muted-foreground">tap to switch</span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                {planningModes.map((m) => {
+                                  const active = planningMode === m.id;
+                                  return (
+                                    <button
+                                      key={m.id}
+                                      type="button"
+                                      onClick={() => setPlanningMode(m.id)}
+                                      className={cn(
+                                        "relative text-left rounded-2xl p-4 border bg-gradient-to-br transition-all",
+                                        m.accent,
+                                        active
+                                          ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-soft scale-[1.01]"
+                                          : "hover:-translate-y-0.5 hover:shadow-soft opacity-90 hover:opacity-100"
+                                      )}
+                                    >
+                                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-lg">{m.emoji}</span>
+                                          <span className="font-display font-bold text-foreground text-base leading-tight">{m.title}</span>
+                                        </div>
+                                        {active && <span className="text-[10px] uppercase tracking-wider font-bold text-primary">Selected</span>}
+                                      </div>
+                                      <span className="inline-block text-[10px] uppercase tracking-wider font-semibold bg-background/60 text-foreground px-2 py-0.5 rounded-full mb-2">{m.badge}</span>
+                                      <p className="text-xs text-foreground/80 italic mb-2">{m.tagline}</p>
+                                      <ul className="space-y-0.5">
+                                        {m.points.map((p) => (
+                                          <li key={p} className="text-[11px] text-muted-foreground flex gap-1.5">
+                                            <span className="text-primary">•</span><span>{p}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
 
                             {enrichmentLoading && (
                               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-4">

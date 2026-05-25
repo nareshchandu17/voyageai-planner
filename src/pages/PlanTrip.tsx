@@ -254,6 +254,8 @@ const PlanTrip = () => {
       nearbyPlaces,
       upcomingEvents,
       narrativeIntensities: Object.keys(intensitiesToUse).length > 0 ? intensitiesToUse : undefined,
+      planningMode,
+
       travelerProfile: travelerProfile ? {
         pace_preference: travelerProfile.pace_preference,
         energy_tolerance: travelerProfile.energy_tolerance,

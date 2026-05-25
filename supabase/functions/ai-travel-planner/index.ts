@@ -73,6 +73,39 @@ ${Object.entries(narrativeIntensities).map(([dayIdx, intensity]) => {
 IMPORTANT: The user has customized the emotional pacing of their trip. Days with higher intensity should have MORE activities, MORE ambitious plans, and LONGER days. Days with lower intensity should have FEWER activities, more free time, leisurely meals, and relaxation. This overrides default pacing.`
       : "";
 
+    const planningModeMap: Record<string, string> = {
+      smart_balanced: `PLANNING MODE: SMART BALANCED (default)
+- Balance exploration with rest. Avoid overload.
+- Mix famous landmarks with hidden local gems (roughly 60/40).
+- Optimize pacing so no day feels rushed or empty.
+- 4-5 activities per day, with at least one rest window.`,
+      deep_exploration: `PLANNING MODE: DEEP EXPLORATION
+- This trip is long enough to go beyond top-10 lists. Avoid repeating the same kinds of attractions.
+- Build THEMATIC days (one neighborhood / one district / one historic era per day).
+- Reduce cross-city movement; cluster activities by geography.
+- Include lesser-known museums, residential districts, specialty markets, slow walks.
+- Never produce a "top attractions repeated differently" itinerary.`,
+      fast_highlights: `PLANNING MODE: FAST HIGHLIGHTS
+- Short or aggressive trip. Prioritize the MAJOR must-see attractions only.
+- Compress the schedule — 6-7 activities per day, minimal downtime.
+- Skip slow/local experiences in favor of iconic landmarks.
+- Optimize transit routes to maximize coverage.`,
+      adaptive_flow: `PLANNING MODE: ADAPTIVE FLOW (premium)
+- Build FLEXIBLE days with optional alternative activities (provide 1 alt per main activity in the tip field, e.g. "Alt: ...").
+- Adapt pacing dynamically based on energy curve — front-load mornings, lighter evenings.
+- Include buffer windows (free time, café breaks, "wander hour") between major stops.
+- Feel like a human travel strategist made this — confident, considered, never rigid.`,
+      local_immersion: `PLANNING MODE: LOCAL IMMERSION (premium)
+- Prioritize LOCAL CULTURE over tourist circuits.
+- Favor neighborhood cafes, family-run eateries, local markets, residential walks, community events.
+- Avoid tourist-heavy repetition — at most 1 marquee landmark per day.
+- Include slow experiences: long meals, neighborhood lingering, conversations with locals (where appropriate).`,
+    };
+    const planningModeContext = planningMode && planningModeMap[planningMode]
+      ? `\n\n${planningModeMap[planningMode]}\n\nIMPORTANT: This mode shapes the WHOLE trip. Apply it consistently across every day.`
+      : "";
+
+
     const systemPrompt = `You are VoyageAI, an expert travel planner. You create comprehensive travel plans with TWO phases:
 1. BEFORE TRIP — preparation intelligence so the user is fully ready
 2. DURING TRIP — a live travel companion with practical info for while traveling

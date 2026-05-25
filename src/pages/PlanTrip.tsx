@@ -155,6 +155,8 @@ const PlanTrip = () => {
   const [enrichmentLoading, setEnrichmentLoading] = useState(false);
   const [enrichmentFetched, setEnrichmentFetched] = useState(false);
   const [narrativeIntensities, setNarrativeIntensities] = useState<Record<number, number>>({});
+  const [planningMode, setPlanningMode] = useState<string>("smart_balanced");
+
 
   // Load existing trip if tripId is provided
   useEffect(() => {

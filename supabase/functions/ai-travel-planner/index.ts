@@ -259,17 +259,36 @@ OUTPUT FORMAT: Return a valid JSON object with this exact structure:
 
 ONLY output the JSON object, nothing else. Ensure all data is realistic and verified.`;
 
+    // Compute exact day count from date range so the model never under-generates
+    let tripDays = 0;
+    try {
+      if (startDate && endDate) {
+        const ms = new Date(endDate).getTime() - new Date(startDate).getTime();
+        tripDays = Math.max(1, Math.round(ms / 86400000) + 1);
+      }
+    } catch { /* noop */ }
+
+    const dayCountInstruction = tripDays > 0
+      ? `\n\n🚨 CRITICAL DAY COUNT REQUIREMENT 🚨
+This trip is EXACTLY ${tripDays} day${tripDays > 1 ? "s" : ""} long (from ${startDate} to ${endDate}, inclusive).
+The "days" array in your JSON output MUST contain EXACTLY ${tripDays} entries — one object per day, numbered day: 1 through day: ${tripDays}, with sequential dates from ${startDate} to ${endDate}.
+Likewise, "beforeTrip.itineraryPreview" MUST contain EXACTLY ${tripDays} entries.
+Do NOT truncate. Do NOT stop early. Do NOT summarize remaining days. Generate every single day in full detail.
+If you are running long, shorten activity descriptions but NEVER drop days. All ${tripDays} days are mandatory.`
+      : "";
+
     const userPrompt = `Plan a trip to ${destination}
-Dates: ${startDate} to ${endDate}
+Dates: ${startDate} to ${endDate}${tripDays > 0 ? ` (${tripDays} days total)` : ""}
 Budget: $${budget} per person
 Group size: ${groupSize} travelers
 Travel styles: ${styles?.join(", ") || "Any"}
 Interests: ${interests?.join(", ") || "General sightseeing"}
-${weatherContext}${placesContext}${eventsContext}${profileContext}${narrativeContext}${planningModeContext}
+${weatherContext}${placesContext}${eventsContext}${profileContext}${narrativeContext}${planningModeContext}${dayCountInstruction}
 
 Create a comprehensive two-phase travel plan:
-1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview.
+1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview${tripDays > 0 ? ` (exactly ${tripDays} days)` : ""}.
 2. DURING TRIP: Include local transport guide, restaurant recommendations (6-8 restaurants), unique experiences (5-6), safety information, hotel tips, and navigation guide with key routes.
+3. DAYS: Generate exactly ${tripDays || "the correct number of"} day objects in the "days" array. Each day must have activities, meals, dailyBudget, theme, and companionInsights.
 
 All recommendations must be REAL, verified places and establishments. If local events are listed above, incorporate relevant ones.`;
 
@@ -280,12 +299,13 @@ All recommendations must be REAL, verified places and establishments. If local e
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         stream: true,
+        max_tokens: 32000,
       }),
     });
 

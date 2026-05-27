@@ -557,7 +557,7 @@ const PlanTrip = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl gradient-ocean flex items-center justify-center"><MapPin className="w-5 h-5 text-primary-foreground" /></div>
-                          <div><h2 className="font-display text-2xl font-bold text-foreground">Where do you want to go?</h2><p className="text-sm text-muted-foreground">Search for any destination or pick a popular one below</p></div>
+                          <div><h2 className="font-display text-2xl font-bold text-foreground">Where do you want to go?</h2><p className="text-sm text-muted-foreground">Type any city or country — suggestions are just inspiration</p></div>
                         </div>
                         <div className="relative mb-6">
                           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -565,27 +565,44 @@ const PlanTrip = () => {
                             type="text"
                             value={destination}
                             onChange={(e) => setDestination(e.target.value)}
-                            placeholder="e.g. Tokyo, Bali, Paris..."
+                            placeholder="Any destination — e.g. Tbilisi, Patagonia, Faroe Islands..."
                             className="w-full h-14 pl-12 pr-4 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean font-body text-base"
                           />
                         </div>
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">Popular destinations</p>
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
+                          {destination && !popularDestinations.some(d => d.name.toLowerCase() === destination.toLowerCase())
+                            ? "Suggestions"
+                            : "Popular destinations"}
+                        </p>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[280px] overflow-y-auto pr-1">
-                          {popularDestinations.map((d) => (
-                            <button
-                              key={d.name}
-                              onClick={() => setDestination(d.name)}
-                              className={cn(
-                                "flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border text-left",
-                                destination === d.name
-                                  ? "bg-ocean text-primary-foreground border-ocean shadow-soft"
-                                  : "bg-secondary border-border text-foreground hover:border-ocean/50"
-                              )}
-                            >
-                              <span className="text-lg leading-none">{d.flag}</span>
-                              <span className="truncate">{d.name}</span>
-                            </button>
-                          ))}
+                          {(() => {
+                            const q = destination.trim().toLowerCase();
+                            const filtered = q
+                              ? popularDestinations.filter(d => d.name.toLowerCase().includes(q))
+                              : popularDestinations;
+                            if (filtered.length === 0) {
+                              return (
+                                <div className="col-span-full text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-xl">
+                                  No match in our popular list — but <span className="font-semibold text-foreground">"{destination}"</span> works perfectly! Tap Next to continue.
+                                </div>
+                              );
+                            }
+                            return filtered.map((d) => (
+                              <button
+                                key={d.name}
+                                onClick={() => setDestination(d.name)}
+                                className={cn(
+                                  "flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border text-left",
+                                  destination === d.name
+                                    ? "bg-ocean text-primary-foreground border-ocean shadow-soft"
+                                    : "bg-secondary border-border text-foreground hover:border-ocean/50"
+                                )}
+                              >
+                                <span className="text-lg leading-none">{d.flag}</span>
+                                <span className="truncate">{d.name}</span>
+                              </button>
+                            ));
+                          })()}
                         </div>
                       </div>
                     )}

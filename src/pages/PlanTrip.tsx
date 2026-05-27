@@ -875,12 +875,58 @@ const PlanTrip = () => {
                                             <span className="text-primary">•</span><span>{p}</span>
                                           </li>
                                         ))}
-                                      </ul>
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                              </ul>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Mode Impact Summary */}
+                      {planningMode && modeImpacts[planningMode] && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-secondary p-5 text-left"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <Sparkles className="w-4 h-4 text-primary" />
                             </div>
+                            <h4 className="text-sm font-semibold text-foreground">Mode Impact — <span className="text-primary">{planningModes.find(m => m.id === planningMode)?.title}</span></h4>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Pacing</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].pacing}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Day Structure</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].structure}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Activity Density</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].density}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Rest Ratio</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].restRatio}</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">What to expect</p>
+                            <ul className="space-y-1">
+                              {modeImpacts[planningMode].expect.map((item, i) => (
+                                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                                  <span className="text-primary mt-1 shrink-0">•</span>
+                                  <span className="leading-snug">{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
 
 
                             {enrichmentLoading && (

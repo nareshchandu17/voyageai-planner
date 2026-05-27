@@ -115,6 +115,44 @@ const planningModes = [
   },
 ];
 
+const modeImpacts: Record<string, { pacing: string; structure: string; density: string; restRatio: string; expect: string[] }> = {
+  smart_balanced: {
+    pacing: "Moderate — starts gently, builds to a peak mid-trip, then eases out",
+    structure: "2–3 activities per day with intentional downtime",
+    density: "Balanced (medium-high on peak days, lighter on travel days)",
+    restRatio: "~30% free time or slow moments built in",
+    expect: ["Famous sights mixed with hidden gems", "No back-to-back marathon days", "Flexible evenings for spontaneous discovery"],
+  },
+  deep_exploration: {
+    pacing: "Slow and immersive — fewer transitions, deeper engagement",
+    structure: "Thematic days focused on one district or topic at a time",
+    density: "Lower volume, higher depth (1–2 major experiences per day)",
+    restRatio: "~40% unstructured time for wandering and reflection",
+    expect: ["Neighborhood walks over hop-on-hop-off tours", "Repeated visits to favorite areas", "Time to talk to locals and absorb culture"],
+  },
+  fast_highlights: {
+    pacing: "Fast — high energy from day one, compressed schedule",
+    structure: "4–5 activities per day, tight routing, minimal gaps",
+    density: "Very high (major attractions prioritized, rest is secondary)",
+    restRatio: "~10% downtime — mostly transit breaks",
+    expect: ["Must-see list gets priority", "Early starts and packed days", "Efficient routing with little wandering"],
+  },
+  adaptive_flow: {
+    pacing: "Dynamic — adjusts intensity based on day type and location",
+    structure: "Core plan + optional alternatives for every slot",
+    density: "Medium with built-in flexibility (swap activities on the fly)",
+    restRatio: "~25% buffer windows + optional slow afternoons",
+    expect: ["A & B plans for each day", "Buffer time for delays and spontaneity", "Pacing that adapts to weather and mood"],
+  },
+  local_immersion: {
+    pacing: "Unhurried — lives like a local, not a checklist tourist",
+    structure: "Café mornings, neighborhood afternoons, slow evenings",
+    density: "Low (quality local spots over famous attractions)",
+    restRatio: "~50% unstructured time for organic discovery",
+    expect: ["Family-run restaurants and corner cafés", "Residential neighborhoods over tourist strips", "Long lunches and people-watching"],
+  },
+};
+
 const TOTAL_STEPS = 7;
 
 
@@ -837,12 +875,58 @@ const PlanTrip = () => {
                                             <span className="text-primary">•</span><span>{p}</span>
                                           </li>
                                         ))}
-                                      </ul>
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                              </ul>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Mode Impact Summary */}
+                      {planningMode && modeImpacts[planningMode] && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-secondary p-5 text-left"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <Sparkles className="w-4 h-4 text-primary" />
                             </div>
+                            <h4 className="text-sm font-semibold text-foreground">Mode Impact — <span className="text-primary">{planningModes.find(m => m.id === planningMode)?.title}</span></h4>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Pacing</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].pacing}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Day Structure</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].structure}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Activity Density</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].density}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Rest Ratio</p>
+                              <p className="text-foreground leading-snug">{modeImpacts[planningMode].restRatio}</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">What to expect</p>
+                            <ul className="space-y-1">
+                              {modeImpacts[planningMode].expect.map((item, i) => (
+                                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                                  <span className="text-primary mt-1 shrink-0">•</span>
+                                  <span className="leading-snug">{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
 
 
                             {enrichmentLoading && (

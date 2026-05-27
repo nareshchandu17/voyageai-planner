@@ -115,6 +115,44 @@ const planningModes = [
   },
 ];
 
+const modeImpacts: Record<string, { pacing: string; structure: string; density: string; restRatio: string; expect: string[] }> = {
+  smart_balanced: {
+    pacing: "Moderate — starts gently, builds to a peak mid-trip, then eases out",
+    structure: "2–3 activities per day with intentional downtime",
+    density: "Balanced (medium-high on peak days, lighter on travel days)",
+    restRatio: "~30% free time or slow moments built in",
+    expect: ["Famous sights mixed with hidden gems", "No back-to-back marathon days", "Flexible evenings for spontaneous discovery"],
+  },
+  deep_exploration: {
+    pacing: "Slow and immersive — fewer transitions, deeper engagement",
+    structure: "Thematic days focused on one district or topic at a time",
+    density: "Lower volume, higher depth (1–2 major experiences per day)",
+    restRatio: "~40% unstructured time for wandering and reflection",
+    expect: ["Neighborhood walks over hop-on-hop-off tours", "Repeated visits to favorite areas", "Time to talk to locals and absorb culture"],
+  },
+  fast_highlights: {
+    pacing: "Fast — high energy from day one, compressed schedule",
+    structure: "4–5 activities per day, tight routing, minimal gaps",
+    density: "Very high (major attractions prioritized, rest is secondary)",
+    restRatio: "~10% downtime — mostly transit breaks",
+    expect: ["Must-see list gets priority", "Early starts and packed days", "Efficient routing with little wandering"],
+  },
+  adaptive_flow: {
+    pacing: "Dynamic — adjusts intensity based on day type and location",
+    structure: "Core plan + optional alternatives for every slot",
+    density: "Medium with built-in flexibility (swap activities on the fly)",
+    restRatio: "~25% buffer windows + optional slow afternoons",
+    expect: ["A & B plans for each day", "Buffer time for delays and spontaneity", "Pacing that adapts to weather and mood"],
+  },
+  local_immersion: {
+    pacing: "Unhurried — lives like a local, not a checklist tourist",
+    structure: "Café mornings, neighborhood afternoons, slow evenings",
+    density: "Low (quality local spots over famous attractions)",
+    restRatio: "~50% unstructured time for organic discovery",
+    expect: ["Family-run restaurants and corner cafés", "Residential neighborhoods over tourist strips", "Long lunches and people-watching"],
+  },
+};
+
 const TOTAL_STEPS = 7;
 
 

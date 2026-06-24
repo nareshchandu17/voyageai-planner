@@ -55,6 +55,21 @@ interface Activity {
   imageUrl?: string;
   coordinates?: Coordinates;
   nextLeg?: RouteEstimate | null;
+  // Premium concierge fields (optional, populated by AI)
+  category?: string;
+  rating?: number;
+  reviewCount?: number;
+  openingHours?: string;
+  ticketPrice?: string;
+  bestTimeToVisit?: string;
+  crowdLevel?: "low" | "moderate" | "high" | string;
+  hiddenGem?: boolean;
+  whyVisit?: string;
+  localSecret?: string;
+  photoTip?: string;
+  commonMistake?: string;
+  accessibility?: string;
+  address?: string;
 }
 
 interface MealInfo {
@@ -1306,7 +1321,22 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
           </div>
         )}
 
-        <h6 className="font-semibold text-foreground text-sm mb-1 leading-snug">{activity.title}</h6>
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <h6 className="font-semibold text-foreground text-sm leading-snug flex-1">
+            {activity.title}
+            {activity.hiddenGem && (
+              <span className="ml-1.5 inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+                <Sparkles className="w-2.5 h-2.5" /> Hidden gem
+              </span>
+            )}
+          </h6>
+          {typeof activity.rating === "number" && (
+            <span className="shrink-0 inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+              <Star className="w-2.5 h-2.5 fill-current" /> {activity.rating.toFixed(1)}
+              {activity.reviewCount ? <span className="text-muted-foreground font-normal ml-0.5">({activity.reviewCount > 999 ? `${Math.round(activity.reviewCount/1000)}k` : activity.reviewCount})</span> : null}
+            </span>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{activity.description}</p>
 
         {/* Meta badges */}
@@ -1317,18 +1347,77 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
           <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
             <Clock className="w-2.5 h-2.5" /> {activity.duration}
           </span>
-          {activity.cost > 0 && (
+          {activity.openingHours && (
+            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
+              <Clock className="w-2.5 h-2.5" /> {activity.openingHours}
+            </span>
+          )}
+          {activity.ticketPrice && (
+            <span className="text-[10px] text-accent flex items-center gap-0.5 bg-accent/10 px-1.5 py-0.5 rounded-md font-medium">
+              <Ticket className="w-2.5 h-2.5" /> {activity.ticketPrice}
+            </span>
+          )}
+          {!activity.ticketPrice && activity.cost > 0 && (
             <span className="text-[10px] text-accent flex items-center gap-0.5 bg-accent/10 px-1.5 py-0.5 rounded-md font-medium">
               <DollarSign className="w-2.5 h-2.5" /> ${activity.cost}
+            </span>
+          )}
+          {activity.crowdLevel && (
+            <span className={cn(
+              "text-[10px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-md font-medium capitalize",
+              activity.crowdLevel === "low" && "text-emerald-700 bg-emerald-500/10",
+              activity.crowdLevel === "moderate" && "text-amber-700 bg-amber-500/10",
+              activity.crowdLevel === "high" && "text-rose-700 bg-rose-500/10",
+            )}>
+              <User className="w-2.5 h-2.5" /> {activity.crowdLevel} crowd
+            </span>
+          )}
+          {activity.category && (
+            <span className="text-[10px] text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded-md">
+              {activity.category}
             </span>
           )}
           <ActivityEnergyBadge activity={activity} />
         </div>
 
-        {/* Insider tip */}
-        {activity.tip && (
-          <div className="mt-2.5 text-[11px] text-primary bg-primary/5 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
-            <Lightbulb className="w-3 h-3 mt-0.5 shrink-0" /> {activity.tip}
+        {/* Concierge insights */}
+        {(activity.whyVisit || activity.localSecret || activity.photoTip || activity.bestTimeToVisit || activity.commonMistake || activity.accessibility || activity.tip) && (
+          <div className="mt-2.5 space-y-1.5">
+            {activity.whyVisit && (
+              <div className="text-[11px] text-primary bg-primary/5 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <Heart className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Why visit:</strong> {activity.whyVisit}</span>
+              </div>
+            )}
+            {activity.localSecret && (
+              <div className="text-[11px] text-accent bg-accent/10 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <Sparkles className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Local secret:</strong> {activity.localSecret}</span>
+              </div>
+            )}
+            {activity.photoTip && (
+              <div className="text-[11px] text-muted-foreground bg-secondary/60 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <Camera className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Photo tip:</strong> {activity.photoTip}</span>
+              </div>
+            )}
+            {activity.bestTimeToVisit && (
+              <div className="text-[11px] text-muted-foreground bg-secondary/60 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <Sunrise className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Best time:</strong> {activity.bestTimeToVisit}</span>
+              </div>
+            )}
+            {activity.commonMistake && (
+              <div className="text-[11px] text-rose-700 bg-rose-500/10 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Avoid:</strong> {activity.commonMistake}</span>
+              </div>
+            )}
+            {activity.accessibility && (
+              <div className="text-[11px] text-muted-foreground bg-secondary/60 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <Compass className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Accessibility:</strong> {activity.accessibility}</span>
+              </div>
+            )}
+            {activity.tip && !activity.localSecret && (
+              <div className="text-[11px] text-primary bg-primary/5 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+                <Lightbulb className="w-3 h-3 mt-0.5 shrink-0" /> {activity.tip}
+              </div>
+            )}
           </div>
         )}
 

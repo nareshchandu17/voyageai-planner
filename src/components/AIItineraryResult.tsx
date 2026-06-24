@@ -55,6 +55,21 @@ interface Activity {
   imageUrl?: string;
   coordinates?: Coordinates;
   nextLeg?: RouteEstimate | null;
+  // Premium concierge fields (optional, populated by AI)
+  category?: string;
+  rating?: number;
+  reviewCount?: number;
+  openingHours?: string;
+  ticketPrice?: string;
+  bestTimeToVisit?: string;
+  crowdLevel?: "low" | "moderate" | "high" | string;
+  hiddenGem?: boolean;
+  whyVisit?: string;
+  localSecret?: string;
+  photoTip?: string;
+  commonMistake?: string;
+  accessibility?: string;
+  address?: string;
 }
 
 interface MealInfo {

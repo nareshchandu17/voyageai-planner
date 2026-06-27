@@ -241,7 +241,7 @@ const Itinerary = () => {
       toast.success("Markdown downloaded");
     } else if (kind === "pdf") {
       try {
-        if (beforeTrip) await exportBeforeTripPDF(beforeTrip, trip.destination);
+        if (beforeTrip) await exportBeforeTripPDF({ ...beforeTrip, destination: trip.destination });
         else toast.error("No before-trip data to export");
       } catch { toast.error("PDF export failed"); }
     }

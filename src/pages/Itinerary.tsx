@@ -241,8 +241,16 @@ const Itinerary = () => {
       toast.success("Markdown downloaded");
     } else if (kind === "pdf") {
       try {
-        if (beforeTrip) await exportBeforeTripPDF({ ...beforeTrip, destination: trip.destination });
-        else toast.error("No before-trip data to export");
+        const data: any = trip.itinerary_data || {};
+        exportBeforeTripPDF({
+          title: data.title || trip.title || trip.destination,
+          summary: data.summary || "",
+          totalBudgetEstimate: data.totalBudgetEstimate,
+          currency: data.currency || trip.currency,
+          beforeTrip: data.beforeTrip,
+          days: data.days || [],
+          warnings: data.warnings,
+        });
       } catch { toast.error("PDF export failed"); }
     }
   };

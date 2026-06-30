@@ -67,6 +67,7 @@ const DayRouteMap = ({ destination, stops }: Props) => {
   const [coords, setCoords] = useState<Record<string, LocationPoint>>({});
   const [routes, setRoutes] = useState<Record<string, RouteEstimate>>({});
   const [loading, setLoading] = useState(false);
+  const [modeOverride, setModeOverride] = useState<"auto" | TravelMode>("auto");
 
   useEffect(() => {
     let cancelled = false;
@@ -109,27 +110,49 @@ const DayRouteMap = ({ destination, stops }: Props) => {
       mode: TravelMode;
       durationText?: string;
       distanceText?: string;
+      durationValue?: number;
       fromLabel: string;
       toLabel: string;
+      unavailable?: boolean;
     }> = [];
     for (let i = 0; i < validStops.length - 1; i++) {
       const o = coords[stopQuery(validStops[i], destination)];
       const d = coords[stopQuery(validStops[i + 1], destination)];
       if (!o || !d) continue;
       const r = routes[`${i}-${i + 1}`];
+      const recommended = r?.recommendedMode || "walking";
+      const pick: TravelMode = modeOverride === "auto" ? recommended : modeOverride;
+      const picked = r?.modes?.[pick];
+      const fallback =
+        modeOverride !== "auto" && !picked && r
+          ? r.modes?.[recommended]
+          : undefined;
+      const useMode: TravelMode = picked ? pick : recommended;
+      const useData = picked || fallback || (r ? { durationText: r.durationText, distanceText: r.distanceText, durationValue: 0 } : undefined);
       segs.push({
         from: [o.lat, o.lng],
         to: [d.lat, d.lng],
-        mode: r?.recommendedMode || "walking",
-        durationText: r?.durationText,
-        distanceText: r?.distanceText,
+        mode: useMode,
+        durationText: useData?.durationText,
+        distanceText: useData?.distanceText,
+        durationValue: useData?.durationValue,
         fromLabel: validStops[i].title || validStops[i].name || `Stop ${i + 1}`,
         toLabel: validStops[i + 1].title || validStops[i + 1].name || `Stop ${i + 2}`,
+        unavailable: modeOverride !== "auto" && !picked,
       });
     }
     return segs;
-  }, [validStops, coords, routes, destination]);
+  }, [validStops, coords, routes, destination, modeOverride]);
 
+  const totals = useMemo(() => {
+    const secs = segments.reduce((s, x) => s + (x.durationValue || 0), 0);
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.round((secs % 3600) / 60);
+    const durationText = secs > 0 ? (hrs ? `${hrs}h ${mins}m` : `${mins}m`) : "—";
+    return { durationText, count: segments.length };
+  }, [segments]);
+
+  const gmapsTravelMode = modeOverride === "auto" ? "walking" : modeOverride;
   const gmapsRoute = useMemo(() => {
     const qs = validStops.map((s) => encodeURIComponent(stopQuery(s, destination))).filter(Boolean);
     if (qs.length < 2) return null;
@@ -138,8 +161,8 @@ const DayRouteMap = ({ destination, stops }: Props) => {
     const waypoints = qs.slice(1, -1).join("|");
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${
       waypoints ? `&waypoints=${waypoints}` : ""
-    }&travelmode=walking`;
-  }, [validStops, destination]);
+    }&travelmode=${gmapsTravelMode}`;
+  }, [validStops, destination, gmapsTravelMode]);
 
   if (!validStops.length) return null;
 
@@ -220,14 +243,38 @@ const DayRouteMap = ({ destination, stops }: Props) => {
         )}
       </div>
 
-      {/* Segment legend */}
+      {/* Mode toggle + legend */}
       {segments.length > 0 && (
         <div className="p-3 space-y-2">
-          <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="font-medium text-foreground">Route segments</span>
-            <span className="inline-flex items-center gap-1"><Footprints className="w-3 h-3 text-emerald-500" />Walk</span>
-            <span className="inline-flex items-center gap-1"><Bus className="w-3 h-3 text-blue-500" />Transit</span>
-            <span className="inline-flex items-center gap-1"><Car className="w-3 h-3 text-amber-500" />Drive</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex rounded-lg border border-border/60 bg-muted/40 p-0.5 text-[11px]">
+              {([
+                { id: "auto" as const, label: "Auto", Icon: Navigation },
+                { id: "walking" as const, label: "Walk", Icon: Footprints },
+                { id: "transit" as const, label: "Transit", Icon: Bus },
+                { id: "driving" as const, label: "Drive", Icon: Car },
+              ]).map(({ id, label, Icon }) => {
+                const active = modeOverride === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setModeOverride(id)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition ${
+                      active
+                        ? "bg-background shadow-sm text-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              <span className="font-medium text-foreground">{totals.count}</span> segments ·{" "}
+              <span className="font-medium text-foreground">{totals.durationText}</span> total
+            </div>
           </div>
           <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
             {segments.map((seg, i) => {
@@ -255,6 +302,7 @@ const DayRouteMap = ({ destination, stops }: Props) => {
                     {modeMeta[seg.mode].label}
                     {seg.durationText ? ` · ${seg.durationText}` : ""}
                     {seg.distanceText ? ` · ${seg.distanceText}` : ""}
+                    {seg.unavailable ? " · fallback" : ""}
                   </Badge>
                   <ExternalLink className="w-3 h-3 text-muted-foreground" />
                 </a>

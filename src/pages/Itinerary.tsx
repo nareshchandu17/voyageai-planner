@@ -17,6 +17,7 @@ import {
   buildGoogleMapsRoute, buildAppleMapsRoute, buildICS, buildMarkdown, downloadBlob,
 } from "@/lib/itineraryExports";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
+import DayRouteMap from "@/components/itinerary/DayRouteMap";
 import { toast } from "sonner";
 
 interface Activity {
@@ -525,6 +526,26 @@ const Itinerary = () => {
                                   <p className="text-xs text-muted-foreground">{day.travelTip}</p>
                                 </div>
                               )}
+                            </div>
+                          )}
+
+                          {/* Interactive day route map */}
+                          {day.activities.length > 0 && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <MapIcon className="w-4 h-4 text-ocean" />
+                                <span className="text-sm font-display font-semibold text-foreground">Day route</span>
+                                <span className="text-xs text-muted-foreground">· optimized stops & segments</span>
+                              </div>
+                              <DayRouteMap
+                                destination={trip.destination}
+                                stops={day.activities.map((a) => ({
+                                  title: a.title || a.name,
+                                  location: a.location,
+                                  address: a.address,
+                                  time: a.time,
+                                }))}
+                              />
                             </div>
                           )}
 

@@ -302,6 +302,7 @@ const DayRouteMap = ({ destination, stops }: Props) => {
                     {modeMeta[seg.mode].label}
                     {seg.durationText ? ` · ${seg.durationText}` : ""}
                     {seg.distanceText ? ` · ${seg.distanceText}` : ""}
+                    {seg.unavailable ? " · fallback" : ""}
                   </Badge>
                   <ExternalLink className="w-3 h-3 text-muted-foreground" />
                 </a>

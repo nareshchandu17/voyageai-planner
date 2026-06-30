@@ -243,14 +243,38 @@ const DayRouteMap = ({ destination, stops }: Props) => {
         )}
       </div>
 
-      {/* Segment legend */}
+      {/* Mode toggle + legend */}
       {segments.length > 0 && (
         <div className="p-3 space-y-2">
-          <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="font-medium text-foreground">Route segments</span>
-            <span className="inline-flex items-center gap-1"><Footprints className="w-3 h-3 text-emerald-500" />Walk</span>
-            <span className="inline-flex items-center gap-1"><Bus className="w-3 h-3 text-blue-500" />Transit</span>
-            <span className="inline-flex items-center gap-1"><Car className="w-3 h-3 text-amber-500" />Drive</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex rounded-lg border border-border/60 bg-muted/40 p-0.5 text-[11px]">
+              {([
+                { id: "auto" as const, label: "Auto", Icon: Navigation },
+                { id: "walking" as const, label: "Walk", Icon: Footprints },
+                { id: "transit" as const, label: "Transit", Icon: Bus },
+                { id: "driving" as const, label: "Drive", Icon: Car },
+              ]).map(({ id, label, Icon }) => {
+                const active = modeOverride === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setModeOverride(id)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition ${
+                      active
+                        ? "bg-background shadow-sm text-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              <span className="font-medium text-foreground">{totals.count}</span> segments ·{" "}
+              <span className="font-medium text-foreground">{totals.durationText}</span> total
+            </div>
           </div>
           <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
             {segments.map((seg, i) => {

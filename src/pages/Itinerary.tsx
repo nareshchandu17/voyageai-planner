@@ -529,6 +529,26 @@ const Itinerary = () => {
                             </div>
                           )}
 
+                          {/* Interactive day route map */}
+                          {day.activities.length > 0 && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <MapIcon className="w-4 h-4 text-ocean" />
+                                <span className="text-sm font-display font-semibold text-foreground">Day route</span>
+                                <span className="text-xs text-muted-foreground">· optimized stops & segments</span>
+                              </div>
+                              <DayRouteMap
+                                destination={trip.destination}
+                                stops={day.activities.map((a) => ({
+                                  title: a.title || a.name,
+                                  location: a.location,
+                                  address: a.address,
+                                  time: a.time,
+                                }))}
+                              />
+                            </div>
+                          )}
+
                           {/* Periods */}
                           {(["morning", "afternoon", "evening"] as const).map((period) => {
                             const acts = day.activities.filter((a) => a.period === period);

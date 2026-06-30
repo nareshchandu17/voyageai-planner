@@ -17,6 +17,7 @@ import {
   buildGoogleMapsRoute, buildAppleMapsRoute, buildICS, buildMarkdown, downloadBlob,
 } from "@/lib/itineraryExports";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
+import DayRouteMap from "@/components/itinerary/DayRouteMap";
 import { toast } from "sonner";
 
 interface Activity {

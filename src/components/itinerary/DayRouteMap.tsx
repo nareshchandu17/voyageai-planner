@@ -110,26 +110,47 @@ const DayRouteMap = ({ destination, stops }: Props) => {
       mode: TravelMode;
       durationText?: string;
       distanceText?: string;
+      durationValue?: number;
       fromLabel: string;
       toLabel: string;
+      unavailable?: boolean;
     }> = [];
     for (let i = 0; i < validStops.length - 1; i++) {
       const o = coords[stopQuery(validStops[i], destination)];
       const d = coords[stopQuery(validStops[i + 1], destination)];
       if (!o || !d) continue;
       const r = routes[`${i}-${i + 1}`];
+      const recommended = r?.recommendedMode || "walking";
+      const pick: TravelMode = modeOverride === "auto" ? recommended : modeOverride;
+      const picked = r?.modes?.[pick];
+      const fallback =
+        modeOverride !== "auto" && !picked && r
+          ? r.modes?.[recommended]
+          : undefined;
+      const useMode: TravelMode = picked ? pick : recommended;
+      const useData = picked || fallback || (r ? { durationText: r.durationText, distanceText: r.distanceText, durationValue: 0 } : undefined);
       segs.push({
         from: [o.lat, o.lng],
         to: [d.lat, d.lng],
-        mode: r?.recommendedMode || "walking",
-        durationText: r?.durationText,
-        distanceText: r?.distanceText,
+        mode: useMode,
+        durationText: useData?.durationText,
+        distanceText: useData?.distanceText,
+        durationValue: useData?.durationValue,
         fromLabel: validStops[i].title || validStops[i].name || `Stop ${i + 1}`,
         toLabel: validStops[i + 1].title || validStops[i + 1].name || `Stop ${i + 2}`,
+        unavailable: modeOverride !== "auto" && !picked,
       });
     }
     return segs;
-  }, [validStops, coords, routes, destination]);
+  }, [validStops, coords, routes, destination, modeOverride]);
+
+  const totals = useMemo(() => {
+    const secs = segments.reduce((s, x) => s + (x.durationValue || 0), 0);
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.round((secs % 3600) / 60);
+    const durationText = secs > 0 ? (hrs ? `${hrs}h ${mins}m` : `${mins}m`) : "—";
+    return { durationText, count: segments.length };
+  }, [segments]);
 
   const gmapsRoute = useMemo(() => {
     const qs = validStops.map((s) => encodeURIComponent(stopQuery(s, destination))).filter(Boolean);

@@ -152,6 +152,7 @@ const DayRouteMap = ({ destination, stops }: Props) => {
     return { durationText, count: segments.length };
   }, [segments]);
 
+  const gmapsTravelMode = modeOverride === "auto" ? "walking" : modeOverride;
   const gmapsRoute = useMemo(() => {
     const qs = validStops.map((s) => encodeURIComponent(stopQuery(s, destination))).filter(Boolean);
     if (qs.length < 2) return null;
@@ -160,8 +161,8 @@ const DayRouteMap = ({ destination, stops }: Props) => {
     const waypoints = qs.slice(1, -1).join("|");
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${
       waypoints ? `&waypoints=${waypoints}` : ""
-    }&travelmode=walking`;
-  }, [validStops, destination]);
+    }&travelmode=${gmapsTravelMode}`;
+  }, [validStops, destination, gmapsTravelMode]);
 
   if (!validStops.length) return null;
 

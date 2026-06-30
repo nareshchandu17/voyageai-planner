@@ -67,6 +67,7 @@ const DayRouteMap = ({ destination, stops }: Props) => {
   const [coords, setCoords] = useState<Record<string, LocationPoint>>({});
   const [routes, setRoutes] = useState<Record<string, RouteEstimate>>({});
   const [loading, setLoading] = useState(false);
+  const [modeOverride, setModeOverride] = useState<"auto" | TravelMode>("auto");
 
   useEffect(() => {
     let cancelled = false;

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
+import FriendsLocationMap from "@/components/dashboard/FriendsLocationMap";
 
 /* ---------- helpers ---------- */
 const fmtRange = (t: Trip) => {
@@ -189,39 +190,82 @@ const Header = ({ name }: { name: string }) => (
 );
 
 /* ---------- Destinations carousel ---------- */
-const DestinationsRail = ({ trips }: { trips: Trip[] }) => {
-  const items = trips.slice(0, 6);
+const DestinationsRail = ({
+  trips,
+  activeId,
+  onSelect,
+}: {
+  trips: Trip[];
+  activeId?: string;
+  onSelect: (id: string) => void;
+}) => {
+  const items = trips.slice(0, 8);
   const placeholders = Array.from({ length: Math.max(0, 6 - items.length) });
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    if (!activeId) return;
+    const el = itemRefs.current[activeId];
+    el?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeId]);
+
+  const handleClick = (t: Trip) => {
+    onSelect(t.id);
+    // Smoothly scroll the recommendations section into view
+    requestAnimationFrame(() => {
+      document.getElementById("reco-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-1">
-      {items.map((t, i) => (
-        <div
-          key={t.id}
-          className={cn(
-            "relative shrink-0 w-[104px] h-[104px] rounded-2xl overflow-hidden group cursor-pointer",
-            "ring-2 ring-transparent hover:ring-[#F97438]/60 transition",
-            i === 0 && "ring-[#F97438]"
-          )}
-        >
-          <img
-            src={t.image_url || t.destination_photos?.[0]?.url || "/placeholder.svg"}
-            alt={t.destination}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white p-0.5 shadow-md">
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-300 to-pink-400 text-white text-[10px] font-bold flex items-center justify-center">
-              {t.destination.slice(0, 1).toUpperCase()}
+    <div
+      ref={scrollerRef}
+      className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth -mx-1 px-1
+        [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {items.map((t) => {
+        const isActive = activeId === t.id;
+        return (
+          <button
+            key={t.id}
+            ref={(el) => (itemRefs.current[t.id] = el)}
+            onClick={() => handleClick(t)}
+            aria-pressed={isActive}
+            aria-label={`Focus ${t.destination}`}
+            className={cn(
+              "relative shrink-0 w-[104px] h-[104px] rounded-2xl overflow-hidden group snap-center outline-none",
+              "ring-2 transition-all duration-300 focus-visible:ring-[#F97438]",
+              isActive ? "ring-[#F97438] scale-[1.03]" : "ring-transparent hover:ring-[#F97438]/60 hover:-translate-y-0.5"
+            )}
+          >
+            <img
+              src={t.image_url || t.destination_photos?.[0]?.url || "/placeholder.svg"}
+              alt={t.destination}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className={cn(
+              "absolute inset-0 transition-opacity",
+              isActive ? "bg-black/0" : "bg-black/10 group-hover:bg-black/0"
+            )} />
+            <span className="absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-white/85 backdrop-blur text-foreground/80">
+              {flagFor(t.destination)} {t.destination.split(",")[0].slice(0, 8)}
+            </span>
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white p-0.5 shadow-md">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-300 to-pink-400 text-white text-[10px] font-bold flex items-center justify-center">
+                {t.destination.slice(0, 1).toUpperCase()}
+              </div>
             </div>
-          </div>
-        </div>
-      ))}
+          </button>
+        );
+      })}
       {placeholders.map((_, i) => (
-        <div key={i} className="shrink-0 w-[104px] h-[104px] rounded-2xl bg-secondary/60" />
+        <div key={i} className="shrink-0 w-[104px] h-[104px] rounded-2xl bg-secondary/60 snap-center" />
       ))}
     </div>
   );
 };
+
 
 /* ---------- Upcoming trip card ---------- */
 const UpcomingCard = ({ trip }: { trip: Trip }) => {
@@ -271,45 +315,6 @@ const UpcomingCard = ({ trip }: { trip: Trip }) => {
   );
 };
 
-/* ---------- Friends Location ---------- */
-const FriendsLocation = () => {
-  const friends = [
-    { name: "Shelly A.", place: "Japan", top: "22%", left: "72%" },
-    { name: "Edgar P.", place: "Argentina", top: "58%", left: "30%" },
-    { name: "Mira T.", place: "Kenya", top: "62%", left: "56%" },
-  ];
-  return (
-    <div className="rounded-3xl border border-border/60 bg-white p-6 h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-display text-xl font-bold text-foreground">Friends Location</h3>
-          <p className="text-xs text-muted-foreground mt-1">Check on your friend live location</p>
-        </div>
-        <button className="text-xs font-semibold text-[#C2410C] bg-[#FFEDD5] hover:bg-[#FED7AA] px-3 py-1.5 rounded-full transition">
-          Expand
-        </button>
-      </div>
-      <div className="relative mt-4 h-[240px] rounded-2xl overflow-hidden bg-[radial-gradient(circle_at_1px_1px,_hsl(var(--muted-foreground)/0.25)_1px,_transparent_0)] [background-size:10px_10px]">
-        {friends.map((f, i) => (
-          <motion.div
-            key={f.name}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * i }}
-            className="absolute flex items-center gap-2 bg-white rounded-full pl-1 pr-3 py-1 shadow-md border border-border/60"
-            style={{ top: f.top, left: f.left }}
-          >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-pink-500 border-2 border-white shrink-0" />
-            <div className="leading-tight">
-              <p className="text-xs font-semibold text-foreground">{f.name}</p>
-              <p className="text-[10px] text-muted-foreground">{f.place}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 /* ---------- Recommendation row ---------- */
 const RecoRow = ({ trip }: { trip: Trip }) => {
@@ -483,7 +488,7 @@ const Dashboard = () => {
             <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* LEFT column (2/3) */}
               <div className="xl:col-span-2 space-y-6">
-                <DestinationsRail trips={trips} />
+                <DestinationsRail trips={trips} activeId={focusTrip?.id} onSelect={setSelectedId} />
 
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -508,12 +513,16 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {focusTrip && <RecoRow trip={focusTrip} />}
+                {focusTrip && (
+                  <div id="reco-section">
+                    <RecoRow trip={focusTrip} />
+                  </div>
+                )}
               </div>
 
               {/* RIGHT column (1/3) */}
               <div className="space-y-6">
-                <FriendsLocation />
+                <FriendsLocationMap />
                 {focusTrip && <FeaturedItinerary trip={focusTrip} />}
               </div>
             </div>

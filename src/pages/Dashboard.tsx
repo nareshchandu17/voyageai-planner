@@ -526,7 +526,7 @@ const Dashboard = () => {
             <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* LEFT column (2/3) */}
               <div className="xl:col-span-2 space-y-6">
-                <DestinationsRail trips={trips} />
+                <DestinationsRail trips={trips} activeId={focusTrip?.id} onSelect={setSelectedId} />
 
                 <div>
                   <div className="flex items-center justify-between mb-4">

@@ -552,12 +552,16 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {focusTrip && <RecoRow trip={focusTrip} />}
+                {focusTrip && (
+                  <div id="reco-section">
+                    <RecoRow trip={focusTrip} />
+                  </div>
+                )}
               </div>
 
               {/* RIGHT column (1/3) */}
               <div className="space-y-6">
-                <FriendsLocation />
+                <FriendsLocationMap />
                 {focusTrip && <FeaturedItinerary trip={focusTrip} />}
               </div>
             </div>

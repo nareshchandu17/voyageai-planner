@@ -189,39 +189,82 @@ const Header = ({ name }: { name: string }) => (
 );
 
 /* ---------- Destinations carousel ---------- */
-const DestinationsRail = ({ trips }: { trips: Trip[] }) => {
-  const items = trips.slice(0, 6);
+const DestinationsRail = ({
+  trips,
+  activeId,
+  onSelect,
+}: {
+  trips: Trip[];
+  activeId?: string;
+  onSelect: (id: string) => void;
+}) => {
+  const items = trips.slice(0, 8);
   const placeholders = Array.from({ length: Math.max(0, 6 - items.length) });
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    if (!activeId) return;
+    const el = itemRefs.current[activeId];
+    el?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeId]);
+
+  const handleClick = (t: Trip) => {
+    onSelect(t.id);
+    // Smoothly scroll the recommendations section into view
+    requestAnimationFrame(() => {
+      document.getElementById("reco-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-1">
-      {items.map((t, i) => (
-        <div
-          key={t.id}
-          className={cn(
-            "relative shrink-0 w-[104px] h-[104px] rounded-2xl overflow-hidden group cursor-pointer",
-            "ring-2 ring-transparent hover:ring-[#F97438]/60 transition",
-            i === 0 && "ring-[#F97438]"
-          )}
-        >
-          <img
-            src={t.image_url || t.destination_photos?.[0]?.url || "/placeholder.svg"}
-            alt={t.destination}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white p-0.5 shadow-md">
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-300 to-pink-400 text-white text-[10px] font-bold flex items-center justify-center">
-              {t.destination.slice(0, 1).toUpperCase()}
+    <div
+      ref={scrollerRef}
+      className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth -mx-1 px-1
+        [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {items.map((t) => {
+        const isActive = activeId === t.id;
+        return (
+          <button
+            key={t.id}
+            ref={(el) => (itemRefs.current[t.id] = el)}
+            onClick={() => handleClick(t)}
+            aria-pressed={isActive}
+            aria-label={`Focus ${t.destination}`}
+            className={cn(
+              "relative shrink-0 w-[104px] h-[104px] rounded-2xl overflow-hidden group snap-center outline-none",
+              "ring-2 transition-all duration-300 focus-visible:ring-[#F97438]",
+              isActive ? "ring-[#F97438] scale-[1.03]" : "ring-transparent hover:ring-[#F97438]/60 hover:-translate-y-0.5"
+            )}
+          >
+            <img
+              src={t.image_url || t.destination_photos?.[0]?.url || "/placeholder.svg"}
+              alt={t.destination}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className={cn(
+              "absolute inset-0 transition-opacity",
+              isActive ? "bg-black/0" : "bg-black/10 group-hover:bg-black/0"
+            )} />
+            <span className="absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-white/85 backdrop-blur text-foreground/80">
+              {flagFor(t.destination)} {t.destination.split(",")[0].slice(0, 8)}
+            </span>
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white p-0.5 shadow-md">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-300 to-pink-400 text-white text-[10px] font-bold flex items-center justify-center">
+                {t.destination.slice(0, 1).toUpperCase()}
+              </div>
             </div>
-          </div>
-        </div>
-      ))}
+          </button>
+        );
+      })}
       {placeholders.map((_, i) => (
-        <div key={i} className="shrink-0 w-[104px] h-[104px] rounded-2xl bg-secondary/60" />
+        <div key={i} className="shrink-0 w-[104px] h-[104px] rounded-2xl bg-secondary/60 snap-center" />
       ))}
     </div>
   );
 };
+
 
 /* ---------- Upcoming trip card ---------- */
 const UpcomingCard = ({ trip }: { trip: Trip }) => {

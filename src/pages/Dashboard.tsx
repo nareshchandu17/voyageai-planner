@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
+import FriendsLocationMap from "@/components/dashboard/FriendsLocationMap";
 
 /* ---------- helpers ---------- */
 const fmtRange = (t: Trip) => {

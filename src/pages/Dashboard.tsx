@@ -315,45 +315,6 @@ const UpcomingCard = ({ trip }: { trip: Trip }) => {
   );
 };
 
-/* ---------- Friends Location ---------- */
-const FriendsLocation = () => {
-  const friends = [
-    { name: "Shelly A.", place: "Japan", top: "22%", left: "72%" },
-    { name: "Edgar P.", place: "Argentina", top: "58%", left: "30%" },
-    { name: "Mira T.", place: "Kenya", top: "62%", left: "56%" },
-  ];
-  return (
-    <div className="rounded-3xl border border-border/60 bg-white p-6 h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-display text-xl font-bold text-foreground">Friends Location</h3>
-          <p className="text-xs text-muted-foreground mt-1">Check on your friend live location</p>
-        </div>
-        <button className="text-xs font-semibold text-[#C2410C] bg-[#FFEDD5] hover:bg-[#FED7AA] px-3 py-1.5 rounded-full transition">
-          Expand
-        </button>
-      </div>
-      <div className="relative mt-4 h-[240px] rounded-2xl overflow-hidden bg-[radial-gradient(circle_at_1px_1px,_hsl(var(--muted-foreground)/0.25)_1px,_transparent_0)] [background-size:10px_10px]">
-        {friends.map((f, i) => (
-          <motion.div
-            key={f.name}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * i }}
-            className="absolute flex items-center gap-2 bg-white rounded-full pl-1 pr-3 py-1 shadow-md border border-border/60"
-            style={{ top: f.top, left: f.left }}
-          >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-pink-500 border-2 border-white shrink-0" />
-            <div className="leading-tight">
-              <p className="text-xs font-semibold text-foreground">{f.name}</p>
-              <p className="text-[10px] text-muted-foreground">{f.place}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 /* ---------- Recommendation row ---------- */
 const RecoRow = ({ trip }: { trip: Trip }) => {

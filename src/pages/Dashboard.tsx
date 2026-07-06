@@ -1,358 +1,548 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import {
+  Plus, Search, Bell, LogOut, LayoutDashboard, Map, Compass,
+  BookOpen, Users, Heart, ArrowUpRight, Calendar, Star, ExternalLink,
+  Loader2, Apple,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  Plus, MapPin, Calendar, ArrowRight, Compass, Plane, Clock,
-  Star, Camera, BookOpen, DollarSign, CheckCircle2, CloudSun,
-  Luggage, FileText, Bus, Utensils, Sparkles, Shield, Hotel,
-  Navigation, Eye, Heart, Play, ChevronRight, Globe, Map,
-  ArrowRightCircle, Loader2
-} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
-import { useTravelerProfile } from "@/hooks/useTravelerProfile";
-import WidgetDetailModal from "@/components/WidgetDetailModal";
-import CompletedTripDetail from "@/components/CompletedTripDetail";
-import TravelerProfileCard from "@/components/TravelerProfileCard";
-import heroTravel from "@/assets/hero-travel.jpg";
-import { toast } from "sonner";
 
-type TripTab = "planned" | "active" | "completed";
-
-const tabConfig: { key: TripTab; label: string; icon: typeof Compass }[] = [
-  { key: "planned", label: "Planned", icon: Compass },
-  { key: "active", label: "Active", icon: Play },
-  { key: "completed", label: "Completed", icon: CheckCircle2 },
-];
-
-const nextStatus: Record<string, "planned" | "active" | "completed"> = {
-  planned: "active",
-  active: "completed",
-  completed: "planned",
+/* ---------- helpers ---------- */
+const fmtRange = (t: Trip) => {
+  if (!t.start_date) return t.duration || "";
+  const s = new Date(t.start_date);
+  const e = t.end_date ? new Date(t.end_date) : null;
+  const days = e ? Math.max(1, Math.round((+e - +s) / 86400000) + 1) : 1;
+  return `${days} Days, ${s.toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" })}`;
 };
 
-const statusLabel: Record<string, string> = {
-  planned: "Start Trip",
-  active: "Complete Trip",
-  completed: "Re-plan",
+const flagFor = (dest: string) => {
+  const d = dest.toLowerCase();
+  if (d.includes("malay") || d.includes("kuala") || d.includes("ipoh")) return "🇲🇾";
+  if (d.includes("japan") || d.includes("tokyo") || d.includes("kyoto")) return "🇯🇵";
+  if (d.includes("thai") || d.includes("bangkok") || d.includes("phuket")) return "🇹🇭";
+  if (d.includes("viet") || d.includes("hanoi") || d.includes("saigon")) return "🇻🇳";
+  if (d.includes("indo") || d.includes("bali") || d.includes("jakarta")) return "🇮🇩";
+  if (d.includes("france") || d.includes("paris")) return "🇫🇷";
+  if (d.includes("italy") || d.includes("rome")) return "🇮🇹";
+  if (d.includes("spain") || d.includes("madrid") || d.includes("barcelona")) return "🇪🇸";
+  if (d.includes("usa") || d.includes("york") || d.includes("angeles")) return "🇺🇸";
+  if (d.includes("uk") || d.includes("london")) return "🇬🇧";
+  return "🌍";
 };
 
-const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState<TripTab>("planned");
-  const { user } = useAuth();
-  const { planned, active, completed, loading, updateStatus, updateTrip, fetchTrips } = useTrips();
-  const { profile: travelerProfile, learnFromTrip, upsertProfile } = useTravelerProfile();
+const greeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return "Good Morning";
+  if (h < 18) return "Good Afternoon";
+  return "Good Evening";
+};
+
+/* ---------- Sidebar ---------- */
+const Sidebar = ({ trips, activeId, onSelect }: { trips: Trip[]; activeId?: string; onSelect: (id: string) => void }) => {
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const initials = (user?.name || "T").slice(0, 2).toUpperCase();
 
-  const counts = { planned: planned.length, active: active.length, completed: completed.length };
-  const totalTrips = planned.length + active.length + completed.length;
+  const navGroups = [
+    {
+      title: "GENERAL",
+      items: [
+        { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard", active: true },
+        { icon: Map, label: "Itinerary", to: "/plan", badge: "NEW!" },
+      ],
+    },
+    {
+      title: "DISCOVER",
+      items: [
+        { icon: Compass, label: "Explore", to: "/discover" },
+        { icon: BookOpen, label: "Guide", to: "/blog" },
+        { icon: Users, label: "Friends", to: "/memories" },
+      ],
+    },
+  ];
+
+  return (
+    <aside className="hidden lg:flex flex-col w-[264px] shrink-0 bg-white border border-border/60 rounded-3xl m-4 mr-0 p-5 sticky top-4 h-[calc(100vh-2rem)]">
+      {/* profile card */}
+      <div className="flex items-center gap-3 rounded-2xl border border-border/60 p-2.5 pr-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+          {initials}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate">{user?.name || "Traveler"}</p>
+          <p className="text-[11px] text-muted-foreground truncate">Part-time Traveller</p>
+        </div>
+        <button className="w-7 h-7 rounded-lg border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-secondary/60">
+          <span className="text-[10px] font-bold">ID</span>
+        </button>
+      </div>
+
+      {/* New Trip CTA */}
+      <button
+        onClick={() => navigate("/plan")}
+        className="mt-4 h-12 w-full rounded-2xl bg-[#F97438] hover:bg-[#ea6a30] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_10px_24px_-10px_rgba(249,116,56,0.6)] transition"
+      >
+        <Plus className="w-4 h-4" /> New Trip
+      </button>
+
+      {/* Trips list */}
+      <div className="mt-6">
+        <p className="text-[11px] font-semibold tracking-wider text-muted-foreground/70 px-1 mb-2">TRIPS</p>
+        <div className="rounded-2xl border border-border/60 p-2 space-y-1">
+          {trips.length === 0 && (
+            <p className="text-xs text-muted-foreground px-3 py-4 text-center">No trips yet</p>
+          )}
+          {trips.slice(0, 5).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => onSelect(t.id)}
+              className={cn(
+                "w-full flex items-center gap-3 p-2 rounded-xl text-left transition",
+                activeId === t.id ? "bg-secondary/70" : "hover:bg-secondary/50"
+              )}
+            >
+              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-base shrink-0">
+                {flagFor(t.destination)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate leading-tight">{t.destination.split(",")[0]}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{fmtRange(t)}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Nav */}
+      <div className="mt-6 flex-1 overflow-y-auto space-y-5">
+        {navGroups.map((g) => (
+          <div key={g.title}>
+            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground/70 px-1 mb-2">{g.title}</p>
+            <div className="space-y-1">
+              {g.items.map((it) => (
+                <Link
+                  key={it.label}
+                  to={it.to}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
+                    it.active ? "bg-foreground text-white" : "text-foreground/70 hover:bg-secondary/60"
+                  )}
+                >
+                  <it.icon className="w-4 h-4" />
+                  <span className="flex-1">{it.label}</span>
+                  {it.badge && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-violet-500 text-white">
+                      {it.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Logout */}
+      <button
+        onClick={() => signOut()}
+        className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#F04A3F] hover:bg-red-50 transition"
+      >
+        <LogOut className="w-4 h-4" /> Logout
+      </button>
+    </aside>
+  );
+};
+
+/* ---------- Header ---------- */
+const Header = ({ name }: { name: string }) => (
+  <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground tracking-tight flex items-center gap-3">
+        {greeting()}, {name.split(" ")[0]} <span className="text-3xl">👋</span>
+      </h1>
+      <p className="text-sm text-muted-foreground mt-1.5">Plan your itinerary with us</p>
+    </div>
+    <div className="flex items-center gap-2">
+      <button className="w-10 h-10 rounded-full border border-border/60 bg-white flex items-center justify-center hover:bg-secondary/60 transition">
+        <Search className="w-4 h-4 text-foreground/70" />
+      </button>
+      <button className="relative w-10 h-10 rounded-full border border-border/60 bg-white flex items-center justify-center hover:bg-secondary/60 transition">
+        <Bell className="w-4 h-4 text-foreground/70" />
+        <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#F04A3F]" />
+      </button>
+      <div className="hidden md:flex items-center gap-2 pl-3 pr-1 h-10 rounded-full border border-border/60 bg-white">
+        <span className="text-xs text-muted-foreground">Get Apps:</span>
+        <div className="flex items-center gap-1">
+          <div className="w-7 h-7 rounded-full bg-foreground flex items-center justify-center">
+            <Apple className="w-3.5 h-3.5 text-white" />
+          </div>
+          <div className="w-7 h-7 rounded-full bg-[#00A4EF] flex items-center justify-center text-white text-[10px] font-bold">⊞</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ---------- Destinations carousel ---------- */
+const DestinationsRail = ({ trips }: { trips: Trip[] }) => {
+  const items = trips.slice(0, 6);
+  const placeholders = Array.from({ length: Math.max(0, 6 - items.length) });
+
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-1">
+      {items.map((t, i) => (
+        <div
+          key={t.id}
+          className={cn(
+            "relative shrink-0 w-[104px] h-[104px] rounded-2xl overflow-hidden group cursor-pointer",
+            "ring-2 ring-transparent hover:ring-[#F97438]/60 transition",
+            i === 0 && "ring-[#F97438]"
+          )}
+        >
+          <img
+            src={t.image_url || t.destination_photos?.[0]?.url || "/placeholder.svg"}
+            alt={t.destination}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white p-0.5 shadow-md">
+            <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-300 to-pink-400 text-white text-[10px] font-bold flex items-center justify-center">
+              {t.destination.slice(0, 1).toUpperCase()}
+            </div>
+          </div>
+        </div>
+      ))}
+      {placeholders.map((_, i) => (
+        <div key={i} className="shrink-0 w-[104px] h-[104px] rounded-2xl bg-secondary/60" />
+      ))}
+    </div>
+  );
+};
+
+/* ---------- Upcoming trip card ---------- */
+const UpcomingCard = ({ trip }: { trip: Trip }) => {
+  const start = trip.start_date ? new Date(trip.start_date) : null;
+  const day = start?.getDate();
+  const month = start?.toLocaleDateString("en", { month: "short" });
+  const days = trip.start_date && trip.end_date
+    ? Math.max(1, Math.round((+new Date(trip.end_date) - +new Date(trip.start_date)) / 86400000) + 1)
+    : null;
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-white p-3 flex flex-col gap-3 hover:shadow-lg transition-shadow">
+      <div className="flex gap-3">
+        <img
+          src={trip.image_url || "/placeholder.svg"}
+          alt={trip.destination}
+          className="w-20 h-20 rounded-xl object-cover shrink-0"
+        />
+        <div className="flex-1 flex gap-2">
+          {day && (
+            <div className="rounded-xl bg-[#FFEDD5] px-3 py-2 text-center min-w-[52px]">
+              <p className="text-[10px] font-semibold text-[#C2410C]">{month}</p>
+              <p className="text-lg font-display font-bold text-[#9A3412] leading-none">{day}</p>
+            </div>
+          )}
+          {days && (
+            <div className="rounded-xl bg-[#FEE2E2] px-3 py-2 text-center min-w-[52px]">
+              <p className="text-lg font-display font-bold text-[#B91C1C] leading-none">{days}</p>
+              <p className="text-[10px] font-semibold text-[#B91C1C] mt-0.5">Days</p>
+            </div>
+          )}
+        </div>
+      </div>
+      <div>
+        <p className="font-display font-bold text-foreground text-[15px] leading-tight">{trip.title || trip.destination}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{trip.destination}</p>
+      </div>
+      <div className="flex items-center justify-between pt-2 border-t border-border/60">
+        <p className="text-xs text-muted-foreground">Budget: <span className="font-semibold text-foreground">${trip.budget?.toLocaleString()}</span></p>
+        <div className="flex -space-x-1.5">
+          {Array.from({ length: Math.min(trip.group_size || 1, 3) }).map((_, i) => (
+            <div key={i} className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-300 to-pink-500 border-2 border-white" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Friends Location ---------- */
+const FriendsLocation = () => {
+  const friends = [
+    { name: "Shelly A.", place: "Japan", top: "22%", left: "72%" },
+    { name: "Edgar P.", place: "Argentina", top: "58%", left: "30%" },
+    { name: "Mira T.", place: "Kenya", top: "62%", left: "56%" },
+  ];
+  return (
+    <div className="rounded-3xl border border-border/60 bg-white p-6 h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="font-display text-xl font-bold text-foreground">Friends Location</h3>
+          <p className="text-xs text-muted-foreground mt-1">Check on your friend live location</p>
+        </div>
+        <button className="text-xs font-semibold text-[#C2410C] bg-[#FFEDD5] hover:bg-[#FED7AA] px-3 py-1.5 rounded-full transition">
+          Expand
+        </button>
+      </div>
+      <div className="relative mt-4 h-[240px] rounded-2xl overflow-hidden bg-[radial-gradient(circle_at_1px_1px,_hsl(var(--muted-foreground)/0.25)_1px,_transparent_0)] [background-size:10px_10px]">
+        {friends.map((f, i) => (
+          <motion.div
+            key={f.name}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * i }}
+            className="absolute flex items-center gap-2 bg-white rounded-full pl-1 pr-3 py-1 shadow-md border border-border/60"
+            style={{ top: f.top, left: f.left }}
+          >
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-pink-500 border-2 border-white shrink-0" />
+            <div className="leading-tight">
+              <p className="text-xs font-semibold text-foreground">{f.name}</p>
+              <p className="text-[10px] text-muted-foreground">{f.place}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Recommendation row ---------- */
+const RecoRow = ({ trip }: { trip: Trip }) => {
+  const places = useMemo(() => {
+    const p = (trip?.nearby_places as any[]) || [];
+    return p.slice(0, 3);
+  }, [trip]);
+
+  const fallback = [
+    { name: `Central Market - ${trip.destination.split(",")[0]}`, rating: 4.5, count: 47, desc: "A vibrant cultural landmark offering local crafts, souvenirs, and more.", tags: ["Shopping", "Souvenirs", "Culture"], guide: "Nita" },
+    { name: `Old Square - ${trip.destination.split(",")[0]}`, rating: 4.6, count: 53, desc: "An iconic historic site surrounded by colonial buildings and cafés.", tags: ["History", "Architecture", "Photography"], guide: "El Primo" },
+  ];
+  const items = places.length ? places.map((p, i) => ({
+    name: p.name,
+    rating: p.rating || 4.5,
+    count: p.user_ratings_total || 40 + i,
+    desc: (p.types || []).slice(0, 3).join(", ") || "A must-see spot loved by travellers.",
+    tags: (p.types || []).slice(0, 3).map((t: string) => t.replace(/_/g, " ")),
+    guide: ["Nita", "El Primo", "Marco"][i % 3],
+    img: p.photo,
+  })) : fallback;
+
+  return (
+    <div className="rounded-3xl border border-border/60 bg-white p-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="font-display text-xl font-bold text-foreground">
+            For your <span className="text-[#F97438]">{trip.destination.split(",")[0]}</span>{" "}
+            <span className="text-2xl">⛺</span> Trip
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">These can't be missed places</p>
+        </div>
+        <button className="text-xs font-semibold text-[#C2410C] bg-[#FFEDD5] hover:bg-[#FED7AA] px-3 py-1.5 rounded-full">Details</button>
+      </div>
+      <div className="mt-5 space-y-4">
+        {items.slice(0, 2).map((p: any, i) => (
+          <div key={i} className="flex gap-4 group">
+            <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-secondary">
+              <img
+                src={p.img || trip.image_url || "/placeholder.svg"}
+                alt={p.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-semibold text-foreground text-sm leading-tight">{p.name}</p>
+                <div className="flex gap-1.5 shrink-0">
+                  <button className="w-8 h-8 rounded-lg border border-border/60 flex items-center justify-center hover:bg-secondary/60">
+                    <Heart className="w-3.5 h-3.5 text-[#F04A3F]" fill={i === 0 ? "#F04A3F" : "none"} />
+                  </button>
+                  <button className="w-8 h-8 rounded-lg bg-[#F97438] flex items-center justify-center hover:bg-[#ea6a30]">
+                    <ExternalLink className="w-3.5 h-3.5 text-white" />
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.desc}</p>
+              <div className="flex items-center gap-1 mt-1.5">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <span className="text-xs font-semibold text-foreground">{p.rating}</span>
+                <span className="text-xs text-muted-foreground">({p.count})</span>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted-foreground">Guide by:</span>
+                  <div className="flex items-center gap-1 bg-secondary/60 rounded-full pl-0.5 pr-2 py-0.5">
+                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-300 to-pink-500" />
+                    <span className="text-[10px] font-semibold text-foreground">{p.guide}</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {p.tags.slice(0, 3).map((t: string, k: number) => (
+                    <span
+                      key={k}
+                      className={cn(
+                        "text-[10px] font-medium px-2 py-0.5 rounded-full border",
+                        ["bg-orange-50 text-orange-700 border-orange-100", "bg-emerald-50 text-emerald-700 border-emerald-100", "bg-sky-50 text-sky-700 border-sky-100"][k % 3]
+                      )}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Featured itinerary ---------- */
+const FeaturedItinerary = ({ trip }: { trip: Trip }) => {
+  const days = trip.itinerary_data?.days?.length || 7;
+  return (
+    <div className="rounded-3xl border border-border/60 bg-white p-5 h-full flex flex-col">
+      <p className="font-display text-lg font-bold text-foreground leading-tight">
+        One Week Itinerary - {trip.destination.split(",")[0]}
+      </p>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="text-xs text-muted-foreground">Traveller:</span>
+        <div className="flex items-center gap-1.5 bg-secondary/60 rounded-full pl-0.5 pr-2 py-0.5">
+          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-300 to-pink-500" />
+          <span className="text-xs font-semibold text-foreground">Mortis A.</span>
+        </div>
+      </div>
+      <div className="mt-3 rounded-2xl overflow-hidden aspect-[4/3] bg-secondary">
+        <img
+          src={trip.image_url || trip.destination_photos?.[0]?.url || "/placeholder.svg"}
+          alt={trip.destination}
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+        />
+      </div>
+      <p className="text-xs font-semibold text-foreground mt-4">Details:</p>
+      <div className="grid grid-cols-3 gap-2 mt-2">
+        {[
+          { label: "Budget", value: `$${(trip.budget || 1200).toLocaleString()}`, bg: "bg-orange-50" },
+          { label: "Person", value: String(trip.group_size || 2), bg: "bg-rose-50" },
+          { label: "Durations", value: `${days}d, ${Math.max(1, days - 1)}n`, bg: "bg-emerald-50" },
+        ].map((s) => (
+          <div key={s.label} className={cn("rounded-xl px-3 py-2", s.bg)}>
+            <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            <p className="text-sm font-display font-bold text-foreground mt-0.5">{s.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Page ---------- */
+const Dashboard = () => {
+  const { user } = useAuth();
+  const { trips, planned, active, loading } = useTrips();
+  const navigate = useNavigate();
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+
+  const focusTrip = useMemo(() => {
+    if (selectedId) return trips.find((t) => t.id === selectedId) || trips[0];
+    return active[0] || planned[0] || trips[0];
+  }, [selectedId, trips, active, planned]);
+
+  const upcoming = useMemo(() => planned.slice(0, 2), [planned]);
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center glass-card p-12 max-w-md">
-          <div className="w-16 h-16 rounded-2xl gradient-ocean flex items-center justify-center mx-auto mb-6">
-            <Plane className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h2 className="font-display text-2xl font-bold text-foreground mb-3">Sign in to view your trips</h2>
-          <p className="text-muted-foreground mb-6">Create an account to save and manage your travel plans.</p>
-          <Link to="/auth"><Button variant="ocean" size="lg">Sign In</Button></Link>
+      <div className="min-h-screen bg-[#F7F6F3] flex items-center justify-center">
+        <div className="bg-white border border-border/60 rounded-3xl p-10 max-w-md text-center">
+          <h2 className="font-display text-2xl font-bold mb-2">Sign in to your dashboard</h2>
+          <p className="text-muted-foreground mb-6">Access your trips and travel plans.</p>
+          <Link to="/auth"><Button className="bg-[#F97438] hover:bg-[#ea6a30] text-white rounded-full h-11 px-6">Sign In</Button></Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <section className="relative h-[320px] sm:h-[380px] overflow-hidden">
-        <motion.img src={heroTravel} alt="My Trips" className="absolute inset-0 w-full h-full object-cover" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 1.6, ease: "easeOut" }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-background" />
-        <div className="absolute inset-0 flex flex-col items-start justify-end container mx-auto px-4 sm:px-6 pb-12">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
-            <div className="flex items-center gap-2 mb-3"><Globe className="w-5 h-5 text-white/70" /><span className="text-white/70 text-sm font-body tracking-wide">Travel Intelligence</span></div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white leading-tight">My Trips</h1>
-            <p className="text-white/60 font-body mt-2 max-w-md">Manage your travel journeys from planning to memories.</p>
-          </motion.div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#F7F6F3]">
+      <div className="flex max-w-[1500px] mx-auto">
+        <Sidebar trips={trips} activeId={focusTrip?.id} onSelect={setSelectedId} />
 
-      <div className="container mx-auto px-4 sm:px-6 -mt-8 relative z-10 pb-20">
-        {/* Stats */}
-        <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
-          {[
-            { label: "Total Trips", value: String(totalTrips), icon: Plane, gradient: "gradient-ocean" },
-            { label: "Active Now", value: String(active.length), icon: Play, gradient: "gradient-sunset" },
-            { label: "Planned", value: String(planned.length), icon: Compass, gradient: "gradient-ocean" },
-            { label: "Completed", value: String(completed.length), icon: CheckCircle2, gradient: "gradient-sunset" },
-          ].map((stat, i) => (
-            <div key={i} className="glass-card p-5 flex items-center gap-4 hover-lift">
-              <div className={`w-11 h-11 rounded-xl ${stat.gradient} flex items-center justify-center shrink-0`}><stat.icon className="w-5 h-5 text-primary-foreground" /></div>
-              <div><p className="text-2xl font-display font-bold text-foreground">{stat.value}</p><p className="text-xs text-muted-foreground font-body">{stat.label}</p></div>
+        <main className="flex-1 p-4 lg:p-8">
+          <Header name={user.name} />
+
+          {loading ? (
+            <div className="flex items-center justify-center py-32"><Loader2 className="w-8 h-8 animate-spin text-[#F97438]" /></div>
+          ) : trips.length === 0 ? (
+            <EmptyDashboard onNew={() => navigate("/plan")} />
+          ) : (
+            <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* LEFT column (2/3) */}
+              <div className="xl:col-span-2 space-y-6">
+                <DestinationsRail trips={trips} />
+
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="font-display text-xl font-bold text-foreground">Upcoming Trip</h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">Remember your upcoming trips!</p>
+                    </div>
+                    <button
+                      onClick={() => navigate("/dashboard")}
+                      className="text-xs font-semibold text-[#C2410C] bg-[#FFEDD5] hover:bg-[#FED7AA] px-3 py-1.5 rounded-full transition"
+                    >
+                      Details
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {upcoming.length > 0 ? upcoming.map((t) => <UpcomingCard key={t.id} trip={t} />) : (
+                      <div className="col-span-2 rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                        No upcoming trips.{" "}
+                        <button onClick={() => navigate("/plan")} className="text-[#F97438] font-semibold underline underline-offset-2">Plan one</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {focusTrip && <RecoRow trip={focusTrip} />}
+              </div>
+
+              {/* RIGHT column (1/3) */}
+              <div className="space-y-6">
+                <FriendsLocation />
+                {focusTrip && <FeaturedItinerary trip={focusTrip} />}
+              </div>
             </div>
-          ))}
-        </motion.div>
-
-        {/* Traveler Profile Card */}
-        {travelerProfile && travelerProfile.trip_count > 0 && (
-          <motion.div className="mb-10" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}>
-            <TravelerProfileCard profile={travelerProfile} onSave={upsertProfile} />
-          </motion.div>
-        )}
-
-        {/* Tabs */}
-        <motion.div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-          <div className="inline-flex bg-secondary/80 backdrop-blur-sm rounded-2xl p-1.5 gap-1">
-            {tabConfig.map((tab) => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={cn("flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold font-body transition-all duration-300", activeTab === tab.key ? "gradient-ocean text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>
-                <tab.icon className="w-4 h-4" /> {tab.label}
-                <span className={cn("w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold", activeTab === tab.key ? "bg-white/20 text-primary-foreground" : "bg-muted text-muted-foreground")}>{counts[tab.key]}</span>
-              </button>
-            ))}
-          </div>
-          <Link to="/plan"><Button variant="ocean" className="shadow-lg"><Plus className="w-4 h-4" /> New Trip</Button></Link>
-        </motion.div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-        ) : (
-          <AnimatePresence mode="wait">
-            <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-              {activeTab === "planned" && <TripGrid trips={planned} tab="planned" updateStatus={updateStatus} navigate={navigate} learnFromTrip={learnFromTrip} />}
-              {activeTab === "active" && <TripGrid trips={active} tab="active" updateStatus={updateStatus} navigate={navigate} learnFromTrip={learnFromTrip} />}
-              {activeTab === "completed" && <TripGrid trips={completed} tab="completed" updateStatus={updateStatus} navigate={navigate} learnFromTrip={learnFromTrip} onStoryGenerated={async () => { await fetchTrips(); }} />}
-            </motion.div>
-          </AnimatePresence>
-        )}
-
-        {/* Quick Links */}
-        <motion.div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-16" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-          {[
-            { title: "Plan a Trip", desc: "AI-powered itinerary builder", icon: Plane, to: "/plan", gradient: "gradient-ocean" },
-            { title: "Discover", desc: "Explore curated experiences", icon: Compass, to: "/discover", gradient: "gradient-sunset" },
-            { title: "Travel Blog", desc: "Stories & inspiration", icon: BookOpen, to: "/blog", gradient: "gradient-ocean" },
-          ].map((link, i) => (
-            <Link key={i} to={link.to} className="group glass-card p-5 flex items-center gap-4 hover-lift">
-              <div className={`w-11 h-11 rounded-xl ${link.gradient} flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110`}><link.icon className="w-5 h-5 text-primary-foreground" /></div>
-              <div className="flex-1"><h4 className="font-display font-semibold text-foreground text-sm">{link.title}</h4><p className="text-xs text-muted-foreground font-body">{link.desc}</p></div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </Link>
-          ))}
-        </motion.div>
+          )}
+        </main>
       </div>
     </div>
   );
 };
 
-// ═══════════════════════════════════════
-// TRIP GRID — handles all three tabs
-// ═══════════════════════════════════════
-const TripGrid = ({ trips, tab, updateStatus, navigate, learnFromTrip, onStoryGenerated }: {
-  trips: Trip[];
-  tab: TripTab;
-  updateStatus: (id: string, status: "planned" | "active" | "completed") => Promise<boolean>;
-  navigate: (path: string) => void;
-  learnFromTrip?: (trip: Trip) => Promise<void>;
-  onStoryGenerated?: (tripId: string, story: string) => void;
-}) => {
-  const [widgetModal, setWidgetModal] = useState<{ open: boolean; title: string; icon: any; items: any[] }>({ open: false, title: "", icon: "restaurants", items: [] });
-
-  if (!trips.length) return <EmptyState tab={tab} />;
-
-  const handleStatusChange = async (trip: Trip) => {
-    const next = nextStatus[trip.status];
-    const ok = await updateStatus(trip.id, next);
-    if (ok) {
-      toast.success(`Trip moved to ${next}`);
-      if (next === "completed" && learnFromTrip) {
-        await learnFromTrip(trip);
-        toast.success("Traveler profile updated from this trip ✨");
-      }
-    }
-  };
-
-  const openWidget = (title: string, icon: any, trip: Trip) => {
-    const itinerary = trip.itinerary_data;
-    let items: any[] = [];
-
-    if (icon === "restaurants" && itinerary?.duringTrip?.restaurants) {
-      items = itinerary.duringTrip.restaurants.map((r: any) => ({ name: r.name, rating: r.rating, distance: r.distance, description: r.cuisine || r.description, price: r.priceRange || r.price }));
-    } else if (icon === "attractions" && trip.nearby_places) {
-      items = (Array.isArray(trip.nearby_places) ? trip.nearby_places : []).map((p: any) => ({ name: p.name, rating: p.rating, distance: p.vicinity || p.distance, description: p.types?.join(", ") || "" }));
-    } else if (icon === "hotels" && itinerary?.beforeTrip?.accommodation) {
-      items = [itinerary.beforeTrip.accommodation].flat().map((h: any) => ({ name: h.name || "Accommodation", description: h.description || h.area, price: h.priceRange || h.price }));
-    } else if (icon === "transport" && itinerary?.duringTrip?.transport) {
-      const t = itinerary.duringTrip.transport;
-      items = (t.options || [t]).map((o: any) => ({ name: o.type || o.name || "Transport", description: o.description || o.details, price: o.cost || o.price }));
-    }
-
-    setWidgetModal({ open: true, title, icon, items });
-  };
-
-  return (
-    <>
-      <WidgetDetailModal open={widgetModal.open} onClose={() => setWidgetModal((p) => ({ ...p, open: false }))} title={widgetModal.title} icon={widgetModal.icon} items={widgetModal.items} />
-
-      <div className={cn(tab === "active" ? "space-y-6" : "grid grid-cols-1 lg:grid-cols-2 gap-6")}>
-        {trips.map((trip, i) => (
-          <motion.div key={trip.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 * i }} className="group glass-card overflow-hidden hover-lift">
-            {/* Image Banner */}
-            <div className={cn("relative overflow-hidden", tab === "active" ? "h-56 sm:h-72" : "h-48")}>
-              <img
-                src={trip.image_url || trip.destination_photos?.[0]?.url || "/placeholder.svg"}
-                alt={trip.destination}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-
-              {/* Status Badge */}
-              <div className="absolute top-3 right-3">
-                <span className={cn(
-                  "backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5",
-                  trip.status === "planned" && "bg-primary/20 text-primary-foreground",
-                  trip.status === "active" && "bg-accent/90 text-accent-foreground animate-pulse",
-                  trip.status === "completed" && "bg-muted/80 text-foreground"
-                )}>
-                  {trip.status === "planned" && <Compass className="w-3 h-3" />}
-                  {trip.status === "active" && <span className="w-2 h-2 rounded-full bg-accent-foreground" />}
-                  {trip.status === "completed" && <CheckCircle2 className="w-3 h-3" />}
-                  {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
-                </span>
-              </div>
-
-              <div className="absolute bottom-3 left-4 right-4">
-                <h3 className="font-display text-xl font-bold text-white">{trip.title}</h3>
-                <p className="text-white/70 text-sm flex items-center gap-1.5 mt-1"><MapPin className="w-3.5 h-3.5" /> {trip.destination}</p>
-                {/* Active trip day counter */}
-                {trip.status === "active" && trip.start_date && trip.end_date && (
-                  <div className="mt-2 flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
-                      <motion.div className="h-full bg-accent rounded-full" initial={{ width: 0 }} animate={{ width: `${getProgress(trip)}%` }} transition={{ duration: 1 }} />
-                    </div>
-                    <span className="text-white text-sm font-semibold">{getDayLabel(trip)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-5 space-y-4">
-              {/* Trip Meta */}
-              <div className="flex items-center gap-4 text-sm">
-                {trip.start_date && <span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {formatDates(trip)}</span>}
-                {trip.duration && <span className="text-muted-foreground flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {trip.duration}</span>}
-                <span className="text-muted-foreground flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5" /> ${trip.budget?.toLocaleString()}</span>
-              </div>
-
-              {/* Planned: preparation insights */}
-              {trip.status === "planned" && trip.itinerary_data && (
-                <div className="grid grid-cols-2 gap-3">
-                  {trip.weather_data?.forecast?.[0] && (
-                    <div className="bg-secondary/50 rounded-xl p-3"><div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><CloudSun className="w-3.5 h-3.5 text-primary" /> Weather</div><p className="text-sm font-medium text-foreground">{trip.weather_data.forecast[0].temp}°C, {trip.weather_data.forecast[0].description}</p></div>
-                  )}
-                  <div className="bg-secondary/50 rounded-xl p-3"><div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><DollarSign className="w-3.5 h-3.5 text-accent" /> Budget</div><p className="text-sm font-bold text-foreground">${trip.budget?.toLocaleString()}</p></div>
-                  {trip.itinerary_data?.beforeTrip?.visa && (
-                    <div className="bg-secondary/50 rounded-xl p-3"><div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><FileText className="w-3.5 h-3.5 text-accent" /> Visa</div><p className="text-sm font-medium text-foreground">{trip.itinerary_data.beforeTrip.visa.required ? "Required" : "Not Required"}</p></div>
-                  )}
-                  {trip.itinerary_data?.days && (
-                    <div className="bg-secondary/50 rounded-xl p-3"><div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><Map className="w-3.5 h-3.5 text-primary" /> Itinerary</div><p className="text-sm font-medium text-foreground">{trip.itinerary_data.days.length} days planned</p></div>
-                  )}
-                </div>
-              )}
-
-              {/* Active: interactive widgets */}
-              {trip.status === "active" && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { icon: Utensils, title: "Restaurants", widgetKey: "restaurants", color: "text-accent", bg: "bg-accent/10" },
-                    { icon: Camera, title: "Attractions", widgetKey: "attractions", color: "text-primary", bg: "bg-primary/10" },
-                    { icon: Hotel, title: "Hotels", widgetKey: "hotels", color: "text-accent", bg: "bg-accent/10" },
-                    { icon: Bus, title: "Transport", widgetKey: "transport", color: "text-primary", bg: "bg-primary/10" },
-                  ].map((w) => (
-                    <button key={w.widgetKey} onClick={() => openWidget(w.title, w.widgetKey, trip)} className="bg-secondary/50 rounded-xl p-4 hover:bg-secondary/70 transition-all text-left group/w">
-                      <div className={`w-9 h-9 rounded-lg ${w.bg} flex items-center justify-center mb-2 group-hover/w:scale-110 transition-transform`}>
-                        <w.icon className={`w-4 h-4 ${w.color}`} />
-                      </div>
-                      <p className="text-xs font-semibold text-foreground">{w.title}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Tap to explore</p>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Completed: stats + memories */}
-              {trip.status === "completed" && (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-secondary/50 rounded-xl p-3 text-center"><DollarSign className="w-4 h-4 mx-auto text-accent mb-1" /><p className="text-lg font-display font-bold text-foreground">${trip.budget?.toLocaleString()}</p><p className="text-[10px] text-muted-foreground">Budget</p></div>
-                    <div className="bg-secondary/50 rounded-xl p-3 text-center"><MapPin className="w-4 h-4 mx-auto text-primary mb-1" /><p className="text-lg font-display font-bold text-foreground">{trip.itinerary_data?.days?.length || 0}</p><p className="text-[10px] text-muted-foreground">Days</p></div>
-                    <div className="bg-secondary/50 rounded-xl p-3 text-center"><Star className="w-4 h-4 mx-auto text-accent mb-1" /><p className="text-lg font-display font-bold text-foreground">{trip.group_size}</p><p className="text-[10px] text-muted-foreground">Travelers</p></div>
-                  </div>
-                  <CompletedTripDetail
-                    trip={trip}
-                    allCompleted={trips}
-                    onStoryGenerated={(id, story) => onStoryGenerated?.(id, story)}
-                  />
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 pt-2 border-t border-border">
-                <Button variant="ocean" size="sm" className="flex-1" onClick={() => navigate(`/plan?tripId=${trip.id}`)}>
-                  <Eye className="w-3.5 h-3.5" /> View Details
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStatusChange(trip)}>
-                  <ArrowRightCircle className="w-3.5 h-3.5" /> {statusLabel[trip.status]}
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </>
-  );
-};
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-const getProgress = (trip: Trip) => {
-  if (!trip.start_date || !trip.end_date) return 0;
-  const start = new Date(trip.start_date).getTime();
-  const end = new Date(trip.end_date).getTime();
-  const now = Date.now();
-  return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
-};
-
-const getDayLabel = (trip: Trip) => {
-  if (!trip.start_date || !trip.end_date) return "";
-  const start = new Date(trip.start_date);
-  const end = new Date(trip.end_date);
-  const now = new Date();
-  const current = Math.max(1, Math.ceil((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
-  const total = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  return `Day ${Math.min(current, total)} of ${total}`;
-};
-
-const formatDates = (trip: Trip) => {
-  if (!trip.start_date) return "";
-  const s = new Date(trip.start_date);
-  const e = trip.end_date ? new Date(trip.end_date) : null;
-  const fmt = (d: Date) => d.toLocaleDateString("en", { month: "short", day: "numeric" });
-  return e ? `${fmt(s)} – ${fmt(e)}` : fmt(s);
-};
-
-const EmptyState = ({ tab }: { tab: string }) => (
-  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card text-center py-20 px-6">
-    <div className="w-20 h-20 rounded-3xl gradient-ocean flex items-center justify-center mx-auto mb-6 animate-float"><Compass className="w-10 h-10 text-primary-foreground" /></div>
-    <h3 className="font-display text-2xl font-bold text-foreground mb-3">No {tab} trips yet</h3>
-    <p className="text-muted-foreground font-body mb-8 max-w-sm mx-auto">
-      {tab === "active" ? "Start a planned trip to see it here." : tab === "completed" ? "Complete a trip to build your travel portfolio." : "Start planning your next adventure."}
+const EmptyDashboard = ({ onNew }: { onNew: () => void }) => (
+  <div className="mt-16 rounded-3xl border border-border/60 bg-white p-12 text-center">
+    <div className="w-16 h-16 rounded-2xl bg-[#FFEDD5] flex items-center justify-center mx-auto mb-5">
+      <Compass className="w-8 h-8 text-[#F97438]" />
+    </div>
+    <h3 className="font-display text-2xl font-bold text-foreground">Start planning your first trip</h3>
+    <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
+      Create an itinerary and it will appear here with all your recommendations, friends, and highlights.
     </p>
-    <Link to="/plan"><Button variant="ocean" size="lg" className="shadow-lg"><Plus className="w-5 h-5" /> Plan Your First Trip</Button></Link>
-  </motion.div>
+    <button
+      onClick={onNew}
+      className="mt-6 h-11 px-6 rounded-full bg-[#F97438] hover:bg-[#ea6a30] text-white font-semibold text-sm inline-flex items-center gap-2 transition"
+    >
+      <Plus className="w-4 h-4" /> New Trip <ArrowUpRight className="w-4 h-4" />
+    </button>
+    <div className="hidden">
+      <Calendar />
+    </div>
+  </div>
 );
 
 export default Dashboard;

@@ -28,8 +28,9 @@ const Navbar = () => {
 
   const transparent = hasHero && !scrolled;
 
-  // Hide navbar on auth + dashboard (dashboard has its own sidebar shell)
-  if (location.pathname === "/auth" || location.pathname === "/dashboard") return null;
+  // Hide navbar on auth page, and for any authenticated user
+  // (authenticated users get the dashboard sidebar shell instead).
+  if (location.pathname === "/auth" || user) return null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 pt-4">

@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Plus, LogOut, LayoutDashboard, Map, Compass,
-  BookOpen, Users, Home, Sparkles, Info,
+  BookOpen, Users, Sparkles, Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const flagFor = (dest: string) => {
   const d = dest.toLowerCase();

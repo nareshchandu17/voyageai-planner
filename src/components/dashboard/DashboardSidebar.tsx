@@ -48,6 +48,7 @@ const DashboardSidebar = ({ trips: tripsProp, activeTripId, onSelectTrip }: Prop
   const { trips: fetchedTrips } = useTrips();
   const trips = tripsProp ?? fetchedTrips;
   const initials = (user?.name || "T").slice(0, 2).toUpperCase();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const navGroups = [
     {
@@ -162,11 +163,35 @@ const DashboardSidebar = ({ trips: tripsProp, activeTripId, onSelectTrip }: Prop
 
       {/* Logout */}
       <button
-        onClick={() => signOut()}
+        onClick={() => setLogoutOpen(true)}
         className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#F04A3F] hover:bg-red-50 transition"
       >
         <LogOut className="w-4 h-4" /> Logout
       </button>
+
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Log out of VoyageAI?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You'll be signed out and returned to the home page. You can sign back in anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                await signOut();
+                setLogoutOpen(false);
+                navigate("/", { replace: true });
+              }}
+              className="rounded-full bg-[#F04A3F] hover:bg-[#d93f36] text-white"
+            >
+              Yes, log out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </aside>
   );
 };

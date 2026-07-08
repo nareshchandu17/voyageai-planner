@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import DestinationCard from "@/components/DestinationCard";
 import { Sparkles, Map, DollarSign, Clock, ArrowRight, Star, ChevronRight, Users, Instagram } from "lucide-react";
@@ -58,6 +59,8 @@ const floatingPhotos = [
 ];
 
 const Index = () => {
+  const { user, isLoading } = useAuth();
+  if (!isLoading && user) return <Navigate to="/dashboard" replace />;
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
 

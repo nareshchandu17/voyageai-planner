@@ -53,7 +53,6 @@ const DashboardSidebar = ({ trips: tripsProp, activeTripId, onSelectTrip }: Prop
     {
       title: "GENERAL",
       items: [
-        { icon: Home, label: "Home", to: "/" },
         { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
         { icon: Sparkles, label: "Plan Trip", to: "/plan", badge: "AI" },
         { icon: Map, label: "Itinerary", to: "/itinerary" },

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
+import AppShell from "@/components/dashboard/AppShell";
 import Index from "./pages/Index";
 import PlanTrip from "./pages/PlanTrip";
 import TripMemories from "./pages/TripMemories";
@@ -26,24 +27,26 @@ const queryClient = new QueryClient();
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/plan" element={<PlanTrip />} />
-        <Route path="/itinerary" element={<Itinerary />} />
-        <Route path="/discover" element={<Discover />} />
-        <Route path="/discover/:slug" element={<TourDetail />} />
-        <Route path="/destinations/:name" element={<DestinationDetail />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/memories" element={<TripMemories />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/shared/:token" element={<SharedStory />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
+    <AppShell>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/plan" element={<PlanTrip />} />
+          <Route path="/itinerary" element={<Itinerary />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/discover/:slug" element={<TourDetail />} />
+          <Route path="/destinations/:name" element={<DestinationDetail />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/memories" element={<TripMemories />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/shared/:token" element={<SharedStory />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AnimatePresence>
+    </AppShell>
   );
 };
 

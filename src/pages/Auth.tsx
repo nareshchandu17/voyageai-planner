@@ -36,7 +36,7 @@ const Auth = () => {
         await signUp(name, email, password);
         toast.success("Account created!");
       }
-      navigate("/");
+      navigate("/dashboard");
     } catch {
       toast.error("Something went wrong");
     } finally {

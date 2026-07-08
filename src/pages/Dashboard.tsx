@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Plus, Search, Bell, LogOut, LayoutDashboard, Map, Compass,
-  BookOpen, Users, Heart, ArrowUpRight, Calendar, Star, ExternalLink,
+  Plus, Search, Bell, Compass,
+  Heart, ArrowUpRight, Calendar, Star, ExternalLink,
   Loader2, Apple,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrips, Trip } from "@/hooks/useTrips";
 import FriendsLocationMap from "@/components/dashboard/FriendsLocationMap";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 /* ---------- helpers ---------- */
 const fmtRange = (t: Trip) => {
@@ -43,121 +44,7 @@ const greeting = () => {
   return "Good Evening";
 };
 
-/* ---------- Sidebar ---------- */
-const Sidebar = ({ trips, activeId, onSelect }: { trips: Trip[]; activeId?: string; onSelect: (id: string) => void }) => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-  const initials = (user?.name || "T").slice(0, 2).toUpperCase();
-
-  const navGroups = [
-    {
-      title: "GENERAL",
-      items: [
-        { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard", active: true },
-        { icon: Map, label: "Itinerary", to: "/plan", badge: "NEW!" },
-      ],
-    },
-    {
-      title: "DISCOVER",
-      items: [
-        { icon: Compass, label: "Explore", to: "/discover" },
-        { icon: BookOpen, label: "Guide", to: "/blog" },
-        { icon: Users, label: "Friends", to: "/memories" },
-      ],
-    },
-  ];
-
-  return (
-    <aside className="hidden lg:flex flex-col w-[264px] shrink-0 bg-white border border-border/60 rounded-3xl m-4 mr-0 p-5 sticky top-4 h-[calc(100vh-2rem)]">
-      {/* profile card */}
-      <div className="flex items-center gap-3 rounded-2xl border border-border/60 p-2.5 pr-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
-          {initials}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate">{user?.name || "Traveler"}</p>
-          <p className="text-[11px] text-muted-foreground truncate">Part-time Traveller</p>
-        </div>
-        <button className="w-7 h-7 rounded-lg border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-secondary/60">
-          <span className="text-[10px] font-bold">ID</span>
-        </button>
-      </div>
-
-      {/* New Trip CTA */}
-      <button
-        onClick={() => navigate("/plan")}
-        className="mt-4 h-12 w-full rounded-2xl bg-[#F97438] hover:bg-[#ea6a30] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_10px_24px_-10px_rgba(249,116,56,0.6)] transition"
-      >
-        <Plus className="w-4 h-4" /> New Trip
-      </button>
-
-      {/* Trips list */}
-      <div className="mt-6">
-        <p className="text-[11px] font-semibold tracking-wider text-muted-foreground/70 px-1 mb-2">TRIPS</p>
-        <div className="rounded-2xl border border-border/60 p-2 space-y-1">
-          {trips.length === 0 && (
-            <p className="text-xs text-muted-foreground px-3 py-4 text-center">No trips yet</p>
-          )}
-          {trips.slice(0, 5).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onSelect(t.id)}
-              className={cn(
-                "w-full flex items-center gap-3 p-2 rounded-xl text-left transition",
-                activeId === t.id ? "bg-secondary/70" : "hover:bg-secondary/50"
-              )}
-            >
-              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-base shrink-0">
-                {flagFor(t.destination)}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate leading-tight">{t.destination.split(",")[0]}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{fmtRange(t)}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Nav */}
-      <div className="mt-6 flex-1 overflow-y-auto space-y-5">
-        {navGroups.map((g) => (
-          <div key={g.title}>
-            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground/70 px-1 mb-2">{g.title}</p>
-            <div className="space-y-1">
-              {g.items.map((it) => (
-                <Link
-                  key={it.label}
-                  to={it.to}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
-                    it.active ? "bg-foreground text-white" : "text-foreground/70 hover:bg-secondary/60"
-                  )}
-                >
-                  <it.icon className="w-4 h-4" />
-                  <span className="flex-1">{it.label}</span>
-                  {it.badge && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-violet-500 text-white">
-                      {it.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Logout */}
-      <button
-        onClick={() => signOut()}
-        className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#F04A3F] hover:bg-red-50 transition"
-      >
-        <LogOut className="w-4 h-4" /> Logout
-      </button>
-    </aside>
-  );
-};
+/* Sidebar extracted to src/components/dashboard/DashboardSidebar.tsx */
 
 /* ---------- Header ---------- */
 const Header = ({ name }: { name: string }) => (
@@ -475,7 +362,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#F7F6F3]">
       <div className="flex max-w-[1500px] mx-auto">
-        <Sidebar trips={trips} activeId={focusTrip?.id} onSelect={setSelectedId} />
+        <DashboardSidebar trips={trips} activeTripId={focusTrip?.id} onSelectTrip={setSelectedId} />
 
         <main className="flex-1 p-4 lg:p-8">
           <Header name={user.name} />

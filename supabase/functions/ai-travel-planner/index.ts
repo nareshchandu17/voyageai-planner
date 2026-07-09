@@ -358,7 +358,10 @@ All recommendations must be REAL, verified places and establishments. If local e
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        // NOTE: do NOT switch to a reasoning model (e.g. gemini-2.5-pro).
+        // Reasoning models spend the entire token budget on hidden reasoning
+        // tokens and emit empty content → itinerary JSON never streams.
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

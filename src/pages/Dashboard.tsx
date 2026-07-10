@@ -101,7 +101,7 @@ const HeroPromptCard = ({ onPlan }: { onPlan: (prompt: string) => void }) => {
         src={illusLuggage}
         alt="Travel luggage"
         loading="lazy"
-        className="absolute right-2 bottom-0 top-0 my-auto h-[220px] w-auto object-contain pointer-events-none select-none hidden sm:block"
+        className="absolute right-4 bottom-0 top-0 my-auto h-[300px] w-auto object-contain pointer-events-none select-none hidden sm:block"
       />
     </div>
   );

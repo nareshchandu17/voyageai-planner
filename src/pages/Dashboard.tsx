@@ -203,11 +203,11 @@ const EmptyDashboardLayout = ({ name }: { name: string }) => {
   };
   return (
     <div className="mt-8 space-y-6">
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
+        <div className="xl:col-span-2 h-full">
           <HeroPromptCard onPlan={goPlan} />
         </div>
-        <div className="rounded-3xl border border-border/60 bg-white overflow-hidden">
+        <div className="rounded-3xl border border-border/60 bg-white overflow-hidden h-full">
           <FriendsLocationMap />
         </div>
       </div>

@@ -70,7 +70,7 @@ const Header = ({ name }: { name: string }) => (
 const HeroPromptCard = ({ onPlan }: { onPlan: (prompt: string) => void }) => {
   const [value, setValue] = useState("");
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-[#FFF8F1] via-white to-[#FFEFE0] p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-[#FFF8F1] via-white to-[#FFEFE0] p-8 h-full min-h-[420px] flex flex-col justify-center">
       <div className="relative z-10 max-w-[58%]">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#F97438]" />

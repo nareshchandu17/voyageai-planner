@@ -70,7 +70,7 @@ const Header = ({ name }: { name: string }) => (
 const HeroPromptCard = ({ onPlan }: { onPlan: (prompt: string) => void }) => {
   const [value, setValue] = useState("");
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-[#FFF8F1] via-white to-[#FFEFE0] p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-[#FFF8F1] via-white to-[#FFEFE0] p-8 h-full min-h-[420px] flex flex-col justify-center">
       <div className="relative z-10 max-w-[58%]">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#F97438]" />
@@ -101,7 +101,7 @@ const HeroPromptCard = ({ onPlan }: { onPlan: (prompt: string) => void }) => {
         src={illusLuggage}
         alt="Travel luggage"
         loading="lazy"
-        className="absolute right-2 bottom-0 top-0 my-auto h-[220px] w-auto object-contain pointer-events-none select-none hidden sm:block"
+        className="absolute right-4 bottom-0 top-0 my-auto h-[300px] w-auto object-contain pointer-events-none select-none hidden sm:block"
       />
     </div>
   );
@@ -203,11 +203,11 @@ const EmptyDashboardLayout = ({ name }: { name: string }) => {
   };
   return (
     <div className="mt-8 space-y-6">
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
+        <div className="xl:col-span-2 h-full">
           <HeroPromptCard onPlan={goPlan} />
         </div>
-        <div className="rounded-3xl border border-border/60 bg-white overflow-hidden">
+        <div className="rounded-3xl border border-border/60 bg-white overflow-hidden h-full">
           <FriendsLocationMap />
         </div>
       </div>

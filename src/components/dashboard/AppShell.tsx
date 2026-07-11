@@ -15,8 +15,9 @@ const AppShell = ({ children }: { children: ReactNode }) => {
 
   const isAuthRoute = pathname === "/auth";
   const isDashboardRoute = pathname === "/dashboard";
+  const isItineraryRoute = pathname === "/itinerary";
 
-  if (isLoading || !user || isAuthRoute || isDashboardRoute) {
+  if (isLoading || !user || isAuthRoute || isDashboardRoute || isItineraryRoute) {
     return <>{children}</>;
   }
 

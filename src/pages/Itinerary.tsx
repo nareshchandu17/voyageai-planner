@@ -71,6 +71,8 @@ const TripWorkspace = () => {
   const [dragId, setDragId] = useState<string | null>(null);
   const [suggestionDismissed, setSuggestionDismissed] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [regeneratingDay, setRegeneratingDay] = useState<number | null>(null);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const trip = useMemo(() => {

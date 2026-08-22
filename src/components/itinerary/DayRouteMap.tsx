@@ -24,6 +24,8 @@ interface Stop {
 interface Props {
   destination: string;
   stops: Stop[];
+  /** Titles of stops that were just added by a regeneration — rendered highlighted. */
+  highlightTitles?: string[];
 }
 
 const modeMeta: Record<TravelMode, { icon: any; color: string; label: string }> = {
@@ -32,13 +34,18 @@ const modeMeta: Record<TravelMode, { icon: any; color: string; label: string }> 
   driving: { icon: Car, color: "#f59e0b", label: "Drive" },
 };
 
-const numberedIcon = (n: number, accent = "#0ea5e9") =>
+const numberedIcon = (n: number, accent = "#0ea5e9", highlighted = false) =>
   L.divIcon({
     className: "",
-    html: `<div style="background:${accent};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;box-shadow:0 4px 10px rgba(0,0,0,.25);border:2px solid #fff;font-family:Inter,sans-serif;">${n}</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;">
+      ${highlighted ? `<span style="position:absolute;width:44px;height:44px;border-radius:50%;background:${accent}33;animation:dayroute-pulse 1.6s ease-out infinite;"></span>` : ""}
+      <div style="position:relative;background:${accent};color:#fff;width:${highlighted ? 32 : 28}px;height:${highlighted ? 32 : 28}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;box-shadow:0 4px 10px rgba(0,0,0,.25);border:${highlighted ? "3px solid #fff" : "2px solid #fff"};font-family:Inter,sans-serif;">${n}</div>
+    </div>
+    <style>@keyframes dayroute-pulse{0%{transform:scale(.7);opacity:.85}100%{transform:scale(1.35);opacity:0}}</style>`,
+    iconSize: [highlighted ? 44 : 28, highlighted ? 44 : 28],
+    iconAnchor: [highlighted ? 22 : 14, highlighted ? 22 : 14],
   });
+
 
 const FitBounds = ({ points }: { points: [number, number][] }) => {
   const map = useMap();

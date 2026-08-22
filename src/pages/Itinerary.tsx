@@ -185,9 +185,60 @@ const TripWorkspace = () => {
     }, 700);
   };
 
-  const regenerateDay = (dayNum: number) => {
-    toast.info(`Regenerating Day ${dayNum}…`, { description: "AI is drafting a new plan." });
+  const regenerateDay = async (dayNum: number) => {
+    const target = days.find((d) => d.day === dayNum);
+    if (!target || regeneratingDay) return;
+    setRegeneratingDay(dayNum);
+    const toastId = toast.loading(`Regenerating Day ${dayNum}…`, { description: "AI is drafting fresh stops." });
+    try {
+      const { data, error } = await supabase.functions.invoke("regenerate-day", {
+        body: {
+          destination: trip.destination,
+          dayNumber: dayNum,
+          date: target.date,
+          theme: target.theme,
+          currentActivities: target.activities.map((a) => ({ time: a.time, title: a.title, type: a.type })),
+          otherDayTitles: days.filter((d) => d.day !== dayNum).flatMap((d) => d.activities.map((a) => a.title).filter(Boolean)),
+          interests: trip.interests || [],
+          styles: trip.styles || [],
+          groupSize: trip.group_size || 1,
+          dailyBudget: target.dailyBudget,
+          currency: trip.currency || "USD",
+        },
+      });
+
+      const errMsg = (error as any)?.message || (data as any)?.error;
+      if (errMsg || !(data as any)?.day) throw new Error(errMsg || "Could not regenerate this day");
+
+      const fresh: any = (data as any).day;
+      const newDay: DayData = {
+        day: dayNum,
+        date: fresh.date || target.date,
+        theme: fresh.theme || target.theme,
+        weather: target.weather,
+        dailyBudget: typeof fresh.dailyBudget === "number" ? fresh.dailyBudget : target.dailyBudget,
+        activities: (fresh.activities || []).map((a: any, j: number) => ({
+          id: `${dayNum}-r${Date.now()}-${j}`,
+          time: a.time,
+          title: a.title || a.name,
+          description: a.description,
+          location: a.location,
+          address: a.address,
+          duration: a.duration,
+          cost: typeof a.cost === "number" ? a.cost : 0,
+          type: (a.type || "attraction").toLowerCase(),
+        })),
+      };
+
+      await persistDays(days.map((d) => (d.day === dayNum ? newDay : d)));
+      toast.success(`Day ${dayNum} regenerated`, { id: toastId, description: `${newDay.activities.length} fresh stops added.` });
+    } catch (e) {
+      toast.error("Regeneration failed", { id: toastId, description: e instanceof Error ? e.message : "Please try again." });
+    } finally {
+      setRegeneratingDay(null);
+    }
   };
+
 
   const handleExport = async (kind: "gmaps" | "apple" | "ics" | "md" | "pdf" | "print") => {
     const dayExport = days.map((d) => ({

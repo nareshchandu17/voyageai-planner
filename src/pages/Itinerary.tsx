@@ -23,6 +23,8 @@ import {
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import DayRouteMap from "@/components/itinerary/DayRouteMap";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
 
 interface Activity {
   id: string;

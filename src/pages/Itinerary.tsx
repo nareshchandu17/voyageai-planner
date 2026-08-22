@@ -425,9 +425,20 @@ const TripWorkspace = () => {
                         <p className="font-display font-semibold text-foreground">Day {currentDay.day}{currentDay.theme ? ` — ${currentDay.theme}` : ""}</p>
                         <p className="text-xs text-muted-foreground">{currentDay.activities.length} stops · {currency} {currentDay.dailyBudget ?? currentDay.activities.reduce((s, a) => s + (a.cost || 0), 0)}</p>
                       </div>
-                      <Button size="sm" variant="outline" className="rounded-full" onClick={() => regenerateDay(currentDay.day)}>
-                        <RotateCw className="w-3.5 h-3.5 mr-1.5" />Regenerate Day
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        disabled={regeneratingDay !== null}
+                        onClick={() => regenerateDay(currentDay.day)}
+                      >
+                        {regeneratingDay === currentDay.day ? (
+                          <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Regenerating…</>
+                        ) : (
+                          <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Regenerate Day</>
+                        )}
                       </Button>
+
                     </div>
 
                     <ul className="divide-y divide-black/5">

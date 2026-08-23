@@ -527,8 +527,9 @@ const TripWorkspace = () => {
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
-                        </li>
-                      ))}
+                        </motion.li>
+                        );
+                      })}
                       {currentDay.activities.length === 0 && (
                         <li className="px-4 py-6 text-center text-sm text-muted-foreground">No activities yet for this day.</li>
                       )}

@@ -396,6 +396,7 @@ const TripWorkspace = () => {
               <DayRouteMap
                 destination={trip.destination}
                 stops={visibleStops.map((a) => ({ title: a.title, location: a.location, address: a.address, time: a.time }))}
+                highlightTitles={newTitles}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">No stops for this day</div>

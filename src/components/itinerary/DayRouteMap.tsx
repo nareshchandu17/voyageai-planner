@@ -66,7 +66,11 @@ const stopQuery = (s: Stop, dest: string) => {
   return /,/.test(base) ? base : `${base}, ${dest}`;
 };
 
-const DayRouteMap = ({ destination, stops }: Props) => {
+const DayRouteMap = ({ destination, stops, highlightTitles = [] }: Props) => {
+  const highlightSet = useMemo(
+    () => new Set(highlightTitles.filter(Boolean).map((t) => t.toLowerCase().trim())),
+    [highlightTitles]
+  );
   const validStops = useMemo(
     () => stops.filter((s) => s.address || s.location || s.title || s.name),
     [stops]
@@ -193,11 +197,20 @@ const DayRouteMap = ({ destination, stops }: Props) => {
             {validStops.map((s, i) => {
               const p = coords[stopQuery(s, destination)];
               if (!p) return null;
+              const isNew = highlightSet.has((s.title || s.name || "").toLowerCase().trim());
               return (
-                <Marker key={i} position={[p.lat, p.lng]} icon={numberedIcon(i + 1)}>
+                <Marker
+                  key={i}
+                  position={[p.lat, p.lng]}
+                  icon={numberedIcon(i + 1, isNew ? "#f59e0b" : "#0ea5e9", isNew)}
+                  zIndexOffset={isNew ? 1000 : 0}
+                >
                   <Popup>
                     <div className="text-xs">
-                      <div className="font-semibold">{s.title || s.name}</div>
+                      <div className="font-semibold">
+                        {s.title || s.name}
+                        {isNew && <span className="ml-1 text-amber-600 font-bold">· New</span>}
+                      </div>
                       {s.time && <div className="text-muted-foreground">{s.time}</div>}
                       {(s.address || s.location) && (
                         <div className="text-muted-foreground">{s.address || s.location}</div>

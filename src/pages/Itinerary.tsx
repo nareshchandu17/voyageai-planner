@@ -742,6 +742,151 @@ const TripWorkspace = () => {
           </div>
         </section>
       </div>
+
+      <Dialog open={regenOpen} onOpenChange={(o) => { setRegenOpen(o); if (!o) setPreviewDay(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display">Regenerate Day {currentDay?.day}</DialogTitle>
+            <DialogDescription>
+              Set your preferences, preview the AI's draft, then confirm before anything changes.
+            </DialogDescription>
+          </DialogHeader>
+
+          {!previewDay ? (
+            <div className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Budget cap ({currency})</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="e.g. 120"
+                    value={regenPrefs.budgetCap}
+                    onChange={(e) => setRegenPrefs((p) => ({ ...p, budgetCap: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Crowd level</Label>
+                  <div className="flex gap-1.5">
+                    {[
+                      { id: "any", label: "Any" },
+                      { id: "quiet", label: "Quiet" },
+                      { id: "balanced", label: "Balanced" },
+                      { id: "lively", label: "Lively" },
+                    ].map((o) => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() => setRegenPrefs((p) => ({ ...p, crowdLevel: o.id }))}
+                        className={`flex-1 text-xs py-2 rounded-lg border transition ${
+                          regenPrefs.crowdLevel === o.id
+                            ? "border-violet-500 bg-violet-50 text-violet-700 font-medium"
+                            : "border-black/10 text-muted-foreground hover:bg-black/[.03]"
+                        }`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs">Focus</Label>
+                <div className="flex gap-1.5">
+                  {[
+                    { id: "any", label: "Mixed" },
+                    { id: "outdoor", label: "Outdoor" },
+                    { id: "indoor", label: "Indoor" },
+                  ].map((o) => (
+                    <button
+                      key={o.id}
+                      type="button"
+                      onClick={() => setRegenPrefs((p) => ({ ...p, focus: o.id }))}
+                      className={`flex-1 text-xs py-2 rounded-lg border transition ${
+                        regenPrefs.focus === o.id
+                          ? "border-violet-500 bg-violet-50 text-violet-700 font-medium"
+                          : "border-black/10 text-muted-foreground hover:bg-black/[.03]"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs">Anything else? (optional)</Label>
+                <Textarea
+                  rows={3}
+                  placeholder="e.g. keep the morning free, more local food, avoid long walks"
+                  value={regenPrefs.note}
+                  onChange={(e) => setRegenPrefs((p) => ({ ...p, note: e.target.value }))}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto">
+              <div className="rounded-xl border border-black/10 overflow-hidden">
+                <div className="px-3 py-2 bg-[#FAFAFA] text-xs font-semibold text-muted-foreground border-b border-black/5">
+                  Current day
+                </div>
+                <ul className="divide-y divide-black/5">
+                  {(days.find((d) => d.day === previewDay.day)?.activities || []).map((a) => (
+                    <li key={a.id} className="px-3 py-2 text-xs">
+                      <span className="text-muted-foreground mr-1.5">{a.time || "—"}</span>
+                      <span className="line-through decoration-rose-400/70">{a.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl border border-amber-300 overflow-hidden">
+                <div className="px-3 py-2 bg-amber-50 text-xs font-semibold text-amber-700 border-b border-amber-200 flex items-center justify-between">
+                  <span>New draft{previewDay.theme ? ` — ${previewDay.theme}` : ""}</span>
+                  <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-[10px]">
+                    {currency} {previewDay.activities.reduce((s, a) => s + (a.cost || 0), 0)}
+                  </Badge>
+                </div>
+                <ul className="divide-y divide-black/5">
+                  {previewDay.activities.map((a) => (
+                    <li key={a.id} className="px-3 py-2 text-xs">
+                      <span className="text-muted-foreground mr-1.5">{a.time || "—"}</span>
+                      <span className="font-medium text-foreground">{a.title}</span>
+                      {a.location && <span className="block text-muted-foreground">{a.location}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            {!previewDay ? (
+              <>
+                <Button variant="outline" className="rounded-full" onClick={() => setRegenOpen(false)}>Cancel</Button>
+                <Button
+                  className="rounded-full"
+                  disabled={regeneratingDay !== null || !currentDay}
+                  onClick={() => currentDay && regenerateDay(currentDay.day)}
+                >
+                  {regeneratingDay !== null ? (
+                    <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" />Drafting…</>
+                  ) : (
+                    <><Sparkles className="w-4 h-4 mr-1.5" />Preview new day</>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" className="rounded-full" onClick={discardRegeneration}>Discard</Button>
+                <Button className="rounded-full" onClick={confirmRegeneration}>
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" />Confirm & replace
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

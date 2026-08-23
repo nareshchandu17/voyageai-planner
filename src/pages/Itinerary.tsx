@@ -240,13 +240,34 @@ const TripWorkspace = () => {
         })),
       };
 
-      await persistDays(days.map((d) => (d.day === dayNum ? newDay : d)));
-      toast.success(`Day ${dayNum} regenerated`, { id: toastId, description: `${newDay.activities.length} fresh stops added.` });
+      setPreviewDay(newDay);
+      toast.success(`Draft ready for Day ${dayNum}`, { id: toastId, description: `${newDay.activities.length} fresh stops — review and confirm.` });
     } catch (e) {
       toast.error("Regeneration failed", { id: toastId, description: e instanceof Error ? e.message : "Please try again." });
     } finally {
       setRegeneratingDay(null);
     }
+  };
+
+  const confirmRegeneration = async () => {
+    if (!previewDay) return;
+    const dayNum = previewDay.day;
+    await persistDays(days.map((d) => (d.day === dayNum ? previewDay : d)));
+    setNewTitles(previewDay.activities.map((a) => a.title || "").filter(Boolean));
+    setPreviewDay(null);
+    setRegenOpen(false);
+    setActiveDay(dayNum);
+    toast.success(`Day ${dayNum} updated`, { description: "New stops highlighted on the map and timeline." });
+  };
+
+  const discardRegeneration = () => {
+    setPreviewDay(null);
+    toast("Draft discarded", { description: "Your original day is unchanged." });
+  };
+
+  const openRegenModal = () => {
+    setPreviewDay(null);
+    setRegenOpen(true);
   };
 
 

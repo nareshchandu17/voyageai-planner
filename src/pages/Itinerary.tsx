@@ -214,6 +214,12 @@ const TripWorkspace = () => {
           groupSize: trip.group_size || 1,
           dailyBudget: target.dailyBudget,
           currency: trip.currency || "USD",
+          constraints: {
+            budgetCap: regenPrefs.budgetCap ? Number(regenPrefs.budgetCap) : null,
+            crowdLevel: regenPrefs.crowdLevel,
+            focus: regenPrefs.focus,
+            note: regenPrefs.note.trim(),
+          },
         },
       });
 

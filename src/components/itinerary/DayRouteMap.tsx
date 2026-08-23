@@ -197,7 +197,6 @@ const DayRouteMap = ({ destination, stops, highlightTitles = [] }: Props) => {
             {validStops.map((s, i) => {
               const p = coords[stopQuery(s, destination)];
               if (!p) return null;
-              return (
               const isNew = highlightSet.has((s.title || s.name || "").toLowerCase().trim());
               return (
                 <Marker

@@ -23,7 +23,20 @@ serve(async (req) => {
       dailyBudget,
       currency = "USD",
       instruction = "",
+      constraints = {},
     } = await req.json();
+
+    const {
+      budgetCap = null,
+      crowdLevel = "any",
+      focus = "any",
+      note = "",
+    } = (constraints || {}) as {
+      budgetCap?: number | null;
+      crowdLevel?: string;
+      focus?: string;
+      note?: string;
+    };
 
     if (!destination) {
       return new Response(JSON.stringify({ error: "destination is required" }), {

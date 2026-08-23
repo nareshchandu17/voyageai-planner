@@ -76,12 +76,17 @@ Rules:
 - Exactly ${count} activities, chronological, geographically clustered to minimise travel.
 - Use REAL, verifiable places in ${destination}. Never invent venues.
 - Replace the previous suggestions with FRESH alternatives — do not repeat the current activities or any place used on other days.
-- Include at least one meal stop and one hidden gem.`;
+- Include at least one meal stop and one hidden gem.
+${budgetCap ? `- HARD CONSTRAINT: the sum of all "cost" values MUST stay at or below ${budgetCap} ${currency} for the day. Prefer free/low-cost options to stay under it.` : ""}
+${crowdLevel && crowdLevel !== "any" ? `- Crowd preference: ${crowdLevel === "quiet" ? "quiet, low-tourist, off-the-beaten-path spots; avoid famous crowded landmarks" : crowdLevel === "lively" ? "lively, buzzing, popular places with energy and people" : "a balanced mix of iconic spots and calmer places"}.` : ""}
+${focus && focus !== "any" ? `- Focus: ${focus === "outdoor" ? "mostly OUTDOOR activities (parks, walks, viewpoints, markets)" : focus === "indoor" ? "mostly INDOOR activities (museums, galleries, cafés, workshops) — good for bad weather" : "a mix of indoor and outdoor"}.` : ""}
+${note ? `- Additional user preference to honour strictly: ${note}` : ""}`;
 
     const userPrompt = `Destination: ${destination}
 Day ${dayNumber} ${date ? `(${date})` : ""}${theme ? ` — current theme: ${theme}` : ""}
 Group size: ${groupSize}. Styles: ${styles.join(", ") || "general"}. Interests: ${interests.join(", ") || "general"}.
-Daily budget: ${dailyBudget ? `${dailyBudget} ${currency}` : "flexible"}.
+Daily budget: ${budgetCap ? `${budgetCap} ${currency} (STRICT CAP)` : dailyBudget ? `${dailyBudget} ${currency}` : "flexible"}.
+Crowd level preference: ${crowdLevel}. Indoor/outdoor focus: ${focus}.
 
 CURRENT activities on this day (replace them all with better, different options):
 ${currentActivities.map((a: any) => `- ${a.time || ""} ${a.title || ""} (${a.type || "attraction"})`).join("\n") || "- none"}
@@ -89,6 +94,7 @@ ${currentActivities.map((a: any) => `- ${a.time || ""} ${a.title || ""} (${a.typ
 Places already used on OTHER days (do NOT reuse):
 ${otherDayTitles.slice(0, 60).map((t: string) => `- ${t}`).join("\n") || "- none"}
 
+${note ? `User note for this day: ${note}` : ""}
 ${instruction ? `User request for this day: ${instruction}` : ""}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

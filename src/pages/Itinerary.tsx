@@ -467,7 +467,7 @@ const TripWorkspace = () => {
                         variant="outline"
                         className="rounded-full"
                         disabled={regeneratingDay !== null}
-                        onClick={() => regenerateDay(currentDay.day)}
+                        onClick={openRegenModal}
                       >
                         {regeneratingDay === currentDay.day ? (
                           <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Regenerating…</>

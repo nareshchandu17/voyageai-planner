@@ -479,14 +479,19 @@ const TripWorkspace = () => {
                     </div>
 
                     <ul className="divide-y divide-black/5">
-                      {currentDay.activities.map((a) => (
-                        <li
+                      {currentDay.activities.map((a) => {
+                        const isNew = newTitles.some((t) => t.toLowerCase().trim() === (a.title || "").toLowerCase().trim());
+                        return (
+                        <motion.li
                           key={a.id}
+                          initial={isNew ? { opacity: 0, y: 8 } : false}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.45, ease: "easeOut" }}
                           draggable
                           onDragStart={() => onDragStart(a.id)}
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={() => onDrop(currentDay.day, a.id)}
-                          className="group flex items-start gap-3 px-4 py-3 hover:bg-[#FAFAFA] transition"
+                          className={`group flex items-start gap-3 px-4 py-3 transition ${isNew ? "bg-amber-50/70 hover:bg-amber-50" : "hover:bg-[#FAFAFA]"}`}
                         >
                           <GripVertical className="w-4 h-4 text-muted-foreground/50 mt-1.5 cursor-grab opacity-0 group-hover:opacity-100 transition" />
                           <div className="w-14 shrink-0 text-xs font-semibold text-muted-foreground pt-1">
@@ -495,7 +500,7 @@ const TripWorkspace = () => {
                             ) : (a.time || "—")}
                           </div>
                           <div className="relative flex flex-col items-center pt-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-violet-500 border-2 border-white shadow" />
+                            <span className={`w-2.5 h-2.5 rounded-full border-2 border-white shadow ${isNew ? "bg-amber-500" : "bg-violet-500"}`} />
                           </div>
                           <div className="flex-1 min-w-0 pt-1">
                             {editingId === a.id ? (
@@ -506,7 +511,10 @@ const TripWorkspace = () => {
                               </div>
                             ) : (
                               <>
-                                <p className="font-medium text-sm text-foreground truncate">{a.title}</p>
+                                <p className="font-medium text-sm text-foreground truncate flex items-center gap-2">
+                                  <span className="truncate">{a.title}</span>
+                                  {isNew && <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-[10px] px-1.5 py-0 shrink-0">New</Badge>}
+                                </p>
                                 {a.location && <p className="text-xs text-muted-foreground truncate flex items-center gap-1"><MapPin className="w-3 h-3" />{a.location}</p>}
                               </>
                             )}

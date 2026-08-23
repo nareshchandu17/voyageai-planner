@@ -66,7 +66,11 @@ const stopQuery = (s: Stop, dest: string) => {
   return /,/.test(base) ? base : `${base}, ${dest}`;
 };
 
-const DayRouteMap = ({ destination, stops }: Props) => {
+const DayRouteMap = ({ destination, stops, highlightTitles = [] }: Props) => {
+  const highlightSet = useMemo(
+    () => new Set(highlightTitles.filter(Boolean).map((t) => t.toLowerCase().trim())),
+    [highlightTitles]
+  );
   const validStops = useMemo(
     () => stops.filter((s) => s.address || s.location || s.title || s.name),
     [stops]

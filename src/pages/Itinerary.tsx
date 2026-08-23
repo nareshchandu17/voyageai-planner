@@ -74,6 +74,12 @@ const TripWorkspace = () => {
   const [suggestionDismissed, setSuggestionDismissed] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [regeneratingDay, setRegeneratingDay] = useState<number | null>(null);
+  const [regenOpen, setRegenOpen] = useState(false);
+  const [regenPrefs, setRegenPrefs] = useState<{ budgetCap: string; crowdLevel: string; focus: string; note: string }>({
+    budgetCap: "", crowdLevel: "any", focus: "any", note: "",
+  });
+  const [previewDay, setPreviewDay] = useState<DayData | null>(null);
+  const [newTitles, setNewTitles] = useState<string[]>([]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 

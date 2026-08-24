@@ -98,6 +98,10 @@ const TripWorkspace = () => {
     budgetCap: "", crowdLevel: "any", focus: "any", note: "",
   });
   const [previewDay, setPreviewDay] = useState<DayData | null>(null);
+  const [undoSnapshots, setUndoSnapshots] = useState<Record<number, DayData>>({});
+  const [regenHistory, setRegenHistory] = useState<RegenEntry[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
   const [newTitles, setNewTitles] = useState<string[]>([]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);

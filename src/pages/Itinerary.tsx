@@ -8,6 +8,8 @@ import {
   Map as MapIcon, Plane, Hotel, Utensils, TrainFront, ShieldCheck, Phone,
   Umbrella, Wallet, Package, ChevronDown, ChevronUp, Plus, MessageSquare,
   StickyNote, Folder, Maximize2, Wifi, WifiOff, Printer, CheckCircle2, XCircle,
+  Undo2, History,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

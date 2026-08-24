@@ -289,13 +289,51 @@ const TripWorkspace = () => {
   const confirmRegeneration = async () => {
     if (!previewDay) return;
     const dayNum = previewDay.day;
-    await persistDays(days.map((d) => (d.day === dayNum ? previewDay : d)));
+    const prev = days.find((d) => d.day === dayNum);
+    if (prev) setUndoSnapshots((s) => ({ ...s, [dayNum]: prev }));
+
+    const entry: RegenEntry = {
+      id: `${dayNum}-${Date.now()}`,
+      day: dayNum,
+      at: new Date().toISOString(),
+      budgetCap: regenPrefs.budgetCap ? Number(regenPrefs.budgetCap) : null,
+      crowdLevel: regenPrefs.crowdLevel,
+      focus: regenPrefs.focus,
+      note: regenPrefs.note.trim(),
+      prevStops: (prev?.activities || []).map((a) => a.title || "").filter(Boolean),
+      newStops: previewDay.activities.map((a) => a.title || "").filter(Boolean),
+      cost: previewDay.activities.reduce((s, a) => s + (a.cost || 0), 0),
+    };
+    const nextHistory = [entry, ...regenHistory].slice(0, 30);
+    setRegenHistory(nextHistory);
+
+    await persistDays(days.map((d) => (d.day === dayNum ? previewDay : d)), nextHistory);
     setNewTitles(previewDay.activities.map((a) => a.title || "").filter(Boolean));
     setPreviewDay(null);
     setRegenOpen(false);
     setActiveDay(dayNum);
-    toast.success(`Day ${dayNum} updated`, { description: "New stops highlighted on the map and timeline." });
+    toast.success(`Day ${dayNum} updated`, {
+      description: "New stops highlighted — you can undo this.",
+      action: { label: "Undo", onClick: () => undoRegeneration(dayNum) },
+    });
   };
+
+  const undoRegeneration = async (dayNum: number) => {
+    const snap = undoSnapshots[dayNum];
+    if (!snap) return;
+    setUndoSnapshots((s) => {
+      const n = { ...s };
+      delete n[dayNum];
+      return n;
+    });
+    const nextHistory = regenHistory.filter((h, i) => !(h.day === dayNum && i === regenHistory.findIndex((x) => x.day === dayNum)));
+    setRegenHistory(nextHistory);
+    setNewTitles([]);
+    await persistDays(days.map((d) => (d.day === dayNum ? snap : d)), nextHistory);
+    setActiveDay(dayNum);
+    toast.success(`Day ${dayNum} restored`, { description: "Your previous itinerary is back." });
+  };
+
 
   const discardRegeneration = () => {
     setPreviewDay(null);

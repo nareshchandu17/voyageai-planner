@@ -139,6 +139,12 @@ const TripWorkspace = () => {
   useEffect(() => { setDays(initialDays); }, [initialDays]);
 
   useEffect(() => {
+    const hist = (trip?.itinerary_data as any)?.regenHistory;
+    if (Array.isArray(hist)) setRegenHistory(hist as RegenEntry[]);
+  }, [trip?.id]);
+
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMsgs]);
 

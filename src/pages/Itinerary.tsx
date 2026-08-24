@@ -52,6 +52,20 @@ interface DayData {
   dailyBudget?: number;
 }
 
+interface RegenEntry {
+  id: string;
+  day: number;
+  at: string;
+  budgetCap: number | null;
+  crowdLevel: string;
+  focus: string;
+  note: string;
+  prevStops: string[];
+  newStops: string[];
+  cost: number;
+}
+
+
 const weatherIcons: Record<string, any> = {
   sunny: Sun, clear: Sun, rainy: CloudRain, rain: CloudRain, cloudy: Cloud, snow: Snowflake,
 };

@@ -8,6 +8,8 @@ import {
   Map as MapIcon, Plane, Hotel, Utensils, TrainFront, ShieldCheck, Phone,
   Umbrella, Wallet, Package, ChevronDown, ChevronUp, Plus, MessageSquare,
   StickyNote, Folder, Maximize2, Wifi, WifiOff, Printer, CheckCircle2, XCircle,
+  Undo2, History,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +52,20 @@ interface DayData {
   dailyBudget?: number;
 }
 
+interface RegenEntry {
+  id: string;
+  day: number;
+  at: string;
+  budgetCap: number | null;
+  crowdLevel: string;
+  focus: string;
+  note: string;
+  prevStops: string[];
+  newStops: string[];
+  cost: number;
+}
+
+
 const weatherIcons: Record<string, any> = {
   sunny: Sun, clear: Sun, rainy: CloudRain, rain: CloudRain, cloudy: Cloud, snow: Snowflake,
 };
@@ -82,6 +98,10 @@ const TripWorkspace = () => {
     budgetCap: "", crowdLevel: "any", focus: "any", note: "",
   });
   const [previewDay, setPreviewDay] = useState<DayData | null>(null);
+  const [undoSnapshots, setUndoSnapshots] = useState<Record<number, DayData>>({});
+  const [regenHistory, setRegenHistory] = useState<RegenEntry[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
   const [newTitles, setNewTitles] = useState<string[]>([]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -119,6 +139,12 @@ const TripWorkspace = () => {
   useEffect(() => { setDays(initialDays); }, [initialDays]);
 
   useEffect(() => {
+    const hist = (trip?.itinerary_data as any)?.regenHistory;
+    if (Array.isArray(hist)) setRegenHistory(hist as RegenEntry[]);
+  }, [trip?.id]);
+
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMsgs]);
 
@@ -150,12 +176,14 @@ const TripWorkspace = () => {
 
   const visibleStops = (currentDay?.activities || []).filter((a) => typeMatchesFilter(a.type));
 
-  const persistDays = async (next: DayData[]) => {
+  const persistDays = async (next: DayData[], history?: RegenEntry[]) => {
     setDays(next);
     if (!trip) return;
     const data: any = { ...(trip.itinerary_data as any || {}), days: next };
+    if (history) data.regenHistory = history;
     await updateTrip(trip.id, { itinerary_data: data });
   };
+
 
   const deleteActivity = (dayNum: number, id: string) => {
     const next = days.map((d) => d.day === dayNum ? { ...d, activities: d.activities.filter((a) => a.id !== id) } : d);
@@ -261,13 +289,51 @@ const TripWorkspace = () => {
   const confirmRegeneration = async () => {
     if (!previewDay) return;
     const dayNum = previewDay.day;
-    await persistDays(days.map((d) => (d.day === dayNum ? previewDay : d)));
+    const prev = days.find((d) => d.day === dayNum);
+    if (prev) setUndoSnapshots((s) => ({ ...s, [dayNum]: prev }));
+
+    const entry: RegenEntry = {
+      id: `${dayNum}-${Date.now()}`,
+      day: dayNum,
+      at: new Date().toISOString(),
+      budgetCap: regenPrefs.budgetCap ? Number(regenPrefs.budgetCap) : null,
+      crowdLevel: regenPrefs.crowdLevel,
+      focus: regenPrefs.focus,
+      note: regenPrefs.note.trim(),
+      prevStops: (prev?.activities || []).map((a) => a.title || "").filter(Boolean),
+      newStops: previewDay.activities.map((a) => a.title || "").filter(Boolean),
+      cost: previewDay.activities.reduce((s, a) => s + (a.cost || 0), 0),
+    };
+    const nextHistory = [entry, ...regenHistory].slice(0, 30);
+    setRegenHistory(nextHistory);
+
+    await persistDays(days.map((d) => (d.day === dayNum ? previewDay : d)), nextHistory);
     setNewTitles(previewDay.activities.map((a) => a.title || "").filter(Boolean));
     setPreviewDay(null);
     setRegenOpen(false);
     setActiveDay(dayNum);
-    toast.success(`Day ${dayNum} updated`, { description: "New stops highlighted on the map and timeline." });
+    toast.success(`Day ${dayNum} updated`, {
+      description: "New stops highlighted — you can undo this.",
+      action: { label: "Undo", onClick: () => undoRegeneration(dayNum) },
+    });
   };
+
+  const undoRegeneration = async (dayNum: number) => {
+    const snap = undoSnapshots[dayNum];
+    if (!snap) return;
+    setUndoSnapshots((s) => {
+      const n = { ...s };
+      delete n[dayNum];
+      return n;
+    });
+    const nextHistory = regenHistory.filter((h, i) => !(h.day === dayNum && i === regenHistory.findIndex((x) => x.day === dayNum)));
+    setRegenHistory(nextHistory);
+    setNewTitles([]);
+    await persistDays(days.map((d) => (d.day === dayNum ? snap : d)), nextHistory);
+    setActiveDay(dayNum);
+    toast.success(`Day ${dayNum} restored`, { description: "Your previous itinerary is back." });
+  };
+
 
   const discardRegeneration = () => {
     setPreviewDay(null);
@@ -462,21 +528,98 @@ const TripWorkspace = () => {
                         <p className="font-display font-semibold text-foreground">Day {currentDay.day}{currentDay.theme ? ` — ${currentDay.theme}` : ""}</p>
                         <p className="text-xs text-muted-foreground">{currentDay.activities.length} stops · {currency} {currentDay.dailyBudget ?? currentDay.activities.reduce((s, a) => s + (a.cost || 0), 0)}</p>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full"
-                        disabled={regeneratingDay !== null}
-                        onClick={openRegenModal}
-                      >
-                        {regeneratingDay === currentDay.day ? (
-                          <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Regenerating…</>
-                        ) : (
-                          <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Regenerate Day</>
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const dayHistory = regenHistory.filter((h) => h.day === currentDay.day);
+                          return dayHistory.length > 0 ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="rounded-full text-xs"
+                              onClick={() => setHistoryOpen((o) => !o)}
+                            >
+                              <History className="w-3.5 h-3.5 mr-1.5" />
+                              History ({dayHistory.length})
+                              {historyOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                            </Button>
+                          ) : null;
+                        })()}
+                        {undoSnapshots[currentDay.day] && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-full text-xs text-amber-700 hover:text-amber-800 hover:bg-amber-50"
+                            onClick={() => undoRegeneration(currentDay.day)}
+                          >
+                            <Undo2 className="w-3.5 h-3.5 mr-1.5" />Undo regenerate
+                          </Button>
                         )}
-                      </Button>
-
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          disabled={regeneratingDay !== null}
+                          onClick={openRegenModal}
+                        >
+                          {regeneratingDay === currentDay.day ? (
+                            <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Regenerating…</>
+                          ) : (
+                            <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Regenerate Day</>
+                          )}
+                        </Button>
+                      </div>
                     </div>
+
+                    <AnimatePresence initial={false}>
+                      {historyOpen && regenHistory.some((h) => h.day === currentDay.day) && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: "easeOut" }}
+                          className="overflow-hidden border-b border-black/5 bg-white"
+                        >
+                          <div className="px-4 py-3 space-y-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                              Constraints used for Day {currentDay.day}
+                            </p>
+                            {regenHistory.filter((h) => h.day === currentDay.day).map((h, idx) => (
+                              <div key={h.id} className="rounded-xl border border-black/5 bg-[#FAFAFA] px-3 py-2.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-xs font-semibold text-foreground">
+                                    {idx === 0 ? "Latest" : `Regeneration #${regenHistory.filter((x) => x.day === currentDay.day).length - idx}`}
+                                  </p>
+                                  <p className="text-[11px] text-muted-foreground">
+                                    {new Date(h.at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                  </p>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  <Badge variant="secondary" className="text-[10px] rounded-full">
+                                    Budget cap: {h.budgetCap ? `${currency} ${h.budgetCap}` : "none"}
+                                  </Badge>
+                                  <Badge variant="secondary" className="text-[10px] rounded-full capitalize">
+                                    Crowd: {h.crowdLevel || "any"}
+                                  </Badge>
+                                  <Badge variant="secondary" className="text-[10px] rounded-full capitalize">
+                                    Focus: {h.focus || "any"}
+                                  </Badge>
+                                  <Badge variant="secondary" className="text-[10px] rounded-full">
+                                    Result: {currency} {h.cost} · {h.newStops.length} stops
+                                  </Badge>
+                                </div>
+                                {h.note && (
+                                  <p className="text-[11px] text-muted-foreground mt-2 italic">“{h.note}”</p>
+                                )}
+                                <p className="text-[11px] text-muted-foreground mt-2 line-clamp-2">
+                                  <span className="font-medium text-foreground/70">Replaced:</span> {h.prevStops.join(", ") || "—"}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
 
                     <ul className="divide-y divide-black/5">
                       {currentDay.activities.map((a) => {

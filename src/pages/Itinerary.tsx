@@ -176,12 +176,14 @@ const TripWorkspace = () => {
 
   const visibleStops = (currentDay?.activities || []).filter((a) => typeMatchesFilter(a.type));
 
-  const persistDays = async (next: DayData[]) => {
+  const persistDays = async (next: DayData[], history?: RegenEntry[]) => {
     setDays(next);
     if (!trip) return;
     const data: any = { ...(trip.itinerary_data as any || {}), days: next };
+    if (history) data.regenHistory = history;
     await updateTrip(trip.id, { itinerary_data: data });
   };
+
 
   const deleteActivity = (dayNum: number, id: string) => {
     const next = days.map((d) => d.day === dayNum ? { ...d, activities: d.activities.filter((a) => a.id !== id) } : d);

@@ -124,6 +124,22 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
   "summary": "2-3 sentence trip summary",
   "totalBudgetEstimate": number,
   "currency": "USD",
+  "tripDNA": [
+    { "trait": "Culture", "weight": 80 },
+    { "trait": "Food", "weight": 65 },
+    { "trait": "Nature", "weight": 40 },
+    { "trait": "Adventure", "weight": 30 },
+    { "trait": "Relaxation", "weight": 55 }
+  ],
+  "signatureExperiences": [
+    { "name": "The one experience that defines this trip", "day": 1, "why": "Why it is unforgettable", "imageQuery": "specific visual query" }
+  ],
+  "moneySavers": [
+    { "tip": "Specific, actionable saving tactic for this destination", "savings": "~$40" }
+  ],
+  "localPhrases": [
+    { "phrase": "Local-language phrase", "meaning": "English meaning", "pronunciation": "phonetic spelling" }
+  ],
   "beforeTrip": {
     "destinationOverview": {
       "country": "Country name",
@@ -283,8 +299,11 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
           "photoTip": "Best angle / lighting / spot for photos",
           "commonMistake": "Frequent tourist mistake to avoid",
           "accessibility": "Wheelchair / stroller / mobility notes",
-          "tip": "Optional general insider tip",
-          "imageQuery": "specific place name + visual cue for image search"
+           "tip": "Optional general insider tip",
+           "sensory": "ONE evocative sensory line — what you hear/smell/feel standing there (max 18 words)",
+           "avgVisitTime": "75 min (typical visitor dwell time)",
+           "nearbyRestStop": "Real nearby cafe/bench/rest spot with a 1-phrase reason (e.g. 'Café Verlet, 3 min walk — best espresso break')",
+           "imageQuery": "specific place name + visual cue for image search"
         }
       ],
       "meals": {

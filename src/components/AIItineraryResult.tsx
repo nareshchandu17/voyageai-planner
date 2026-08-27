@@ -308,6 +308,14 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
         )}
       </motion.div>
 
+      {/* Trip DNA */}
+      <TripDNAPanel
+        tripDNA={(data as any).tripDNA}
+        signatureExperiences={(data as any).signatureExperiences}
+        moneySavers={(data as any).moneySavers}
+        localPhrases={(data as any).localPhrases}
+      />
+
       {/* Warnings */}
       {data.warnings?.length ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}

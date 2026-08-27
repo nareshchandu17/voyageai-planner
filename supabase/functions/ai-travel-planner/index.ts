@@ -124,6 +124,22 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
   "summary": "2-3 sentence trip summary",
   "totalBudgetEstimate": number,
   "currency": "USD",
+  "tripDNA": [
+    { "trait": "Culture", "weight": 80 },
+    { "trait": "Food", "weight": 65 },
+    { "trait": "Nature", "weight": 40 },
+    { "trait": "Adventure", "weight": 30 },
+    { "trait": "Relaxation", "weight": 55 }
+  ],
+  "signatureExperiences": [
+    { "name": "The one experience that defines this trip", "day": 1, "why": "Why it is unforgettable", "imageQuery": "specific visual query" }
+  ],
+  "moneySavers": [
+    { "tip": "Specific, actionable saving tactic for this destination", "savings": "~$40" }
+  ],
+  "localPhrases": [
+    { "phrase": "Local-language phrase", "meaning": "English meaning", "pronunciation": "phonetic spelling" }
+  ],
   "beforeTrip": {
     "destinationOverview": {
       "country": "Country name",

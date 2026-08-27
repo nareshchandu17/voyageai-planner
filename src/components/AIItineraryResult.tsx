@@ -764,6 +764,9 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
         </motion.div>
       )}
 
+      {/* Day Intelligence */}
+      <DayIntelligencePanel day={day as any} />
+
       {/* Energy Bar */}
       <EnergyBar activities={day.activities} dayNum={day.day} />
 

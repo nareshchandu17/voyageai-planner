@@ -299,8 +299,11 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
           "photoTip": "Best angle / lighting / spot for photos",
           "commonMistake": "Frequent tourist mistake to avoid",
           "accessibility": "Wheelchair / stroller / mobility notes",
-          "tip": "Optional general insider tip",
-          "imageQuery": "specific place name + visual cue for image search"
+           "tip": "Optional general insider tip",
+           "sensory": "ONE evocative sensory line — what you hear/smell/feel standing there (max 18 words)",
+           "avgVisitTime": "75 min (typical visitor dwell time)",
+           "nearbyRestStop": "Real nearby cafe/bench/rest spot with a 1-phrase reason (e.g. 'Café Verlet, 3 min walk — best espresso break')",
+           "imageQuery": "specific place name + visual cue for image search"
         }
       ],
       "meals": {

@@ -1391,7 +1391,24 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
             </span>
           )}
           <ActivityEnergyBadge activity={activity} />
+          {(activity as any).avgVisitTime && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded-md">
+              <Clock className="w-2.5 h-2.5" /> avg {(activity as any).avgVisitTime}
+            </span>
+          )}
         </div>
+
+        {(activity as any).sensory && (
+          <p className="mt-2 text-[11px] italic text-foreground/70 leading-relaxed border-l-2 border-primary/30 pl-2">
+            “{(activity as any).sensory}”
+          </p>
+        )}
+        {(activity as any).nearbyRestStop && (
+          <div className="mt-1.5 text-[11px] text-muted-foreground flex items-start gap-1.5">
+            <Compass className="w-3 h-3 mt-0.5 shrink-0 text-accent" />
+            <span><strong>Nearby break:</strong> {(activity as any).nearbyRestStop}</span>
+          </div>
+        )}
 
         {/* Concierge insights */}
         {(activity.whyVisit || activity.localSecret || activity.photoTip || activity.bestTimeToVisit || activity.commonMistake || activity.accessibility || activity.tip) && (

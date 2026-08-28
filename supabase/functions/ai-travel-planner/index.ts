@@ -317,6 +317,16 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
       "transportPlan": "1-sentence summary of how to move between today's stops (e.g. 'Walk the Old Town loop, metro line 2 back to hotel')",
       "dailyBudget": number,
       "travelTip": "Practical tip for the day",
+      "signatureMoment": { "title": "The one unmissable moment of this day", "time": "18:30", "why": "Why this moment defines the day", "imageQuery": "specific visual query" },
+      "dayScorecard": { "culture": 70, "food": 55, "nature": 30, "adventure": 25, "relaxation": 45 },
+      "rainPlanB": [
+        { "instead": "Outdoor stop name", "swapTo": "Real indoor alternative nearby", "why": "Why it works as a swap", "location": "Neighborhood" }
+      ],
+      "reservations": [
+        { "what": "Restaurant / tour / ticket to book", "leadTime": "Book 3 days ahead", "urgency": "low|medium|high", "how": "Website / phone / app" }
+      ],
+      "costBreakdown": { "activities": number, "food": number, "transport": number, "extras": number, "total": number, "currency": "USD" },
+      "packToday": ["Day-specific item 1", "item 2", "item 3"],
       "companionInsight": "A 1-2 sentence personalized note explaining HOW this day was tailored to the traveler's profile or narrative arc. Reference SPECIFIC profile fields or arc intensity.",
       "companionInsights": {
         "morning": "1 sentence companion-memory insight for the MORNING block.",
@@ -367,6 +377,7 @@ Create a comprehensive two-phase travel plan:
 1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview${tripDays > 0 ? ` (exactly ${tripDays} days)` : ""}.
 2. DURING TRIP: Include local transport guide, restaurant recommendations (6-8 restaurants), unique experiences (5-6), safety information, hotel tips, and navigation guide with key routes.
 3. DAYS: Generate exactly ${tripDays || "the correct number of"} day objects in the "days" array. Each day must have activities, meals, dailyBudget, theme, and companionInsights.
+4. DAY INTELLIGENCE (MANDATORY on EVERY day object — never omit or leave empty): signatureMoment, dayScorecard (all 5 traits 0-100), rainPlanB (at least 1 indoor swap per outdoor stop), reservations (what to book with lead time + urgency), costBreakdown (activities/food/transport/extras summing to total, matching dailyBudget), and packToday (3-5 day-specific items).
 
 All recommendations must be REAL, verified places and establishments. If local events are listed above, incorporate relevant ones.`;
 

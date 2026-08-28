@@ -377,6 +377,7 @@ Create a comprehensive two-phase travel plan:
 1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview${tripDays > 0 ? ` (exactly ${tripDays} days)` : ""}.
 2. DURING TRIP: Include local transport guide, restaurant recommendations (6-8 restaurants), unique experiences (5-6), safety information, hotel tips, and navigation guide with key routes.
 3. DAYS: Generate exactly ${tripDays || "the correct number of"} day objects in the "days" array. Each day must have activities, meals, dailyBudget, theme, and companionInsights.
+4. DAY INTELLIGENCE (MANDATORY on EVERY day object — never omit or leave empty): signatureMoment, dayScorecard (all 5 traits 0-100), rainPlanB (at least 1 indoor swap per outdoor stop), reservations (what to book with lead time + urgency), costBreakdown (activities/food/transport/extras summing to total, matching dailyBudget), and packToday (3-5 day-specific items).
 
 All recommendations must be REAL, verified places and establishments. If local events are listed above, incorporate relevant ones.`;
 

@@ -27,6 +27,8 @@ import {
 } from "@/lib/itineraryExports";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import DayRouteMap from "@/components/itinerary/DayRouteMap";
+import DayCostBreakdown, { deriveBreakdown, type CostBreakdown } from "@/components/itinerary/DayCostBreakdown";
+import BookingChecklist, { type Reservation } from "@/components/itinerary/BookingChecklist";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -50,6 +52,8 @@ interface DayData {
   weather?: { condition?: string; temp?: string };
   activities: Activity[];
   dailyBudget?: number;
+  costBreakdown?: Partial<CostBreakdown> | null;
+  reservations?: Reservation[];
 }
 
 interface RegenEntry {
@@ -63,6 +67,9 @@ interface RegenEntry {
   prevStops: string[];
   newStops: string[];
   cost: number;
+  prevCost?: number;
+  breakdown?: CostBreakdown;
+  prevBreakdown?: CostBreakdown;
 }
 
 

@@ -317,6 +317,16 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
       "transportPlan": "1-sentence summary of how to move between today's stops (e.g. 'Walk the Old Town loop, metro line 2 back to hotel')",
       "dailyBudget": number,
       "travelTip": "Practical tip for the day",
+      "signatureMoment": { "title": "The one unmissable moment of this day", "time": "18:30", "why": "Why this moment defines the day", "imageQuery": "specific visual query" },
+      "dayScorecard": { "culture": 70, "food": 55, "nature": 30, "adventure": 25, "relaxation": 45 },
+      "rainPlanB": [
+        { "instead": "Outdoor stop name", "swapTo": "Real indoor alternative nearby", "why": "Why it works as a swap", "location": "Neighborhood" }
+      ],
+      "reservations": [
+        { "what": "Restaurant / tour / ticket to book", "leadTime": "Book 3 days ahead", "urgency": "low|medium|high", "how": "Website / phone / app" }
+      ],
+      "costBreakdown": { "activities": number, "food": number, "transport": number, "extras": number, "total": number, "currency": "USD" },
+      "packToday": ["Day-specific item 1", "item 2", "item 3"],
       "companionInsight": "A 1-2 sentence personalized note explaining HOW this day was tailored to the traveler's profile or narrative arc. Reference SPECIFIC profile fields or arc intensity.",
       "companionInsights": {
         "morning": "1 sentence companion-memory insight for the MORNING block.",

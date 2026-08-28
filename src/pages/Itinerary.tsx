@@ -50,6 +50,8 @@ interface DayData {
   weather?: { condition?: string; temp?: string };
   activities: Activity[];
   dailyBudget?: number;
+  costBreakdown?: Partial<CostBreakdown> | null;
+  reservations?: Reservation[];
 }
 
 interface RegenEntry {
@@ -63,6 +65,9 @@ interface RegenEntry {
   prevStops: string[];
   newStops: string[];
   cost: number;
+  prevCost?: number;
+  breakdown?: CostBreakdown;
+  prevBreakdown?: CostBreakdown;
 }
 
 

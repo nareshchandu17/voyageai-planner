@@ -425,6 +425,13 @@ const TripWorkspace = () => {
   const packingList: string[] = beforeTrip?.packingList?.slice(0, 6) || ["Passport", "Universal adapter", "Comfortable shoes", "Rain jacket", "Power bank", "Prescriptions"];
   const emergency = beforeTrip?.emergencyNumbers || { police: "110", ambulance: "119", tourist: "050-3816-2787" };
   const visaStatus = beforeTrip?.visa?.status || "eVisa required · 5–7 days";
+  const dayHistory = currentDay ? regenHistory.filter((h) => h.day === currentDay.day) : [];
+  const currentBreakdown = currentDay ? deriveBreakdown(currentDay.activities, currentDay.costBreakdown) : null;
+  const previousBreakdown = dayHistory[0]?.prevBreakdown || null;
+  const varianceTrail = dayHistory
+    .slice(1)
+    .reverse()
+    .map((h, i) => ({ label: `Regeneration ${i + 1}`, total: h.breakdown?.total ?? h.cost }));
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
@@ -609,6 +616,22 @@ const TripWorkspace = () => {
                         </Button>
                       </div>
                     </div>
+
+                     {currentBreakdown && (
+                       <DayCostBreakdown
+                         breakdown={currentBreakdown}
+                         previous={previousBreakdown}
+                         currency={currency}
+                         trail={varianceTrail}
+                       />
+                     )}
+                     <BookingChecklist
+                       dayNum={currentDay.day}
+                       date={currentDay.date}
+                       reservations={currentDay.reservations || []}
+                       booked={bookedReservations}
+                       onToggle={toggleBookedReservation}
+                     />
 
                     <AnimatePresence initial={false}>
                       {historyOpen && regenHistory.some((h) => h.day === currentDay.day) && (

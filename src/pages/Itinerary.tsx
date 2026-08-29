@@ -107,6 +107,7 @@ const TripWorkspace = () => {
   const [previewDay, setPreviewDay] = useState<DayData | null>(null);
   const [undoSnapshots, setUndoSnapshots] = useState<Record<number, DayData>>({});
   const [regenHistory, setRegenHistory] = useState<RegenEntry[]>([]);
+  const [bookedReservations, setBookedReservations] = useState<Record<string, boolean>>({});
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const [newTitles, setNewTitles] = useState<string[]>([]);
@@ -128,6 +129,8 @@ const TripWorkspace = () => {
       theme: d.theme,
       weather: d.weather,
       dailyBudget: d.dailyBudget,
+      costBreakdown: d.costBreakdown ?? null,
+      reservations: Array.isArray(d.reservations) ? d.reservations : [],
       activities: (d.activities || d.items || []).map((a: any, j: number) => ({
         id: a.id || `${i}-${j}-${a.title || a.name || "act"}`,
         time: a.time,
@@ -146,8 +149,14 @@ const TripWorkspace = () => {
   useEffect(() => { setDays(initialDays); }, [initialDays]);
 
   useEffect(() => {
-    const hist = (trip?.itinerary_data as any)?.regenHistory;
+    const itineraryData = (trip?.itinerary_data as any) || {};
+    const hist = itineraryData.regenHistory;
     if (Array.isArray(hist)) setRegenHistory(hist as RegenEntry[]);
+    setBookedReservations(
+      itineraryData.bookedReservations && typeof itineraryData.bookedReservations === "object"
+        ? itineraryData.bookedReservations
+        : {},
+    );
   }, [trip?.id]);
 
 
@@ -183,12 +192,26 @@ const TripWorkspace = () => {
 
   const visibleStops = (currentDay?.activities || []).filter((a) => typeMatchesFilter(a.type));
 
-  const persistDays = async (next: DayData[], history?: RegenEntry[]) => {
+  const persistDays = async (
+    next: DayData[],
+    history: RegenEntry[] = regenHistory,
+    booked: Record<string, boolean> = bookedReservations,
+  ) => {
     setDays(next);
     if (!trip) return;
-    const data: any = { ...(trip.itinerary_data as any || {}), days: next };
-    if (history) data.regenHistory = history;
+    const data: any = {
+      ...(trip.itinerary_data as any || {}),
+      days: next,
+      regenHistory: history,
+      bookedReservations: booked,
+    };
     await updateTrip(trip.id, { itinerary_data: data });
+  };
+
+  const toggleBookedReservation = (key: string, value: boolean) => {
+    const nextBooked = { ...bookedReservations, [key]: value };
+    setBookedReservations(nextBooked);
+    void persistDays(days, regenHistory, nextBooked);
   };
 
 
@@ -271,6 +294,8 @@ const TripWorkspace = () => {
         theme: fresh.theme || target.theme,
         weather: target.weather,
         dailyBudget: typeof fresh.dailyBudget === "number" ? fresh.dailyBudget : target.dailyBudget,
+        costBreakdown: fresh.costBreakdown ?? null,
+        reservations: Array.isArray(fresh.reservations) ? fresh.reservations : [],
         activities: (fresh.activities || []).map((a: any, j: number) => ({
           id: `${dayNum}-r${Date.now()}-${j}`,
           time: a.time,
@@ -299,6 +324,11 @@ const TripWorkspace = () => {
     const prev = days.find((d) => d.day === dayNum);
     if (prev) setUndoSnapshots((s) => ({ ...s, [dayNum]: prev }));
 
+    const prevBreakdown = prev
+      ? deriveBreakdown(prev.activities, prev.costBreakdown)
+      : deriveBreakdown([], null);
+    const breakdown = deriveBreakdown(previewDay.activities, previewDay.costBreakdown);
+
     const entry: RegenEntry = {
       id: `${dayNum}-${Date.now()}`,
       day: dayNum,
@@ -309,7 +339,10 @@ const TripWorkspace = () => {
       note: regenPrefs.note.trim(),
       prevStops: (prev?.activities || []).map((a) => a.title || "").filter(Boolean),
       newStops: previewDay.activities.map((a) => a.title || "").filter(Boolean),
-      cost: previewDay.activities.reduce((s, a) => s + (a.cost || 0), 0),
+      cost: breakdown.total,
+      prevCost: prevBreakdown.total,
+      breakdown,
+      prevBreakdown,
     };
     const nextHistory = [entry, ...regenHistory].slice(0, 30);
     setRegenHistory(nextHistory);

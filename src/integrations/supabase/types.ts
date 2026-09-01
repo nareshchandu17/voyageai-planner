@@ -62,6 +62,57 @@ export type Database = {
         }
         Relationships: []
       }
+      place_image_cache: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          credit: string | null
+          credit_link: string | null
+          fetched_at: string
+          image_url: string
+          last_used_at: string
+          query_key: string
+          relevance_score: number
+          search_query: string
+          small_url: string | null
+          source: string
+          thumb_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          credit?: string | null
+          credit_link?: string | null
+          fetched_at?: string
+          image_url: string
+          last_used_at?: string
+          query_key: string
+          relevance_score?: number
+          search_query: string
+          small_url?: string | null
+          source: string
+          thumb_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          credit?: string | null
+          credit_link?: string | null
+          fetched_at?: string
+          image_url?: string
+          last_used_at?: string
+          query_key?: string
+          relevance_score?: number
+          search_query?: string
+          small_url?: string | null
+          source?: string
+          thumb_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       traveler_profiles: {
         Row: {
           average_rating: number | null

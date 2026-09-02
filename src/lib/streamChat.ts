@@ -3,6 +3,7 @@ const WEATHER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather`;
 const GOOGLE_MAPS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps`;
 const TICKETMASTER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ticketmaster`;
 const UNSPLASH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unsplash`;
+const PLACE_IMAGES_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/place-images`;
 
 export interface LocationPoint {
   lat: number;
@@ -362,6 +363,40 @@ export async function fetchUnsplashPhotos(query: string, count = 5): Promise<any
     return data.photos || null;
   } catch {
     return null;
+  }
+}
+
+export type PlaceImage = {
+  id: string;
+  url: string;
+  small: string;
+  thumb: string;
+  alt: string;
+  credit?: string;
+  creditLink?: string;
+  source?: string;
+  relevanceScore?: number;
+};
+
+export async function fetchPlaceImages(
+  queries: string[],
+  destination?: string,
+): Promise<Record<string, PlaceImage | null>> {
+  const uniqueQueries = [...new Set(queries.map((query) => query.trim()).filter(Boolean))].slice(0, 30);
+  if (!uniqueQueries.length) return {};
+
+  try {
+    const { data, error } = await supabase.functions.invoke("place-images", {
+      body: { queries: uniqueQueries, destination },
+    });
+    if (error) {
+      console.warn("Place image resolver failed:", error.message);
+      return {};
+    }
+    return (data?.results || {}) as Record<string, PlaceImage | null>;
+  } catch (error) {
+    console.warn("Place image resolver failed:", error);
+    return {};
   }
 }
 

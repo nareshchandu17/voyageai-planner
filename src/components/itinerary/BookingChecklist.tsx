@@ -11,6 +11,8 @@ export interface Reservation {
   leadTime?: string;
   urgency?: string;
   how?: string;
+  bookingUrl?: string;
+  bookingProvider?: string;
 }
 
 /** Parse "Book 3 days ahead" / "2 weeks in advance" / "same day" → days of lead time. */
@@ -57,6 +59,7 @@ const BookingChecklist = ({ dayNum, date, reservations, booked, onToggle }: Prop
         return {
           key: `d${dayNum}-${i}-${(r.what || "").slice(0, 40)}`,
           ...r,
+          bookingUrl: typeof r.bookingUrl === "string" && /^https?:\/\//i.test(r.bookingUrl) ? r.bookingUrl : undefined,
           leadDays,
           bookBy,
           daysLeft,
@@ -157,6 +160,18 @@ const BookingChecklist = ({ dayNum, date, reservations, booked, onToggle }: Prop
                       <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                         <ExternalLink className="w-3 h-3" />{it.how}
                       </span>
+                    )}
+                    {it.bookingUrl && (
+                      <a
+                        href={it.bookingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+                        aria-label={`Open booking page for ${it.what}`}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        {it.bookingProvider || "Book now"}
+                      </a>
                     )}
                   </div>
                 </div>

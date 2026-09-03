@@ -68,15 +68,20 @@ Return ONLY valid JSON (no markdown fences) with this exact shape:
       "cost": number,
       "type": "attraction | restaurant | hotel | transport",
       "whyVisit": "one line",
-      "localSecret": "insider tip"
+         "localSecret": "insider tip"
     }
-  ]
+   ],
+   "reservations": [
+     { "what": "Restaurant / tour / ticket to book", "leadTime": "Book 3 days ahead", "urgency": "low|medium|high", "how": "Official website / phone / app", "bookingUrl": "https://official-booking-page.example", "bookingProvider": "Official site" }
+   ],
+   "costBreakdown": { "activities": number, "food": number, "transport": number, "extras": number, "total": number, "currency": "${currency}" }
 }
 Rules:
 - Exactly ${count} activities, chronological, geographically clustered to minimise travel.
 - Use REAL, verifiable places in ${destination}. Never invent venues.
 - Replace the previous suggestions with FRESH alternatives — do not repeat the current activities or any place used on other days.
 - Include at least one meal stop and one hidden gem.
+- For every reservation, include a valid direct HTTPS bookingUrl to the official venue, ticket seller, or trusted booking provider, plus bookingProvider. Never invent a URL; omit a reservation if no reliable direct booking page can be identified.
 ${budgetCap ? `- HARD CONSTRAINT: the sum of all "cost" values MUST stay at or below ${budgetCap} ${currency} for the day. Prefer free/low-cost options to stay under it.` : ""}
 ${crowdLevel && crowdLevel !== "any" ? `- Crowd preference: ${crowdLevel === "quiet" ? "quiet, low-tourist, off-the-beaten-path spots; avoid famous crowded landmarks" : crowdLevel === "lively" ? "lively, buzzing, popular places with energy and people" : "a balanced mix of iconic spots and calmer places"}.` : ""}
 ${focus && focus !== "any" ? `- Focus: ${focus === "outdoor" ? "mostly OUTDOOR activities (parks, walks, viewpoints, markets)" : focus === "indoor" ? "mostly INDOOR activities (museums, galleries, cafés, workshops) — good for bad weather" : "a mix of indoor and outdoor"}.` : ""}

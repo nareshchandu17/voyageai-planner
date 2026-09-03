@@ -53,6 +53,7 @@ export interface TripParams {
   styles: string[];
   groupSize: number;
   interests: string[];
+  travelVibe?: string;
 }
 
 export async function fetchWeather(destination: string, startDate: string, endDate: string) {

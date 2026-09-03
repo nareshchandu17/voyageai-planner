@@ -1,0 +1,2 @@
+- [ ] Add reservation booking links to generated checklist items
+- [ ] Add preferred travel vibe picker and planner prompt support

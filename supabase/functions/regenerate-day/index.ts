@@ -18,7 +18,8 @@ serve(async (req) => {
       currentActivities = [],
       otherDayTitles = [],
       interests = [],
-      styles = [],
+        styles = [],
+        travelVibe = "",
       groupSize = 1,
       dailyBudget,
       currency = "USD",
@@ -37,6 +38,8 @@ serve(async (req) => {
       focus?: string;
       note?: string;
     };
+
+    const safeTravelVibe = typeof travelVibe === "string" ? travelVibe.trim().slice(0, 120) : "";
 
     if (!destination) {
       return new Response(JSON.stringify({ error: "destination is required" }), {
@@ -85,11 +88,13 @@ Rules:
 ${budgetCap ? `- HARD CONSTRAINT: the sum of all "cost" values MUST stay at or below ${budgetCap} ${currency} for the day. Prefer free/low-cost options to stay under it.` : ""}
 ${crowdLevel && crowdLevel !== "any" ? `- Crowd preference: ${crowdLevel === "quiet" ? "quiet, low-tourist, off-the-beaten-path spots; avoid famous crowded landmarks" : crowdLevel === "lively" ? "lively, buzzing, popular places with energy and people" : "a balanced mix of iconic spots and calmer places"}.` : ""}
 ${focus && focus !== "any" ? `- Focus: ${focus === "outdoor" ? "mostly OUTDOOR activities (parks, walks, viewpoints, markets)" : focus === "indoor" ? "mostly INDOOR activities (museums, galleries, cafés, workshops) — good for bad weather" : "a mix of indoor and outdoor"}.` : ""}
+${safeTravelVibe ? `- Preferred travel vibe: ${safeTravelVibe}. Reflect this mood in the activity rhythm, neighborhood choices, restaurant atmosphere, and balance of iconic versus intimate experiences.` : ""}
 ${note ? `- Additional user preference to honour strictly: ${note}` : ""}`;
 
     const userPrompt = `Destination: ${destination}
 Day ${dayNumber} ${date ? `(${date})` : ""}${theme ? ` — current theme: ${theme}` : ""}
 Group size: ${groupSize}. Styles: ${styles.join(", ") || "general"}. Interests: ${interests.join(", ") || "general"}.
+Preferred travel vibe: ${safeTravelVibe || "general"}.
 Daily budget: ${budgetCap ? `${budgetCap} ${currency} (STRICT CAP)` : dailyBudget ? `${dailyBudget} ${currency}` : "flexible"}.
 Crowd level preference: ${crowdLevel}. Indoor/outdoor focus: ${focus}.
 

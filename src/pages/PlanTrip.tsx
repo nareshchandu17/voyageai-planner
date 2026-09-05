@@ -8,7 +8,7 @@ import {
   ArrowLeft, ArrowRight, CalendarIcon, MapPin, DollarSign,
   Users, Sparkles, Loader2, Mountain, Palette, UtensilsCrossed,
   TreePine, Crown, Wallet, Tag, Search, Phone, Mail, MapPinned,
-  CloudSun, AlertCircle, Ticket, RefreshCw
+  CloudSun, AlertCircle, Ticket, RefreshCw, Compass, Coffee, Waves, Heart, Landmark
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchWeather, fetchNearbyPlaces, fetchEvents, fetchUnsplashPhotos, fetchUnsplashBatch, fetchLocationCoordinatesBatch, fetchRouteEstimatesBatch, streamItinerary, parseItineraryJSON } from "@/lib/streamChat";
@@ -115,6 +115,14 @@ const planningModes = [
   },
 ];
 
+const travelVibes = [
+  { id: "slow_restore", label: "Slow & restorative", icon: Waves, description: "Long lunches, gentle mornings, and room to breathe" },
+  { id: "culture_curious", label: "Culture & curious", icon: Landmark, description: "Museums, stories, architecture, and local context" },
+  { id: "food_social", label: "Food & social", icon: Coffee, description: "Markets, memorable tables, and lively evenings" },
+  { id: "adventure_outdoors", label: "Adventure & outdoors", icon: Compass, description: "Fresh air, active days, and dramatic landscapes" },
+  { id: "luxury_elevated", label: "Luxury & elevated", icon: Heart, description: "Beautiful stays, polished service, and special moments" },
+];
+
 const modeImpacts: Record<string, { pacing: string; structure: string; density: string; restRatio: string; expect: string[] }> = {
   smart_balanced: {
     pacing: "Moderate — starts gently, builds to a peak mid-trip, then eases out",
@@ -194,6 +202,7 @@ const PlanTrip = () => {
   const [enrichmentFetched, setEnrichmentFetched] = useState(false);
   const [narrativeIntensities, setNarrativeIntensities] = useState<Record<number, number>>({});
   const [planningMode, setPlanningMode] = useState<string>("smart_balanced");
+  const [travelVibe, setTravelVibe] = useState<string>("");
 
 
   // Load existing trip if tripId is provided
@@ -217,6 +226,7 @@ const PlanTrip = () => {
         setStyles(trip.styles || []);
         setGroupSize(trip.group_size || 2);
         setInterests(trip.interests || []);
+        setTravelVibe(trip.itinerary_data?.travelVibe || "");
         setExistingTripId(trip.id);
         if (trip.itinerary_data) {
           setItineraryData(trip.itinerary_data);
@@ -287,7 +297,7 @@ const PlanTrip = () => {
     let fullText = "";
 
     await streamItinerary({
-      params: { destination, startDate, endDate, budget, styles, groupSize, interests },
+      params: { destination, startDate, endDate, budget, styles, groupSize, interests, travelVibe: travelVibe || undefined },
       weatherData,
       nearbyPlaces,
       upcomingEvents,
@@ -308,6 +318,7 @@ const PlanTrip = () => {
         setGenerationPhase("done");
         const parsed = parseItineraryJSON(fullText);
         if (parsed) {
+            parsed.travelVibe = travelVibe || null;
           // Extract image queries from itinerary
           const imageQueries: string[] = [];
           const locationQueries: string[] = [];
@@ -836,6 +847,41 @@ const PlanTrip = () => {
                               {dateRange.from && dateRange.to && (<p><span className="text-muted-foreground">Dates:</span> <span className="font-medium text-foreground">{format(dateRange.from, "MMM d")} — {format(dateRange.to, "MMM d")}</span></p>)}
                               <p><span className="text-muted-foreground">Budget:</span> <span className="font-medium text-foreground">${budget.toLocaleString()}/person · {groupSize} travelers</span></p>
                               <p><span className="text-muted-foreground">Style:</span> <span className="font-medium text-foreground">{styles.join(", ") || "Any"}</span></p>
+                              <p><span className="text-muted-foreground">Travel vibe:</span> <span className="font-medium text-foreground">{travelVibes.find((v) => v.id === travelVibe)?.label || "Let AI choose"}</span></p>
+                            </div>
+
+                            <div className="text-left">
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Heart className="w-4 h-4 text-primary" /> Choose your travel vibe</h3>
+                                  <p className="text-xs text-muted-foreground mt-1">This shapes the mood, rhythm, neighborhoods, and places in your plan.</p>
+                                </div>
+                                {travelVibe && <button type="button" onClick={() => setTravelVibe("")} className="text-xs text-muted-foreground underline hover:text-foreground">Clear</button>}
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {travelVibes.map((vibe) => {
+                                  const active = travelVibe === vibe.id;
+                                  return (
+                                    <button
+                                      key={vibe.id}
+                                      type="button"
+                                      onClick={() => setTravelVibe(vibe.id)}
+                                      className={cn(
+                                        "flex items-start gap-3 rounded-2xl border p-3 text-left transition-all",
+                                        active
+                                          ? "border-primary bg-primary/10 ring-2 ring-primary/20"
+                                          : "border-border bg-secondary hover:border-primary/50 hover:-translate-y-0.5",
+                                      )}
+                                    >
+                                      <vibe.icon className={cn("mt-0.5 h-5 w-5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
+                                      <span className="min-w-0">
+                                        <span className="block text-sm font-semibold text-foreground">{vibe.label}</span>
+                                        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{vibe.description}</span>
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
 
                             {/* AI Planning Mode selector */}

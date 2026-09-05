@@ -272,6 +272,7 @@ const TripWorkspace = () => {
           otherDayTitles: days.filter((d) => d.day !== dayNum).flatMap((d) => d.activities.map((a) => a.title).filter(Boolean)),
           interests: trip.interests || [],
           styles: trip.styles || [],
+           travelVibe: (trip.itinerary_data as any)?.travelVibe || undefined,
           groupSize: trip.group_size || 1,
           dailyBudget: target.dailyBudget,
           currency: trip.currency || "USD",

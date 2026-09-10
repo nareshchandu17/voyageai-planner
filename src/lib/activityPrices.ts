@@ -16,23 +16,15 @@ const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, 
 const matchReservation = (activity: any, reservations: any[]) => {
   const title = normalize(`${activity.title || ""} ${activity.location || ""}`);
   if (!title) return null;
-  return reservations
+  const best = reservations
     .filter((reservation) => typeof reservation?.bookingUrl === "string" && /^https:\/\//i.test(reservation.bookingUrl))
     .map((reservation) => {
       const words = normalize(reservation.what || "").split(" ").filter((word: string) => word.length > 2);
       const overlap = words.filter((word: string) => title.includes(word)).length;
       return { reservation, score: words.length ? overlap / words.length : 0 };
     })
-    .sort((a, b) => b.score - a.score)[0]?.score >= 0.5
-    ? reservations
-      .filter((reservation) => typeof reservation?.bookingUrl === "string" && /^https:\/\//i.test(reservation.bookingUrl))
-      .map((reservation) => {
-        const words = normalize(reservation.what || "").split(" ").filter((word: string) => word.length > 2);
-        const overlap = words.filter((word: string) => title.includes(word)).length;
-        return { reservation, score: words.length ? overlap / words.length : 0 };
-      })
-      .sort((a, b) => b.score - a.score)[0]?.reservation || null
-    : null;
+    .sort((a, b) => b.score - a.score)[0];
+  return best && best.score >= 0.5 ? best.reservation : null;
 };
 
 export async function enrichDaysWithVerifiedPrices<T extends { activities?: any[]; reservations?: any[] }>(days: T[]) {

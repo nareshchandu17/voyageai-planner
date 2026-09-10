@@ -136,7 +136,6 @@ const fetchPrice = async (activity: ActivityRequest): Promise<PriceResult> => {
     const response = await fetch(url, {
       headers: { "User-Agent": "VoyageAI price verifier/1.0", Accept: "text/html,application/xhtml+xml" },
       redirect: "follow",
-      signal: AbortSignal.timeout(12_000),
     });
     const finalUrl = safeUrl(response.url);
     if (!response.ok || !finalUrl) return { key: activity.key, status: "unavailable", checkedAt };

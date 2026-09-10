@@ -295,6 +295,8 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
           "reviewCount": 12000,
           "openingHours": "09:00-18:00 (closed Tue)",
           "ticketPrice": "$15 adult / $8 child / free under 6",
+           "bookingUrl": "https://official-direct-booking-page.example or null if no reliable direct page exists",
+           "bookingProvider": "Official site or trusted ticket seller, or null",
           "bestTimeToVisit": "Early morning to avoid crowds",
           "crowdLevel": "low|moderate|high",
           "hiddenGem": false,
@@ -381,7 +383,7 @@ Create a comprehensive two-phase travel plan:
 1. BEFORE TRIP: Include destination overview, weather forecast, budget estimation, packing checklist, visa/documents info, and itinerary preview${tripDays > 0 ? ` (exactly ${tripDays} days)` : ""}.
 2. DURING TRIP: Include local transport guide, restaurant recommendations (6-8 restaurants), unique experiences (5-6), safety information, hotel tips, and navigation guide with key routes.
 3. DAYS: Generate exactly ${tripDays || "the correct number of"} day objects in the "days" array. Each day must have activities, meals, dailyBudget, theme, and companionInsights.
-    4. DAY INTELLIGENCE (MANDATORY on EVERY day object — never omit or leave empty): signatureMoment, dayScorecard (all 5 traits 0-100), rainPlanB (at least 1 indoor swap per outdoor stop), reservations (what to book with lead time + urgency + a valid direct HTTPS bookingUrl for the official venue, ticket seller, or trusted booking provider, plus bookingProvider), costBreakdown (activities/food/transport/extras summing to total, matching dailyBudget), and packToday (3-5 day-specific items). Never invent a booking URL: if an official direct URL cannot be confidently verified, use the venue's official homepage or omit that reservation rather than fabricate a link.
+    4. DAY INTELLIGENCE (MANDATORY on EVERY day object — never omit or leave empty): signatureMoment, dayScorecard (all 5 traits 0-100), rainPlanB (at least 1 indoor swap per outdoor stop), reservations (what to book with lead time + urgency + a valid direct HTTPS bookingUrl for the official venue, ticket seller, or trusted booking provider, plus bookingProvider), costBreakdown (activities/food/transport/extras summing to total, matching dailyBudget), and packToday (3-5 day-specific items). Every bookable activity must also include its own bookingUrl and bookingProvider when a reliable direct page is known. Never invent a booking URL: if an official direct URL cannot be confidently verified, use null and do not present an estimate as a verified price. The app will verify prices from these URLs, so activity cost is only a fallback estimate and must not be treated as actual spend.
 
 All recommendations must be REAL, verified places and establishments. If local events are listed above, incorporate relevant ones.`;
 

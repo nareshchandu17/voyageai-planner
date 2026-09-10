@@ -9,6 +9,8 @@ export interface CostBreakdown {
   total: number;
 }
 
+export type ActivityPriceStatus = "verified" | "unavailable" | "no_link";
+
 const SEGMENTS: { key: keyof Omit<CostBreakdown, "total">; label: string; className: string; dot: string }[] = [
   { key: "activities", label: "Activities", className: "bg-primary", dot: "bg-primary" },
   { key: "food", label: "Food", className: "bg-amber-400", dot: "bg-amber-400" },
@@ -18,21 +20,10 @@ const SEGMENTS: { key: keyof Omit<CostBreakdown, "total">; label: string; classN
 
 export const emptyBreakdown = (): CostBreakdown => ({ activities: 0, food: 0, transport: 0, extras: 0, total: 0 });
 
-/** Derive a cost breakdown from raw activities when the AI did not supply one. */
+/** Build spend only from activity prices verified from booking pages. */
 export function deriveBreakdown(
-  activities: { cost?: number; type?: string }[],
-  provided?: Partial<CostBreakdown> | null,
+  activities: { cost?: number; type?: string; priceStatus?: ActivityPriceStatus }[],
 ): CostBreakdown {
-  if (provided && typeof provided.total === "number" && provided.total > 0) {
-    const b = {
-      activities: Number(provided.activities) || 0,
-      food: Number(provided.food) || 0,
-      transport: Number(provided.transport) || 0,
-      extras: Number(provided.extras) || 0,
-      total: Number(provided.total) || 0,
-    };
-    return b;
-  }
   const b = emptyBreakdown();
   for (const a of activities) {
     const cost = Number(a.cost) || 0;
@@ -46,15 +37,28 @@ export function deriveBreakdown(
   return b;
 }
 
+export function getPriceCoverage(activities: { priceStatus?: ActivityPriceStatus }[]) {
+  return activities.reduce(
+    (coverage, activity) => {
+      if (activity.priceStatus === "verified") coverage.verified += 1;
+      else if (activity.priceStatus === "unavailable") coverage.unavailable += 1;
+      else coverage.noLink += 1;
+      return coverage;
+    },
+    { verified: 0, unavailable: 0, noLink: 0 },
+  );
+}
+
 interface Props {
   breakdown: CostBreakdown;
   previous?: CostBreakdown | null;
   currency: string;
+  coverage?: { verified: number; unavailable: number; noLink: number };
   /** Totals of earlier regenerations, oldest → newest, for the variance trail. */
   trail?: { label: string; total: number }[];
 }
 
-const DayCostBreakdown = ({ breakdown, previous, currency, trail = [] }: Props) => {
+const DayCostBreakdown = ({ breakdown, previous, currency, coverage, trail = [] }: Props) => {
   const total = breakdown.total || 1;
   const delta = previous ? breakdown.total - previous.total : 0;
   const DeltaIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
@@ -77,6 +81,14 @@ const DayCostBreakdown = ({ breakdown, previous, currency, trail = [] }: Props) 
           )}
         </div>
       </div>
+
+      {coverage && (coverage.unavailable > 0 || coverage.noLink > 0) && (
+        <p className="text-[10px] text-muted-foreground mb-2">
+          {coverage.verified > 0 ? `${coverage.verified} verified price${coverage.verified === 1 ? "" : "s"}` : "No verified prices yet"}
+          {coverage.unavailable > 0 ? ` · ${coverage.unavailable} booking page${coverage.unavailable === 1 ? "" : "s"} did not publish a price` : ""}
+          {coverage.noLink > 0 ? ` · ${coverage.noLink} stop${coverage.noLink === 1 ? " has" : "s have"} no booking link` : ""}
+        </p>
+      )}
 
       <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-[#F1F1F3]">
         {SEGMENTS.map((s) => {

@@ -6,6 +6,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export interface DayIntelligence {
+  activities?: { cost?: number; type?: string; priceStatus?: "verified" | "unavailable" | "no_link" }[];
   signatureMoment?: { title?: string; time?: string; why?: string; where?: string };
   dayScorecard?: { culture?: number; food?: number; nature?: number; adventure?: number; relaxation?: number };
   rainPlanB?: { original?: string; alternative?: string; why?: string }[];
@@ -43,11 +44,21 @@ const Section = ({ icon: Icon, title, children, className }: {
 );
 
 export const DayIntelligencePanel = ({ day, currency = "USD" }: { day: DayIntelligence; currency?: string }) => {
-  const { signatureMoment, dayScorecard, rainPlanB, reservations, costBreakdown, packToday } = day || {};
+  const { signatureMoment, dayScorecard, rainPlanB, reservations, packToday } = day || {};
   const hasScores = dayScorecard && Object.values(dayScorecard).some(v => typeof v === "number");
-  const costEntries = costBreakdown
-    ? (Object.entries(costBreakdown).filter(([, v]) => typeof v === "number" && v > 0) as [string, number][])
-    : [];
+  const costEntries = (day.activities || []).reduce<[string, number][]>((entries, activity) => {
+    if (activity.priceStatus !== "verified" || typeof activity.cost !== "number" || activity.cost <= 0) return entries;
+    const type = (activity.type || "activities").toLowerCase();
+    const key = type.includes("food") || type.includes("restaurant") || type.includes("meal") || type.includes("cafe")
+      ? "food"
+      : type.includes("transport") || type.includes("transit") || type.includes("train") || type.includes("metro")
+        ? "transport"
+        : type.includes("shopping") || type.includes("nightlife") ? "extras" : "activities";
+    const existing = entries.findIndex(([label]) => label === key);
+    if (existing >= 0) entries[existing][1] += activity.cost;
+    else entries.push([key, activity.cost]);
+    return entries;
+  }, []);
   const costTotal = costEntries.reduce((s, [, v]) => s + v, 0);
 
   if (!signatureMoment?.title && !hasScores && !rainPlanB?.length && !reservations?.length && !costEntries.length && !packToday?.length) {
@@ -115,7 +126,7 @@ export const DayIntelligencePanel = ({ day, currency = "USD" }: { day: DayIntell
         )}
 
         {costEntries.length > 0 && (
-          <Section icon={PieChart} title={`Cost split · ${currency}`}>
+          <Section icon={PieChart} title={`Verified spend · ${currency}`}>
             <div className="flex h-2 w-full rounded-full overflow-hidden bg-secondary mb-2.5">
               {costEntries.map(([k, v], i) => (
                 <div
@@ -135,7 +146,7 @@ export const DayIntelligencePanel = ({ day, currency = "USD" }: { day: DayIntell
               ))}
             </div>
             <div className="mt-2 pt-2 border-t border-border/60 flex justify-between text-[11px] font-semibold">
-              <span className="text-muted-foreground">Day total</span>
+              <span className="text-muted-foreground">Verified total</span>
               <span className="text-foreground">${costTotal}</span>
             </div>
           </Section>

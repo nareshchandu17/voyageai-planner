@@ -27,8 +27,9 @@ import {
 } from "@/lib/itineraryExports";
 import { exportBeforeTripPDF } from "@/lib/exportPDF";
 import DayRouteMap from "@/components/itinerary/DayRouteMap";
-import DayCostBreakdown, { deriveBreakdown, type CostBreakdown } from "@/components/itinerary/DayCostBreakdown";
+import DayCostBreakdown, { deriveBreakdown, getPriceCoverage, type CostBreakdown, type ActivityPriceStatus } from "@/components/itinerary/DayCostBreakdown";
 import BookingChecklist, { type Reservation } from "@/components/itinerary/BookingChecklist";
+import { enrichDaysWithVerifiedPrices } from "@/lib/activityPrices";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,6 +44,12 @@ interface Activity {
   duration?: string;
   cost?: number;
   type?: string;
+  bookingUrl?: string;
+  bookingProvider?: string;
+  priceStatus?: ActivityPriceStatus;
+  verifiedCost?: number;
+  priceSource?: string;
+  priceCheckedAt?: string;
 }
 
 interface DayData {
@@ -141,12 +148,30 @@ const TripWorkspace = () => {
         duration: a.duration,
         cost: typeof a.cost === "number" ? a.cost : typeof a.price === "number" ? a.price : 0,
         type: (a.type || a.category || "attraction").toLowerCase(),
+        bookingUrl: a.bookingUrl,
+        bookingProvider: a.bookingProvider,
+        priceStatus: a.priceStatus,
+        verifiedCost: a.verifiedCost,
+        priceSource: a.priceSource,
+        priceCheckedAt: a.priceCheckedAt,
       })),
     }));
   }, [trip]);
 
   const [days, setDays] = useState<DayData[]>([]);
-  useEffect(() => { setDays(initialDays); }, [initialDays]);
+  useEffect(() => {
+    let cancelled = false;
+    setDays(initialDays);
+    void (async () => {
+      const enriched = await enrichDaysWithVerifiedPrices(initialDays);
+      if (cancelled) return;
+      setDays(enriched);
+      if (trip && JSON.stringify(enriched) !== JSON.stringify(initialDays)) {
+        await updateTrip(trip.id, { itinerary_data: { ...(trip.itinerary_data as any || {}), days: enriched } });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [initialDays, trip?.id]);
 
   useEffect(() => {
     const itineraryData = (trip?.itinerary_data as any) || {};
@@ -307,6 +332,12 @@ const TripWorkspace = () => {
           duration: a.duration,
           cost: typeof a.cost === "number" ? a.cost : 0,
           type: (a.type || "attraction").toLowerCase(),
+          bookingUrl: a.bookingUrl,
+          bookingProvider: a.bookingProvider,
+          priceStatus: a.priceStatus,
+          verifiedCost: a.verifiedCost,
+          priceSource: a.priceSource,
+          priceCheckedAt: a.priceCheckedAt,
         })),
       };
 
@@ -326,9 +357,9 @@ const TripWorkspace = () => {
     if (prev) setUndoSnapshots((s) => ({ ...s, [dayNum]: prev }));
 
     const prevBreakdown = prev
-      ? deriveBreakdown(prev.activities, prev.costBreakdown)
-      : deriveBreakdown([], null);
-    const breakdown = deriveBreakdown(previewDay.activities, previewDay.costBreakdown);
+      ? deriveBreakdown(prev.activities)
+      : deriveBreakdown([]);
+    const breakdown = deriveBreakdown(previewDay.activities);
 
     const entry: RegenEntry = {
       id: `${dayNum}-${Date.now()}`,
@@ -427,7 +458,8 @@ const TripWorkspace = () => {
   const emergency = beforeTrip?.emergencyNumbers || { police: "110", ambulance: "119", tourist: "050-3816-2787" };
   const visaStatus = beforeTrip?.visa?.status || "eVisa required · 5–7 days";
   const dayHistory = currentDay ? regenHistory.filter((h) => h.day === currentDay.day) : [];
-  const currentBreakdown = currentDay ? deriveBreakdown(currentDay.activities, currentDay.costBreakdown) : null;
+  const currentBreakdown = currentDay ? deriveBreakdown(currentDay.activities) : null;
+  const currentCoverage = currentDay ? getPriceCoverage(currentDay.activities) : undefined;
   const previousBreakdown = dayHistory[0]?.prevBreakdown || null;
   const varianceTrail = dayHistory
     .slice(1)
@@ -623,6 +655,7 @@ const TripWorkspace = () => {
                          breakdown={currentBreakdown}
                          previous={previousBreakdown}
                          currency={currency}
+                          coverage={currentCoverage}
                          trail={varianceTrail}
                        />
                      )}

@@ -1,2 +1,3 @@
 - [x] Add reservation booking links to generated checklist items
 - [x] Add preferred travel vibe picker and planner prompt support
+- [x] Complete verified activity pricing across initial generation, regeneration, cards, and day totals; deploy and verify

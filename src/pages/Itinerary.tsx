@@ -341,8 +341,10 @@ const TripWorkspace = () => {
         })),
       };
 
-      setPreviewDay(newDay);
-      toast.success(`Draft ready for Day ${dayNum}`, { id: toastId, description: `${newDay.activities.length} fresh stops — review and confirm.` });
+      const pricedDay = (await enrichDaysWithVerifiedPrices([newDay]))[0] || newDay;
+
+      setPreviewDay(pricedDay);
+      toast.success(`Draft ready for Day ${dayNum}`, { id: toastId, description: `${pricedDay.activities.length} fresh stops — review and confirm.` });
     } catch (e) {
       toast.error("Regeneration failed", { id: toastId, description: e instanceof Error ? e.message : "Please try again." });
     } finally {

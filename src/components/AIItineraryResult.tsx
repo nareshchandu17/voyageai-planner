@@ -63,6 +63,11 @@ interface Activity {
   reviewCount?: number;
   openingHours?: string;
   ticketPrice?: string;
+  bookingUrl?: string;
+  bookingProvider?: string;
+  priceStatus?: "verified" | "unavailable" | "no_link";
+  verifiedCost?: number;
+  verifiedCurrency?: string;
   bestTimeToVisit?: string;
   crowdLevel?: "low" | "moderate" | "high" | string;
   hiddenGem?: boolean;
@@ -1365,14 +1370,14 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
               <Clock className="w-2.5 h-2.5" /> {activity.openingHours}
             </span>
           )}
-          {activity.ticketPrice && (
+          {activity.priceStatus === "verified" && typeof activity.verifiedCost === "number" && (
             <span className="text-[10px] text-accent flex items-center gap-0.5 bg-accent/10 px-1.5 py-0.5 rounded-md font-medium">
-              <Ticket className="w-2.5 h-2.5" /> {activity.ticketPrice}
+              <DollarSign className="w-2.5 h-2.5" /> {activity.verifiedCurrency || data.currency || ""} {activity.verifiedCost} · verified
             </span>
           )}
-          {!activity.ticketPrice && activity.cost > 0 && (
-            <span className="text-[10px] text-accent flex items-center gap-0.5 bg-accent/10 px-1.5 py-0.5 rounded-md font-medium">
-              <DollarSign className="w-2.5 h-2.5" /> ${activity.cost}
+          {activity.bookingUrl && activity.priceStatus !== "verified" && (
+            <span className="text-[10px] text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded-md">
+              {activity.priceStatus === "unavailable" ? "Price unavailable" : "Price not verified"}
             </span>
           )}
           {activity.crowdLevel && (

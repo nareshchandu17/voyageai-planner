@@ -22,11 +22,12 @@ export const emptyBreakdown = (): CostBreakdown => ({ activities: 0, food: 0, tr
 
 /** Build spend only from activity prices verified from booking pages. */
 export function deriveBreakdown(
-  activities: { cost?: number; type?: string; priceStatus?: ActivityPriceStatus }[],
+  activities: { cost?: number; verifiedCost?: number; type?: string; priceStatus?: ActivityPriceStatus }[],
 ): CostBreakdown {
   const b = emptyBreakdown();
   for (const a of activities) {
-    const cost = Number(a.cost) || 0;
+    if (a.priceStatus !== "verified") continue;
+    const cost = Number(a.verifiedCost ?? a.cost) || 0;
     const t = (a.type || "").toLowerCase();
     if (t.includes("food") || t.includes("restaurant") || t.includes("meal") || t.includes("cafe")) b.food += cost;
     else if (t.includes("transport") || t.includes("transit") || t.includes("train") || t.includes("metro")) b.transport += cost;
@@ -72,7 +73,9 @@ const DayCostBreakdown = ({ breakdown, previous, currency, coverage, trail = [] 
           <PieChart className="w-3.5 h-3.5" /> Cost breakdown
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-foreground">{currency} {Math.round(breakdown.total)}</span>
+          <span className="text-xs font-semibold text-foreground">
+            {coverage?.verified ? `${currency} ${Math.round(breakdown.total)} verified` : "No verified prices"}
+          </span>
           {previous && (
             <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${deltaClass}`}>
               <DeltaIcon className="w-3 h-3" />

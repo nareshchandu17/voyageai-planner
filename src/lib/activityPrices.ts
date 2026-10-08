@@ -48,11 +48,14 @@ export async function enrichDaysWithVerifiedPrices<T extends { activities?: any[
     });
   });
 
-  let results: PriceResult[] = [];
-  if (requests.length) {
+  const results: PriceResult[] = [];
+  for (let index = 0; index < requests.length; index += 60) {
     try {
-      const { data, error } = await supabase.functions.invoke("activity-prices", { body: { activities: requests } });
-      if (!error && Array.isArray(data?.results)) results = data.results as PriceResult[];
+      const { data, error } = await supabase.functions.invoke("activity-prices", {
+        body: { activities: requests.slice(index, index + 60) },
+      });
+      if (!error && Array.isArray(data?.results)) results.push(...data.results as PriceResult[]);
+      else if (error) console.warn("Activity price verification failed:", error.message);
     } catch (error) {
       console.warn("Activity price verification failed:", error);
     }

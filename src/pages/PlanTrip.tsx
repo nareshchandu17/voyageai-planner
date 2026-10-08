@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTrips } from "@/hooks/useTrips";
 import { useTravelerProfile } from "@/hooks/useTravelerProfile";
 import { supabase } from "@/integrations/supabase/client";
+import { enrichDaysWithVerifiedPrices } from "@/lib/activityPrices";
 import planTripHero from "@/assets/plan-trip-hero.jpg";
 import planTripBanner from "@/assets/plan-trip-banner.jpg";
 import { motion, AnimatePresence } from "framer-motion";
@@ -319,6 +320,9 @@ const PlanTrip = () => {
         const parsed = parseItineraryJSON(fullText);
         if (parsed) {
             parsed.travelVibe = travelVibe || null;
+          if (Array.isArray(parsed.days)) {
+            parsed.days = await enrichDaysWithVerifiedPrices(parsed.days);
+          }
           // Extract image queries from itinerary
           const imageQueries: string[] = [];
           const locationQueries: string[] = [];

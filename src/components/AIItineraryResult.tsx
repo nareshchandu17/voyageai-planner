@@ -1372,7 +1372,7 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
           )}
           {activity.priceStatus === "verified" && typeof activity.verifiedCost === "number" && (
             <span className="text-[10px] text-accent flex items-center gap-0.5 bg-accent/10 px-1.5 py-0.5 rounded-md font-medium">
-              <DollarSign className="w-2.5 h-2.5" /> {activity.verifiedCurrency || data.currency || ""} {activity.verifiedCost} · verified
+              <DollarSign className="w-2.5 h-2.5" /> {activity.verifiedCurrency || ""} {activity.verifiedCost} · verified
             </span>
           )}
           {activity.bookingUrl && activity.priceStatus !== "verified" && (

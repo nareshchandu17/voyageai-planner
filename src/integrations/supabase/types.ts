@@ -62,6 +62,66 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_inbox: {
+        Row: {
+          body: string
+          created_at: string
+          dedupe_key: string
+          href: string | null
+          id: string
+          kind: string
+          read_at: string | null
+          title: string
+          trip_id: string | null
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          dedupe_key: string
+          href?: string | null
+          id?: string
+          kind: string
+          read_at?: string | null
+          title: string
+          trip_id?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dedupe_key?: string
+          href?: string | null
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title?: string
+          trip_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          booking_reminders_enabled: boolean
+          last_booking_reminder_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_reminders_enabled?: boolean
+          last_booking_reminder_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_reminders_enabled?: boolean
+          last_booking_reminder_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       place_image_cache: {
         Row: {
           alt_text: string | null

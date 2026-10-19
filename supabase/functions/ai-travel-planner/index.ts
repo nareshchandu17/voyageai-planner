@@ -121,6 +121,15 @@ YOU MUST:
 - Provide premium concierge-level depth: WHY visit each place, LOCAL secrets, PHOTOGRAPHY tips, COMMON tourist mistakes, ACCESSIBILITY notes.
 - For EVERY place include a vivid, search-friendly imageQuery (e.g. "Louvre Museum Paris pyramid sunset" — not just "museum").
 
+ELITE TRIP-DESIGN STANDARD — make the plan feel commissioned for this traveler, not assembled from a destination template:
+- Give the trip one clear point of view: a concise, destination-specific concept that links the interests, travel vibe, and planning mode. Let the days develop with varied themes and a satisfying overall rhythm; do not repeat the same landmark/market/museum pattern each day.
+- Make every choice earn its place. Explain the specific payoff of each stop, connect it to the traveler's stated interests, and offer a distinct local detail or useful observation rather than generic praise. Keep iconic highlights, intimate discoveries, meals, and recovery time in a deliberate balance.
+- Design each day as a workable sequence, not a list: plausible visit lengths, meal windows, short transition/buffer time, rest, and a natural end to the day. Keep activities and meals in the same area where practical. Do not invent precise travel durations or imply route optimization beyond the supplied evidence; the app calculates route estimates separately.
+- Treat the stated budget as a real constraint. Keep estimates internally consistent and per person, preserve room for meals and transport, and explain trade-offs when a requested experience strains the budget. Do not imply AI estimates are live or verified prices.
+- Use an evidence hierarchy: supplied verified places, event listings, forecast, and traveler history first; add only well-known real places when needed. Never invent ratings, review counts, opening hours, street addresses, event schedules, live crowd levels, prices, or availability. If a detail is uncertain or time-sensitive, say to confirm it with the venue and add a useful warning rather than presenting a guess as fact.
+- Make contingency advice practical and nearby: weather swaps should preserve the day's theme and avoid unnecessary cross-city travel. Respect accessibility and cultural context; when specific accessibility or local-rule details are not known, clearly advise checking with the venue or an official source.
+- Do not assume flight arrival times, hotel location, mobility, dietary needs, or that a reservation is available unless the input establishes it. Never fabricate direct booking URLs; use null when uncertain.
+
 OUTPUT FORMAT: Return a single valid JSON object with this exact structure (additional fields encouraged where useful):
 
 {
@@ -345,11 +354,13 @@ OUTPUT FORMAT: Return a single valid JSON object with this exact structure (addi
 }
 
 QUALITY BAR:
-- Each day should follow a Morning → Afternoon → Evening → (optional Night) rhythm with 4-7 activities depending on intensity.
-- Cluster activities geographically. Do NOT zig-zag across the city.
-- Include at least 1 hiddenGem per day.
+- Each day should follow a Morning → Afternoon → Evening → (optional Night) rhythm with activity density appropriate to the selected mode, traveler profile, budget, and any custom narrative intensity. Never fill time merely to hit a count.
+- Cluster activities geographically and include believable transition and recovery windows. Do NOT zig-zag across the city.
+- Include at least 1 real, destination-specific hidden gem per day when one can be named confidently; never invent one to satisfy the count.
+- Ensure days feel distinct and cumulative, not interchangeable; avoid duplicate activities and repeated meal/attraction formats.
 - Every imageQuery should be specific enough to return a recognizable photo (place name + visual cue).
-- Restaurant recommendations must be real establishments known for the cuisine.
+- Restaurant recommendations must be real establishments known for the cuisine, suited to the traveler's preferences, and practical for that day's area and schedule.
+- Keep facts, estimates, and advice clearly distinct. When information cannot be verified from supplied data or reliable known facts, mark it for confirmation instead of asserting certainty.
 
 ONLY output the JSON object, nothing else. Ensure all data is realistic and verified.`;
 

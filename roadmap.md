@@ -1,6 +1,7 @@
 - [x] Add reservation booking links to generated checklist items
 - [x] Add preferred travel vibe picker and planner prompt support
 - [x] Complete verified activity pricing across initial generation, regeneration, cards, and day totals; deploy and verify
+- [x] Upgrade itinerary generation quality with more distinctive trip design, realistic logistics, and factual restraint
 - [ ] Add persistent in-app notification inbox for booking deadlines, trip chat, and place votes
 - [ ] Add user-controlled daily booking reminder toggle; show reminders once per day on app open without browser/Firebase alerts
 - [ ] Validate inbox, live events, reminder deduplication, and preview build

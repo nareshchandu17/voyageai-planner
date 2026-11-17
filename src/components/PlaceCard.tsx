@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { Star, MapPin, Users } from "lucide-react";
-import { getPlacePhotoUrl } from "@/lib/streamChat";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PlaceCardProps {
   name: string;
@@ -20,6 +21,46 @@ const PlaceCard = ({
   types,
   compact = false,
 }: PlaceCardProps) => {
+  const [photoUrl, setPhotoUrl] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    setPhotoUrl("");
+    if (!photoReference) return () => { active = false; };
+
+    try {
+      const existing = new URL(photoReference);
+      if (existing.searchParams.has("signature") && existing.searchParams.has("expires")) {
+        const expires = Number(existing.searchParams.get("expires"));
+        if (expires > Math.floor(Date.now() / 1000)) {
+          setPhotoUrl(photoReference);
+          return () => { active = false; };
+        }
+        const originalReference = existing.searchParams.get("photo_reference");
+        if (originalReference) {
+          void supabase.functions.invoke("google-maps", {
+            body: { action: "sign_photo", photoReference: originalReference, maxWidth: 600 },
+          }).then(({ data }) => { if (active) setPhotoUrl(data?.url || ""); });
+          return () => { active = false; };
+        }
+      }
+      const legacyReference = existing.searchParams.get("photo_reference");
+      if (legacyReference) {
+        void supabase.functions.invoke("google-maps", {
+          body: { action: "sign_photo", photoReference: legacyReference, maxWidth: 600 },
+        }).then(({ data }) => { if (active) setPhotoUrl(data?.url || ""); });
+      } else if (existing.protocol === "https:") {
+        setPhotoUrl(photoReference);
+      }
+    } catch {
+      void supabase.functions.invoke("google-maps", {
+        body: { action: "sign_photo", photoReference, maxWidth: 600 },
+      }).then(({ data }) => { if (active) setPhotoUrl(data?.url || ""); });
+    }
+
+    return () => { active = false; };
+  }, [photoReference]);
+
   const formatType = (type: string) => {
     return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
@@ -27,9 +68,9 @@ const PlaceCard = ({
   if (compact) {
     return (
       <div className="flex items-center gap-3 bg-secondary/50 rounded-xl p-2 hover:bg-secondary/70 transition-colors">
-        {photoReference ? (
+        {photoUrl ? (
           <img
-            src={getPlacePhotoUrl(photoReference, 100)}
+            src={photoUrl}
             alt={name}
             className="w-14 h-14 rounded-lg object-cover shrink-0"
             loading="lazy"
@@ -64,9 +105,9 @@ const PlaceCard = ({
   return (
     <div className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:border-primary/30 transition-all shadow-sm hover:shadow-md">
       <div className="aspect-[4/3] relative overflow-hidden">
-        {photoReference ? (
+        {photoUrl ? (
           <img
-            src={getPlacePhotoUrl(photoReference, 600)}
+            src={photoUrl}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"

@@ -11,9 +11,9 @@ const LocationSchema = z.object({
   lat: z.number(),
   lng: z.number(),
 });
-
 const RequestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("search"), query: z.string().min(1) }),
+  z.object({ action: z.literal("sign_photo"), photoReference: z.string().min(1).max(4096), maxWidth: z.number().int().min(100).max(1600).optional() }),
   z.object({ action: z.literal("nearby"), location: LocationSchema, radius: z.number().optional(), query: z.string().optional() }),
   z.object({ action: z.literal("details"), placeId: z.string().min(1) }),
   z.object({ action: z.literal("geocode"), query: z.string().min(1) }),
@@ -47,25 +47,26 @@ serve(async (req) => {
     let result;
 
     switch (payload.action) {
+      case "sign_photo": {
+        result = { url: await signedPhotoUrl(payload.photoReference, payload.maxWidth || 600) };
+        break;
+      }
       case "search": {
         const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(payload.query)}&key=${API_KEY}`;
         const res = await fetch(url);
         result = await res.json();
-        await signPlacePhotos(result);
         break;
       }
       case "nearby": {
         const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${payload.location.lat},${payload.location.lng}&radius=${payload.radius || 5000}&keyword=${encodeURIComponent(payload.query || "")}&key=${API_KEY}`;
         const res = await fetch(url);
         result = await res.json();
-        await signPlacePhotos(result);
         break;
       }
       case "details": {
         const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${payload.placeId}&fields=name,formatted_address,geometry,rating,opening_hours,photos,reviews,price_level,website,formatted_phone_number&key=${API_KEY}`;
         const res = await fetch(url);
         result = await res.json();
-        await signPlacePhotos(result);
         break;
       }
       case "geocode": {
@@ -172,13 +173,3 @@ serve(async (req) => {
     });
   }
 });
-
-async function signPlacePhotos(data: any) {
-  for (const place of data?.results || []) {
-    for (const photo of place.photos || []) {
-      if (typeof photo.photo_reference === "string" && photo.photo_reference.length <= 4096) {
-        photo.photo_reference = await signedPhotoUrl(photo.photo_reference, 600);
-      }
-    }
-  }
-}

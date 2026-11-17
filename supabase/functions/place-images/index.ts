@@ -87,7 +87,7 @@ async function fromGooglePlaces(query: string): Promise<ImageCandidate[]> {
     const response = await fetch(url);
     if (!response.ok) return [];
     const data = await response.json();
-    return (data.results || []).flatMap((place: any) => {
+    return (await Promise.all((data.results || []).map(async (place: any) => {
       const photo = place.photos?.[0];
       if (!photo?.photo_reference) return [];
       const photoUrl = await signedPhotoUrl(photo.photo_reference, 1200, SUPABASE_URL);
@@ -95,15 +95,15 @@ async function fromGooglePlaces(query: string): Promise<ImageCandidate[]> {
       return [{
         id: `google_${place.place_id || place.name}`,
         url: photoUrl,
-        small: await signedPhotoUrl(photo.photo_reference, 640, SUPABASE_URL),
-        thumb: await signedPhotoUrl(photo.photo_reference, 320, SUPABASE_URL),
+        small: photoUrl,
+        thumb: photoUrl,
         alt: cleanText(place.name, query),
         credit: "Google Places",
         creditLink: place.place_id ? `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${encodeURIComponent(place.place_id)}` : undefined,
         source: "google_places" as const,
         relevanceScore: relevance(query, label, "google_places"),
       }];
-    });
+    }))).flat();
   } catch {
     return [];
   }

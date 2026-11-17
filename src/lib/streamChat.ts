@@ -79,11 +79,6 @@ export async function fetchWeather(destination: string, startDate: string, endDa
   return resp.json();
 }
 
-export function getPlacePhotoUrl(photoReference: string, maxWidth = 400): string {
-  if (/^https:\/\//i.test(photoReference)) return photoReference;
-  return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-photo?photo_reference=${photoReference}&maxwidth=${maxWidth}`;
-}
-
 export async function fetchNearbyPlaces(destination: string) {
   try {
     const resp = await fetch(GOOGLE_MAPS_URL, {
@@ -117,7 +112,7 @@ export async function fetchEvents(destination: string, startDate: string, endDat
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: await sessionAuthorization(),
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({ destination, startDate, endDate, size: 8 }),
     });
@@ -347,7 +342,7 @@ export async function fetchUnsplashBatch(queries: string[]): Promise<Record<stri
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: await sessionAuthorization(),
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({ queries }),
     });
@@ -365,7 +360,7 @@ export async function fetchUnsplashPhotos(query: string, count = 5): Promise<any
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: await sessionAuthorization(),
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({ query, count }),
     });

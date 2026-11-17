@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AIDestinationResult {
   title: string;
@@ -63,6 +64,9 @@ const AIPromptBar = ({ onSearch, onAIResults, isLoading, setIsLoading }: AIPromp
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Please sign in to use AI discovery.");
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/ai-discover`,
         {
@@ -70,7 +74,7 @@ const AIPromptBar = ({ onSearch, onAIResults, isLoading, setIsLoading }: AIPromp
           headers: {
             "Content-Type": "application/json",
             apikey: anonKey,
-            Authorization: `Bearer ${anonKey}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({ query: value }),
         }

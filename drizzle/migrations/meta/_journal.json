@@ -8,6 +8,13 @@
       "when": 1792348414112,
       "tag": "0000_add_live_notification_inbox",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794897093616,
+      "tag": "0001_restrict_place_image_cache_access",
+      "breakpoints": true
     }
   ]
 }

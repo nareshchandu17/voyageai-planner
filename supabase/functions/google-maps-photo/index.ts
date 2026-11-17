@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { hasValidPhotoSignature } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,15 +15,17 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     const photoReference = url.searchParams.get("photo_reference");
-    const maxWidth = url.searchParams.get("maxwidth") || "400";
+    const maxWidth = Number(url.searchParams.get("maxwidth") || "400");
+    const expires = Number(url.searchParams.get("expires"));
+    const signature = url.searchParams.get("signature") || "";
 
-    if (!photoReference) {
-      return new Response(JSON.stringify({ error: "photo_reference is required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!photoReference || !await hasValidPhotoSignature(photoReference, maxWidth, expires, signature)) {
+      return new Response(JSON.stringify({ error: "Photo URL is invalid or expired" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${API_KEY}`;
+    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${encodeURIComponent(photoReference)}&key=${API_KEY}`;
     
     const photoRes = await fetch(photoUrl, { redirect: "follow" });
     
@@ -42,7 +45,7 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("Photo proxy error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Could not load photo" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

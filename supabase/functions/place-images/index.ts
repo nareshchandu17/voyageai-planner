@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { signedPhotoUrl } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,13 +90,13 @@ async function fromGooglePlaces(query: string): Promise<ImageCandidate[]> {
     return (data.results || []).flatMap((place: any) => {
       const photo = place.photos?.[0];
       if (!photo?.photo_reference) return [];
-      const photoUrl = `${SUPABASE_URL}/functions/v1/google-maps-photo?photo_reference=${encodeURIComponent(photo.photo_reference)}&maxwidth=1200`;
+      const photoUrl = await signedPhotoUrl(photo.photo_reference, 1200, SUPABASE_URL);
       const label = `${place.name || ""} ${place.formatted_address || ""}`;
       return [{
         id: `google_${place.place_id || place.name}`,
         url: photoUrl,
-        small: `${SUPABASE_URL}/functions/v1/google-maps-photo?photo_reference=${encodeURIComponent(photo.photo_reference)}&maxwidth=640`,
-        thumb: `${SUPABASE_URL}/functions/v1/google-maps-photo?photo_reference=${encodeURIComponent(photo.photo_reference)}&maxwidth=320`,
+        small: await signedPhotoUrl(photo.photo_reference, 640, SUPABASE_URL),
+        thumb: await signedPhotoUrl(photo.photo_reference, 320, SUPABASE_URL),
         alt: cleanText(place.name, query),
         credit: "Google Places",
         creditLink: place.place_id ? `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${encodeURIComponent(place.place_id)}` : undefined,
@@ -214,11 +215,24 @@ const toCacheRow = (queryKey: string, searchQuery: string, image: ImageCandidate
   relevance_score: image.relevanceScore,
 });
 
-const fromCacheRow = (row: CacheRow) => ({
+const refreshCachedPhotoUrl = async (value: string | null, fallbackWidth: number, row: CacheRow) => {
+  const raw = value || row.image_url;
+  if (row.source !== "google_places") return raw;
+  try {
+    const url = new URL(raw);
+    const reference = url.searchParams.get("photo_reference");
+    const maxWidth = Number(url.searchParams.get("maxwidth")) || fallbackWidth;
+    return reference ? await signedPhotoUrl(reference, maxWidth, SUPABASE_URL) : raw;
+  } catch {
+    return raw;
+  }
+};
+
+const fromCacheRow = async (row: CacheRow) => ({
   id: `cached_${row.query_key}`,
-  url: row.image_url,
-  small: row.small_url || row.image_url,
-  thumb: row.thumb_url || row.small_url || row.image_url,
+  url: await refreshCachedPhotoUrl(row.image_url, 1200, row),
+  small: await refreshCachedPhotoUrl(row.small_url, 640, row),
+  thumb: await refreshCachedPhotoUrl(row.thumb_url, 320, row),
   alt: row.alt_text || row.search_query,
   credit: row.credit || row.source,
   creditLink: row.credit_link || undefined,
@@ -283,7 +297,7 @@ serve(async (req) => {
     const missing = requested.filter((item) => !cachedByKey.has(item.queryKey));
 
     for (const item of requested.filter((entry) => cachedByKey.has(entry.queryKey))) {
-      results[item.query] = fromCacheRow(cachedByKey.get(item.queryKey) as CacheRow);
+      results[item.query] = await fromCacheRow(cachedByKey.get(item.queryKey) as CacheRow);
       void database.from("place_image_cache").update({ last_used_at: new Date().toISOString() }).eq("query_key", item.queryKey);
     }
 

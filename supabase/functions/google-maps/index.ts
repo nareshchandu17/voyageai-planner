@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.24.1/mod.ts";
+import { hasValidUserSession, signedPhotoUrl } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,6 +25,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    if (!await hasValidUserSession(req)) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const API_KEY = Deno.env.get("GOOGLE_MAPS_API_KEY");
     if (!API_KEY) throw new Error("GOOGLE_MAPS_API_KEY is not configured");
 
@@ -44,18 +51,21 @@ serve(async (req) => {
         const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(payload.query)}&key=${API_KEY}`;
         const res = await fetch(url);
         result = await res.json();
+        await signPlacePhotos(result);
         break;
       }
       case "nearby": {
         const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${payload.location.lat},${payload.location.lng}&radius=${payload.radius || 5000}&keyword=${encodeURIComponent(payload.query || "")}&key=${API_KEY}`;
         const res = await fetch(url);
         result = await res.json();
+        await signPlacePhotos(result);
         break;
       }
       case "details": {
         const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${payload.placeId}&fields=name,formatted_address,geometry,rating,opening_hours,photos,reviews,price_level,website,formatted_phone_number&key=${API_KEY}`;
         const res = await fetch(url);
         result = await res.json();
+        await signPlacePhotos(result);
         break;
       }
       case "geocode": {
@@ -162,3 +172,13 @@ serve(async (req) => {
     });
   }
 });
+
+async function signPlacePhotos(data: any) {
+  for (const place of data?.results || []) {
+    for (const photo of place.photos || []) {
+      if (typeof photo.photo_reference === "string" && photo.photo_reference.length <= 4096) {
+        photo.photo_reference = await signedPhotoUrl(photo.photo_reference, 600);
+      }
+    }
+  }
+}

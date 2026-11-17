@@ -1,5 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 
+async function sessionAuthorization() {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Please sign in to continue.");
+  return `Bearer ${token}`;
+}
+
 const PLANNER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-travel-planner`;
 const WEATHER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather`;
 const GOOGLE_MAPS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps`;
@@ -73,6 +80,7 @@ export async function fetchWeather(destination: string, startDate: string, endDa
 }
 
 export function getPlacePhotoUrl(photoReference: string, maxWidth = 400): string {
+  if (/^https:\/\//i.test(photoReference)) return photoReference;
   return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-photo?photo_reference=${photoReference}&maxwidth=${maxWidth}`;
 }
 
@@ -82,7 +90,7 @@ export async function fetchNearbyPlaces(destination: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ action: "search", query: `top attractions in ${destination}` }),
     });
@@ -109,7 +117,7 @@ export async function fetchEvents(destination: string, startDate: string, endDat
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ destination, startDate, endDate, size: 8 }),
     });
@@ -126,7 +134,7 @@ export async function fetchLocationCoordinates(query: string): Promise<LocationP
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ action: "geocode", query }),
     });
@@ -176,7 +184,7 @@ export async function fetchRouteEstimate(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ action: "route_estimates", origin, destination }),
     });
@@ -199,7 +207,7 @@ export async function fetchDirectionsSteps(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ action: "directions_steps", origin, destination, mode }),
     });
@@ -256,7 +264,7 @@ export async function streamItinerary({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ ...params, weatherForecast: weatherData, nearbyPlaces, upcomingEvents, travelerProfile, narrativeIntensities, planningMode }),
     });
@@ -339,7 +347,7 @@ export async function fetchUnsplashBatch(queries: string[]): Promise<Record<stri
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ queries }),
     });
@@ -357,7 +365,7 @@ export async function fetchUnsplashPhotos(query: string, count = 5): Promise<any
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: await sessionAuthorization(),
       },
       body: JSON.stringify({ query, count }),
     });

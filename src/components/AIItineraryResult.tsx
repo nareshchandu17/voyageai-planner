@@ -250,28 +250,34 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
   const heroPhoto = destinationPhotos[0];
   const totalDays = localDays.length;
   const totalBudget = data.totalBudgetEstimate || localDays.reduce((sum, d) => sum + (d.dailyBudget || 0), 0);
+  const totalStops = localDays.reduce((sum, day) => sum + day.activities.length, 0);
 
   return (
     <div className="space-y-6">
-      {/* ===== CINEMATIC TRIP HERO ===== */}
+      {/* ===== TRIP OVERVIEW ===== */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative rounded-3xl overflow-hidden"
-        style={{ height: "clamp(280px, 45vh, 420px)" }}
+        className="relative min-h-[340px] overflow-hidden rounded-2xl border border-border bg-card"
       >
         {heroPhoto ? (
-          <img src={heroPhoto.url} alt={heroPhoto.alt} className="w-full h-full object-cover" />
+          <img src={heroPhoto.url} alt={heroPhoto.alt} className="absolute inset-0 h-full w-full object-cover" />
         ) : (
-          <div className="w-full h-full gradient-ocean" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/35 via-accent/15 to-secondary" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
+        <div className="relative flex min-h-[340px] flex-col justify-end p-5 sm:p-8 md:p-10">
+          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground/80">
+            <Compass className="h-4 w-4 text-primary" />
+            <span>{destination || "Your trip"}</span>
+            <span aria-hidden="true">·</span>
+            <span>{totalDays} {totalDays === 1 ? "day" : "days"}</span>
+          </div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-display text-3xl md:text-5xl font-bold text-white mb-2 leading-tight"
+            className="max-w-3xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl"
           >
             {data.title}
           </motion.h2>
@@ -279,39 +285,66 @@ const AIItineraryResult = ({ data, weatherData, nearbyPlaces, upcomingEvents, de
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="text-white/75 max-w-2xl text-sm md:text-base mb-5"
+            className="mb-5 mt-2 max-w-2xl text-sm leading-relaxed text-foreground/80 md:text-base"
           >
             {data.summary}
           </motion.p>
-          {/* Stats row */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
-            className="flex flex-wrap gap-3"
+            className="flex flex-wrap items-center gap-2"
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
-              📅 {totalDays} Days
-            </span>
             {totalBudget > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
-                <DollarSign className="w-3.5 h-3.5" /> ${totalBudget.toLocaleString()} {data.currency || "USD"}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-sm font-medium text-foreground backdrop-blur-md">
+                <DollarSign className="h-3.5 w-3.5 text-primary" /> {totalBudget.toLocaleString()} {data.currency || "USD"} estimated
               </span>
             )}
             {localDays[0]?.weather && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-sm font-medium">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-sm font-medium text-foreground backdrop-blur-md">
                 {weatherIcon(localDays[0].weather.condition)} {localDays[0].weather.temp}
               </span>
             )}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-sm font-medium text-foreground backdrop-blur-md">
+              <MapPin className="h-3.5 w-3.5 text-primary" /> {totalStops} planned {totalStops === 1 ? "stop" : "stops"}
+            </span>
+            <Button
+              size="sm"
+              onClick={() => scrollToDay(localDays[0]?.day || 1)}
+              className="ml-0 mt-1 sm:ml-1 sm:mt-0"
+            >
+              Explore day 1 <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
           </motion.div>
         </div>
         {heroPhoto?.credit && (
           <a href={heroPhoto.creditLink} target="_blank" rel="noopener noreferrer"
-            className="absolute top-3 right-3 text-[10px] text-white/50 bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-md hover:text-white/80 transition-colors">
+            className="absolute right-3 top-3 rounded-md bg-background/75 px-2 py-1 text-[10px] text-foreground/75 backdrop-blur-sm transition-colors hover:text-foreground">
             📷 {heroPhoto.credit}
           </a>
         )}
       </motion.div>
+
+      <div className="grid grid-cols-2 divide-x divide-border border-y border-border py-4 sm:grid-cols-4">
+        <div className="px-3 py-1 sm:px-5">
+          <p className="text-xs text-muted-foreground">Trip length</p>
+          <p className="mt-1 text-base font-semibold text-foreground">{totalDays} {totalDays === 1 ? "day" : "days"}</p>
+        </div>
+        <div className="px-3 py-1 sm:px-5">
+          <p className="text-xs text-muted-foreground">Planned stops</p>
+          <p className="mt-1 text-base font-semibold text-foreground">{totalStops}</p>
+        </div>
+        <div className="px-3 py-1 sm:px-5">
+          <p className="text-xs text-muted-foreground">Trip begins</p>
+          <p className="mt-1 text-base font-semibold text-foreground">
+            {localDays[0]?.date ? new Date(localDays[0].date).toLocaleDateString("en", { month: "short", day: "numeric" }) : "Dates set"}
+          </p>
+        </div>
+        <div className="px-3 py-1 sm:px-5">
+          <p className="text-xs text-muted-foreground">Estimated budget</p>
+          <p className="mt-1 text-base font-semibold text-foreground">{totalBudget > 0 ? `${totalBudget.toLocaleString()} ${data.currency || "USD"}` : "Not provided"}</p>
+        </div>
+      </div>
 
       {/* Trip DNA */}
       <TripDNAPanel
@@ -633,27 +666,34 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-      {/* Header */}
-      <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-        📅 Day-by-Day Itinerary
-      </h3>
+      <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase text-primary">The journey</p>
+          <h3 className="font-display text-2xl font-bold text-foreground">Your trip, day by day</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Choose a day to see its route, stops, dining, and local guidance.</p>
+        </div>
+        <span className="text-sm text-muted-foreground">{days.length} {days.length === 1 ? "day" : "days"} planned</span>
+      </div>
 
       {/* Sticky Day Navigation */}
-      <div className="sticky top-16 z-30 -mx-4 px-4 py-3 bg-background/80 backdrop-blur-xl border-b border-border/50 mb-6" ref={navRef}>
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="sticky top-16 z-30 -mx-4 mb-6 border-y border-border/60 bg-background/90 px-4 py-3 backdrop-blur-xl" ref={navRef}>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="group" aria-label="Jump to a trip day">
           {days.map(day => (
-            <button
+            <Button
               key={day.day}
+              type="button"
               onClick={() => scrollToDay(day.day)}
-              className={cn(
-                "shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
-                activeDay === day.day
-                  ? "gradient-ocean text-primary-foreground shadow-md"
-                  : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
-              )}
+              variant={activeDay === day.day ? "default" : "outline"}
+              size="sm"
+              aria-current={activeDay === day.day ? "step" : undefined}
+              className="h-auto min-w-[88px] shrink-0 flex-col items-start gap-0.5 rounded-lg px-3 py-2"
             >
-              Day {day.day}
-            </button>
+              <span className="font-semibold">Day {day.day}</span>
+              <span className={cn("text-[10px] font-normal", activeDay === day.day ? "text-primary-foreground/80" : "text-muted-foreground")}>
+                {day.activities.length} {day.activities.length === 1 ? "stop" : "stops"}
+                {day.date ? ` · ${new Date(day.date).toLocaleDateString("en", { month: "short", day: "numeric" })}` : ""}
+              </span>
+            </Button>
           ))}
         </div>
       </div>
@@ -719,7 +759,7 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
       className="scroll-mt-32"
     >
       {/* Day Hero */}
-      <div className="relative rounded-2xl overflow-hidden mb-6" style={{ height: "clamp(180px, 28vh, 280px)" }}>
+      <div className="relative mb-5 overflow-hidden rounded-xl border border-border/60" style={{ height: "clamp(180px, 28vh, 280px)" }}>
         {dayImage ? (
           <img src={dayImage} alt={day.theme} className="w-full h-full object-cover" loading="lazy" />
         ) : (
@@ -729,8 +769,8 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
         <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-white/60 text-xs font-medium uppercase tracking-wider mb-1">
-                {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
+              <p className="mb-1 text-xs font-medium text-white/80">
+                Day {day.day} · {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
               </p>
               <h4 className="font-display text-2xl md:text-3xl font-bold text-white">
                 Day {day.day}: {day.theme}
@@ -751,6 +791,7 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Companion Memory insight */}

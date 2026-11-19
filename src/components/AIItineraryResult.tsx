@@ -668,11 +668,11 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
       <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase text-primary">The journey</p>
-          <h3 className="font-display text-2xl font-bold text-foreground">Your trip, day by day</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Choose a day to see its route, stops, dining, and local guidance.</p>
+          <p className="mb-1 text-xs font-semibold uppercase text-primary">Your itinerary</p>
+          <h3 className="font-display text-2xl font-bold text-foreground">The days ahead</h3>
+          <p className="mt-1 text-sm text-muted-foreground">A closer look at each day’s plans and places.</p>
         </div>
-        <span className="text-sm text-muted-foreground">{days.length} {days.length === 1 ? "day" : "days"} planned</span>
+        <span className="text-sm font-medium text-muted-foreground">{days.length} {days.length === 1 ? "day" : "days"} · {days.reduce((total, day) => total + day.activities.length, 0)} stops</span>
       </div>
 
       {/* Sticky Day Navigation */}
@@ -686,12 +686,11 @@ const DayByDaySection = ({ days, activeDay, dayRefs, scrollToDay, groupActivitie
               variant={activeDay === day.day ? "default" : "outline"}
               size="sm"
               aria-current={activeDay === day.day ? "step" : undefined}
-              className="h-auto min-w-[88px] shrink-0 flex-col items-start gap-0.5 rounded-lg px-3 py-2"
+              className="h-auto min-w-[118px] max-w-[176px] shrink-0 flex-col items-start gap-1 rounded-lg px-3 py-2.5 text-left"
             >
-              <span className="font-semibold">Day {day.day}</span>
-              <span className={cn("text-[10px] font-normal", activeDay === day.day ? "text-primary-foreground/80" : "text-muted-foreground")}>
-                {day.activities.length} {day.activities.length === 1 ? "stop" : "stops"}
-                {day.date ? ` · ${new Date(day.date).toLocaleDateString("en", { month: "short", day: "numeric" })}` : ""}
+              <span className="text-xs font-semibold">Day {day.day}{day.date ? ` · ${new Date(day.date).toLocaleDateString("en", { month: "short", day: "numeric" })}` : ""}</span>
+              <span className={cn("w-full truncate text-[11px] font-normal", activeDay === day.day ? "text-primary-foreground/80" : "text-muted-foreground")}>
+                {day.theme || `${day.activities.length} planned stops`}
               </span>
             </Button>
           ))}
@@ -759,32 +758,32 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
       className="scroll-mt-32"
     >
       {/* Day Hero */}
-      <div className="relative mb-5 overflow-hidden rounded-xl border border-border/60" style={{ height: "clamp(180px, 28vh, 280px)" }}>
+      <div className="relative mb-5 overflow-hidden rounded-lg border border-border/60" style={{ height: "clamp(180px, 28vh, 280px)" }}>
         {dayImage ? (
           <img src={dayImage} alt={day.theme} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-secondary" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="mb-1 text-xs font-medium text-white/80">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+            <div className="min-w-0">
+              <p className="mb-1 text-xs font-medium text-background/80">
                 Day {day.day} · {new Date(day.date).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
               </p>
-              <h4 className="font-display text-2xl md:text-3xl font-bold text-white">
+              <h4 className="break-words font-display text-2xl font-bold text-background sm:text-3xl">
                 Day {day.day}: {day.theme}
               </h4>
             </div>
-            <div className="flex gap-2 shrink-0 flex-wrap items-center">
+            <div className="flex flex-wrap items-center gap-2">
               {narrativePhase && <NarrativePhaseBadge phase={narrativePhase} />}
               {day.weather && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-medium">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-background/20 px-3 py-1.5 text-xs font-medium text-background backdrop-blur-md">
                   {weatherIcon(day.weather.condition)} {day.weather.temp}
                 </span>
               )}
               {day.dailyBudget != null && day.dailyBudget > 0 && (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-medium">
+                <span className="inline-flex items-center gap-1 rounded-full bg-background/20 px-3 py-1.5 text-xs font-medium text-background backdrop-blur-md">
                   <DollarSign className="w-3 h-3" /> ${day.dailyBudget}
                 </span>
               )}
@@ -862,6 +861,7 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
                   nextActivity={nextAct}
                   stopKey={stopKey}
                   selected={selectedStopKey === stopKey}
+                  stopOrder={globalIdx + 1}
                   onSelect={() => {
                     setSelectedStopKey(stopKey);
                     onSelectStop(day.day, stopKey);
@@ -1338,7 +1338,7 @@ const RouteLegDisplay = ({ activity, nextActivity }: { activity: Activity; nextA
   );
 };
 
-const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity, tripId, dayNum, hasCollaborators }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity; tripId?: string | null; dayNum?: number; hasCollaborators?: boolean }) => {
+const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActivity, tripId, dayNum, stopOrder, hasCollaborators }: { activity: Activity; stopKey: string; selected: boolean; onSelect: () => void; cardRef: (el: HTMLDivElement | null) => void; nextActivity?: Activity; tripId?: string | null; dayNum?: number; stopOrder?: number; hasCollaborators?: boolean }) => {
   const hasImage = !!activity.imageUrl;
 
   return (
@@ -1346,44 +1346,55 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
       ref={cardRef}
       whileHover={{ y: -2 }}
       onClick={onSelect}
-      className={cn("group relative cursor-pointer rounded-xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-md transition-all", selected && "border-primary/60 shadow-lg shadow-primary/10 ring-2 ring-primary/20")}
+      className={cn("group relative h-full cursor-pointer overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-md", selected && "border-primary/60 shadow-lg shadow-primary/10 ring-2 ring-primary/20")}
     >
       {/* Activity image */}
       {hasImage && (
-        <div className="relative h-36 overflow-hidden">
+        <div className="relative aspect-[16/9] max-h-44 overflow-hidden">
           <img
             src={activity.imageUrl}
             alt={activity.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
           {/* Type badge */}
-          <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium uppercase tracking-wider">
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md bg-background/85 px-2 py-1 text-[10px] font-medium uppercase text-foreground backdrop-blur-sm">
             {activityIcon(activity.type)} {activity.type}
           </span>
           {/* Time badge */}
-          <span className="absolute top-2 right-2 px-2 py-1 rounded-md bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium">
-            {activity.time}
+          <span className="absolute right-2 top-2 rounded-md bg-background/85 px-2 py-1 text-[10px] font-medium text-foreground backdrop-blur-sm">
+            Stop {stopOrder ?? ""} · {activity.time}
           </span>
         </div>
       )}
 
-      <div className={cn("p-3.5", !hasImage && "pt-4")}>
-        {!hasImage && (
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-primary">
-              {activityIcon(activity.type)} {activity.type}
+      {!hasImage && (
+        <div className="flex aspect-[16/9] max-h-32 items-center justify-center border-b border-border/60 bg-secondary/50">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-background text-primary">
+              {activityIcon(activity.type)}
             </span>
-            <span className="text-xs text-muted-foreground">{activity.time}</span>
+            <span className="text-xs font-medium capitalize">{activity.type || "Place"}</span>
           </div>
+        </div>
+      )}
+
+      <div className="p-4">
+        {!hasImage && (
+          <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary">
+            <Clock className="h-3 w-3" /> Stop {stopOrder ?? ""} · {activity.time}
+          </span>
         )}
 
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h6 className="font-semibold text-foreground text-sm leading-snug flex-1">
+        <div className="mb-1.5 flex items-start gap-2">
+          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-foreground">
+            {stopOrder ?? "•"}
+          </span>
+          <h6 className="min-w-0 flex-1 text-sm font-semibold leading-snug text-foreground">
             {activity.title}
             {activity.hiddenGem && (
-              <span className="ml-1.5 inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+              <span className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-accent/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-accent">
                 <Sparkles className="w-2.5 h-2.5" /> Hidden gem
               </span>
             )}
@@ -1395,15 +1406,22 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{activity.description}</p>
+        <p className="mb-3 line-clamp-3 text-xs leading-relaxed text-muted-foreground">{activity.description}</p>
+
+        {activity.whyVisit && (
+          <div className="mb-3 rounded-r-md border-l-2 border-primary/50 bg-primary/5 px-3 py-2.5">
+            <p className="mb-0.5 text-[10px] font-semibold uppercase text-primary">Why it fits</p>
+            <p className="text-xs leading-relaxed text-foreground/80">{activity.whyVisit}</p>
+          </div>
+        )}
 
         {/* Meta badges */}
-        <div className="flex flex-wrap gap-1.5">
-          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
-            <MapPin className="w-2.5 h-2.5" /> {activity.location}
+        <div className="flex flex-wrap gap-1.5 border-t border-border/60 pt-3">
+          <span className="inline-flex items-center gap-1 rounded-md bg-secondary/60 px-2 py-1 text-[10px] text-muted-foreground">
+            <MapPin className="h-3 w-3 shrink-0" /> <span className="line-clamp-1">{activity.location}</span>
           </span>
-          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
-            <Clock className="w-2.5 h-2.5" /> {activity.duration}
+          <span className="inline-flex items-center gap-1 rounded-md bg-secondary/60 px-2 py-1 text-[10px] text-muted-foreground">
+            <Clock className="h-3 w-3 shrink-0" /> {activity.duration}
           </span>
           {activity.openingHours && (
             <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 bg-secondary/60 px-1.5 py-0.5 rounded-md">
@@ -1456,13 +1474,8 @@ const ActivityCard = ({ activity, stopKey, selected, onSelect, cardRef, nextActi
         )}
 
         {/* Concierge insights */}
-        {(activity.whyVisit || activity.localSecret || activity.photoTip || activity.bestTimeToVisit || activity.commonMistake || activity.accessibility || activity.tip) && (
+        {(activity.localSecret || activity.photoTip || activity.bestTimeToVisit || activity.commonMistake || activity.accessibility || activity.tip) && (
           <div className="mt-2.5 space-y-1.5">
-            {activity.whyVisit && (
-              <div className="text-[11px] text-primary bg-primary/5 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
-                <Heart className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Why visit:</strong> {activity.whyVisit}</span>
-              </div>
-            )}
             {activity.localSecret && (
               <div className="text-[11px] text-accent bg-accent/10 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
                 <Sparkles className="w-3 h-3 mt-0.5 shrink-0" /> <span><strong>Local secret:</strong> {activity.localSecret}</span>

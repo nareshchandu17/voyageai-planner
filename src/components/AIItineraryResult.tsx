@@ -792,7 +792,6 @@ const DaySection = ({ day, idx, dayRefs, groupActivities, destinationPhotos, sel
           </div>
         </div>
       </div>
-      </div>
 
       {/* Companion Memory insight */}
       {(day as any).companionInsight && (
